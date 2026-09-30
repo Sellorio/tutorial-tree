@@ -1,13 +1,12 @@
-import {createDiagram} from '../model/createDiagram'
-import {createInstance} from '../model/createInstance'
-import type {WorkspaceOperationContext} from '../WorkspaceApp/WorkspaceOperationContext'
+import { createDiagram } from '../model/createDiagram'
+import { createInstance } from '../model/createInstance'
+import type { WorkspaceOperationContext } from '../WorkspaceApp/WorkspaceOperationContext'
 
 export function submitWorkspaceName(
   state: WorkspaceOperationContext,
   name: string,
 ) {
-  const { library, dialog, setDialog, editing, commit, navigate } =
-    state
+  const { library, dialog, setDialog, editing, commit, navigate } = state
 
   if (!dialog) return
   if (dialog.kind === 'diagram') {

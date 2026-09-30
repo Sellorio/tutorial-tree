@@ -8,7 +8,10 @@ export function openPosition(diagram: Diagram, desired: Point): Point {
     diagram.nodes.some(
       (node) =>
         Math.hypot(node.position.x - position.x, node.position.y - position.y) <
-        (NodeSizeConstants[node.size].nodeSize + NodeSizeConstants.medium.nodeSize) / 2 + 48,
+        (NodeSizeConstants[node.size].nodeSize +
+          NodeSizeConstants.medium.nodeSize) /
+          2 +
+          48,
     )
   )
     position.x += 180
