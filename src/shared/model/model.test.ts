@@ -49,6 +49,57 @@ function fixture() {
 }
 
 describe('progress rules', () => {
+  it('uses in-progress and completed inputs by default for ALL and ANY', () => {
+    const { diagram, instance, first, second, final } = fixture()
+    const partial = setStatus(diagram, instance, first.id, 'in-progress')
+    expect(partial.statuses[final.id]).toBe('locked')
+    const active = setStatus(diagram, partial, second.id, 'in-progress')
+    expect(active.statuses[final.id]).toBe('unlocked')
+    expect(
+      setStatus(diagram, active, first.id, 'unlocked').statuses[final.id],
+    ).toBe('locked')
+    final.requirement = 'any'
+    expect(reconcileStatuses(diagram, partial.statuses)[final.id]).toBe(
+      'unlocked',
+    )
+  })
+  it('resolves unlocked chains regardless of node order and relocks active descendants', () => {
+    const { diagram, first, second, final } = fixture()
+    diagram.activeStatuses = ['unlocked', 'in-progress', 'completed']
+    diagram.nodes.reverse()
+    const statuses = reconcileStatuses(diagram)
+    expect(statuses[first.id]).toBe('unlocked')
+    expect(statuses[second.id]).toBe('unlocked')
+    expect(statuses[final.id]).toBe('unlocked')
+    diagram.connections = diagram.connections.filter(
+      (edge) => edge.target !== first.id,
+    )
+    expect(
+      reconcileStatuses(diagram, { ...statuses, [final.id]: 'in-progress' })[
+        final.id
+      ],
+    ).toBe('locked')
+  })
+  it('honors connection overrides, empty sets, and mixed ALL/ANY requirements', () => {
+    const { diagram, first, second, final } = fixture()
+    diagram.activeStatuses = ['completed']
+    diagram.connections.find(
+      (edge) => edge.source === first.id,
+    )!.activeStatuses = ['unlocked']
+    expect(reconcileStatuses(diagram)[final.id]).toBe('locked')
+    expect(
+      reconcileStatuses(diagram, { [second.id]: 'completed' })[final.id],
+    ).toBe('unlocked')
+    final.requirement = 'any'
+    expect(reconcileStatuses(diagram)[final.id]).toBe('unlocked')
+    diagram.connections.find(
+      (edge) => edge.source === first.id,
+    )!.activeStatuses = []
+    expect(reconcileStatuses(diagram)[final.id]).toBe('locked')
+    expect(
+      reconcileStatuses(diagram, { [final.id]: 'completed' })[final.id],
+    ).toBe('completed')
+  })
   it('always completes Start, unlocks its children, and locks unmet all requirements', () => {
     const { start, first, final, instance } = fixture()
     expect(instance.statuses).toMatchObject({
@@ -138,11 +189,40 @@ describe('progress rules', () => {
 })
 
 describe('editing and validation', () => {
+  it('round-trips connection settings and accepts legacy defaults', () => {
+    const { diagram } = fixture()
+    diagram.activeStatuses = ['unlocked']
+    diagram.connections[0].activeStatuses = []
+    diagram.connections[0].curveAngle = 60
+    expect(diagramSchema.parse(diagram)).toEqual(diagram)
+    const legacy = { ...diagram, activeStatuses: undefined }
+    expect(reconcileStatuses(legacy)).toEqual(
+      reconcileStatuses({
+        ...legacy,
+        activeStatuses: ['in-progress', 'completed'],
+      }),
+    )
+    for (const curveAngle of [-1, 61]) {
+      expect(
+        diagramSchema.safeParse({
+          ...diagram,
+          connections: [{ ...diagram.connections[0], curveAngle }],
+        }).success,
+      ).toBe(false)
+    }
+    expect(
+      connectionCurve({ x: 0, y: 0 }, { x: 100, y: 0 }, true, 0).angle,
+    ).toBe(0)
+    expect(
+      connectionCurve({ x: 0, y: 0 }, { x: 100, y: 0 }, true, 60).angle,
+    ).toBe(60)
+  })
   it('migrates old diagrams to medium nodes while preserving image backgrounds', () => {
     const original = fixture().diagram
     const legacy = JSON.parse(JSON.stringify(original))
     delete legacy.image
     for (const node of legacy.nodes) {
+      delete node.name
       delete node.size
       delete node.media
       delete node.icon
@@ -151,6 +231,7 @@ describe('editing and validation', () => {
     const migrated = diagramSchema.parse(legacy)
     expect(migrated.image).toBe('')
     expect(migrated.nodes[1]).toMatchObject({
+      name: '',
       size: 'medium',
       media: 'image',
       icon: 'sparkles',
@@ -162,8 +243,9 @@ describe('editing and validation', () => {
       large: { nodeSize: 110, iconSize: 48, fontSize: '1.4rem' },
     })
   })
-  it('round-trips node sizes, icon choices, and diagram cover images', () => {
+  it('round-trips node names, sizes, icon choices, and diagram cover images', () => {
     const { diagram, first } = fixture()
+    first.name = 'Observation'
     first.size = 'large'
     first.media = 'icon'
     first.icon = 'camera'

@@ -20,14 +20,13 @@ export function WorkspaceHeader({
   library,
   fileRef,
   setDialog,
-  dirty,
-  save,
   completedCount,
   preference,
   theme,
   changeTheme,
   setNotice,
   importFile,
+  ...history
 }: WorkspaceHeaderProps) {
   return (
     <header className={styles.header}>
@@ -65,7 +64,7 @@ export function WorkspaceHeader({
         {route &&
           diagram &&
           (editing ? (
-            <EditActions dirty={dirty} save={save} navigate={navigate} />
+            <EditActions {...history} navigate={navigate} />
           ) : (
             <RunActions
               completedCount={completedCount}

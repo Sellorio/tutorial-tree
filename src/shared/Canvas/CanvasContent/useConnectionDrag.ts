@@ -37,7 +37,7 @@ export function useConnectionDrag({
   }
   const onPointerDownCapture = (event: PointerEvent<HTMLDivElement>) => {
     suppressClick.current = false
-    if (!editing || event.button !== 0 || drag) return
+    if (!editing || event.button !== 0 || event.shiftKey || drag) return
     const handle = (event.target as Element).closest('[data-connection-handle]')
     const source =
       handle?.closest<HTMLElement>('[data-node-id]')?.dataset.nodeId

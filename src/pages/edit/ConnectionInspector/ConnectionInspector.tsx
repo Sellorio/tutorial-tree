@@ -1,4 +1,6 @@
 import type { ConnectionInspectorProps } from './ConnectionInspectorProps'
+import { ActivationField } from '../ActivationField/ActivationField'
+import { CurveField } from '../CurveField/CurveField'
 import { ArrowRight, RotateCcw, RotateCw, Unplug } from 'lucide-react'
 import styles from './ConnectionInspector.module.css'
 
@@ -41,6 +43,29 @@ export function ConnectionInspector({
           </button>
         </div>
       </fieldset>
+      <CurveField
+        diagram={diagram}
+        connection={connection}
+        onConnection={onConnection}
+      />
+      <ActivationField
+        value={
+          connection.activeStatuses ??
+          diagram.activeStatuses ?? ['in-progress', 'completed']
+        }
+        disabled={connection.activeStatuses === undefined}
+        onUseDefaults={(useDefaults) =>
+          onConnection({
+            ...connection,
+            activeStatuses: useDefaults
+              ? undefined
+              : [...(diagram.activeStatuses ?? ['in-progress', 'completed'])],
+          })
+        }
+        onChange={(activeStatuses) =>
+          onConnection({ ...connection, activeStatuses })
+        }
+      />
       <button className={styles.dangerButton} onClick={onDelete}>
         <Unplug size={15} />
         Delete connection

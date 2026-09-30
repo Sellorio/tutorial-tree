@@ -27,6 +27,18 @@
 .fields input[aria-invalid='true'] {
   border-color: var(--danger);
 }
+.fields .toggle {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+.toggle input[type='checkbox'] {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--accent);
+}
 .fields input:focus,
 .fields textarea:focus {
   outline: 2px solid var(--accent);

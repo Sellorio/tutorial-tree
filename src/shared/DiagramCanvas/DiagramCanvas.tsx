@@ -17,6 +17,8 @@ export function DiagramCanvas({
   selectedNode,
   instance,
   changeStatus,
+  beginHistory,
+  endHistory,
 }: DiagramCanvasProps) {
   return (
     <div className={styles.canvasWrap}>
@@ -30,6 +32,8 @@ export function DiagramCanvas({
         onAdd={addNode}
         onConnect={connect}
         onDelete={removeSelected}
+        onMoveStart={beginHistory}
+        onMoveEnd={endHistory}
         onMove={(positions) =>
           setDraft((current) =>
             current

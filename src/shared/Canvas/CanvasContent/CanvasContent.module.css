@@ -31,6 +31,12 @@
 .canvas[data-connecting='true'] * {
   cursor: crosshair !important;
 }
+.canvas[data-selecting='true'] :global(.react-flow__pane),
+.canvas[data-selecting='true'] :global(.react-flow__node),
+.canvas[data-selecting='true'] :global(.react-flow__edge),
+.canvas[data-selecting='true'] :global(.react-flow__nodesselection) {
+  cursor: crosshair !important;
+}
 .canvasLabel {
   position: absolute;
   left: 25px;

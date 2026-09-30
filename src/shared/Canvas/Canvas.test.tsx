@@ -198,6 +198,116 @@ describe('canvas adapter', () => {
     )
     expect(onSelect).toHaveBeenCalledTimes(4)
   })
+  it('preserves keyboard edge selection when React Flow deselects the previous node', () => {
+    const { onSelect } = canvas(true, { kind: 'node', id: 'seeing' })
+    act(() =>
+      harness.props.onEdgesChange!([
+        { type: 'select', id: 'connection-0', selected: true },
+      ]),
+    )
+    act(() =>
+      harness.props.onNodesChange!([
+        { type: 'select', id: 'seeing', selected: false },
+      ]),
+    )
+    expect(onSelect).toHaveBeenCalledTimes(1)
+    expect(onSelect).toHaveBeenLastCalledWith({
+      kind: 'connection',
+      id: 'connection-0',
+    })
+  })
+  it('preserves box-selected nodes and groups their movement in edit mode', () => {
+    const { onSelect, diagram, rerender, ...props } = canvas()
+    expect(harness.props.selectionKeyCode).toBe('Shift')
+    act(() => harness.props.onSelectionStart!(event))
+    act(() =>
+      harness.props.onNodesChange!([
+        { type: 'select', id: 'seeing', selected: true },
+      ]),
+    )
+    act(() =>
+      harness.props.onNodesChange!([
+        { type: 'select', id: 'color', selected: true },
+      ]),
+    )
+    const selection: Selection = {
+      kind: 'node',
+      id: 'seeing',
+      ids: ['seeing', 'color'],
+    }
+    expect(onSelect).toHaveBeenLastCalledWith(selection)
+    act(() =>
+      harness.props.onEdgesChange!([
+        { type: 'select', id: 'connection-1', selected: true },
+      ]),
+    )
+    expect(onSelect).toHaveBeenLastCalledWith(selection)
+    act(() => harness.props.onSelectionEnd!(event))
+    const onMoveStart = vi.fn()
+    const onMoveEnd = vi.fn()
+    rerender(
+      <Canvas
+        {...props}
+        diagram={diagram}
+        onSelect={onSelect}
+        selection={selection}
+        onMoveStart={onMoveStart}
+        onMoveEnd={onMoveEnd}
+      />,
+    )
+    expect(
+      harness.props
+        .nodes!.filter((node) => node.selected)
+        .map((node) => node.id),
+    ).toEqual(['seeing', 'color'])
+    act(() => harness.props.onNodeClick!(event, harness.props.nodes![1]))
+    expect(onSelect).toHaveBeenLastCalledWith(selection)
+    act(() =>
+      harness.props.onNodeDragStart!(
+        new MouseEvent('mousedown'),
+        harness.props.nodes![1],
+        harness.props.nodes!,
+      ),
+    )
+    act(() =>
+      harness.props.onNodesChange!([
+        { type: 'position', id: 'seeing', position: { x: 10, y: 20 } },
+        { type: 'position', id: 'color', position: { x: 30, y: 40 } },
+      ]),
+    )
+    act(() =>
+      harness.props.onNodeDragStop!(
+        new MouseEvent('mouseup'),
+        harness.props.nodes![1],
+        harness.props.nodes!,
+      ),
+    )
+    expect(onMoveStart).toHaveBeenCalledOnce()
+    expect(onMoveEnd).toHaveBeenCalledOnce()
+    expect(props.onMove).toHaveBeenLastCalledWith([
+      { id: 'seeing', position: { x: 10, y: 20 } },
+      { id: 'color', position: { x: 30, y: 40 } },
+    ])
+  })
+  it('changes the canvas cursor state while Shift is held and resets on blur', () => {
+    canvas()
+    fireEvent.keyDown(window, { key: 'Shift', shiftKey: true })
+    expect(screen.getByTestId('canvas')).toHaveAttribute(
+      'data-selecting',
+      'true',
+    )
+    fireEvent.keyUp(window, { key: 'Shift', shiftKey: false })
+    expect(screen.getByTestId('canvas')).toHaveAttribute(
+      'data-selecting',
+      'false',
+    )
+    fireEvent.keyDown(window, { key: 'Shift', shiftKey: true })
+    fireEvent.blur(window)
+    expect(screen.getByTestId('canvas')).toHaveAttribute(
+      'data-selecting',
+      'false',
+    )
+  })
   it('adds through the context menu and toolbar and handles all viewport controls', () => {
     const { onAdd, onSelect } = canvas()
     fireEvent.contextMenu(screen.getByTestId('flow'), {
@@ -264,14 +374,9 @@ describe('canvas adapter', () => {
     )
     expect(onSelect).toHaveBeenLastCalledWith(null)
   })
-  it('centers open selections on resize and leaves programmatic moves open', () => {
+  it('does not center run selections and leaves programmatic moves open', () => {
     const { onSelect } = canvas(false, { kind: 'node', id: 'seeing' })
-    expect(harness.flow.setCenter).toHaveBeenCalledWith(290, 310, {
-      zoom: 1,
-      duration: 0,
-    })
-    act(() => harness.observer!())
-    expect(harness.flow.setCenter).toHaveBeenCalledTimes(2)
+    expect(harness.flow.setCenter).not.toHaveBeenCalled()
     act(() => harness.props.onMoveStart!(null, { x: 0, y: 0, zoom: 1 }))
     expect(onSelect).not.toHaveBeenCalled()
   })

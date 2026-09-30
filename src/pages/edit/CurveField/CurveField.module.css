@@ -1,0 +1,84 @@
+.field {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.field legend {
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+.modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  padding: 3px;
+  background: var(--canvas);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+.field .mode {
+  position: relative;
+  cursor: pointer;
+}
+.mode input[type='radio'] {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+.mode span {
+  text-align: center;
+  padding: 7px 4px;
+  border-radius: 3px;
+  color: var(--muted);
+}
+.mode input:checked + span {
+  color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 1px 4px #00000012;
+}
+.mode input:focus-visible + span {
+  outline: 2px solid var(--accent);
+}
+.angleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 12px;
+}
+.field .number {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}
+.number input[type='number'] {
+  width: 64px;
+  padding: 4px 6px;
+}
+.number input:disabled {
+  color: var(--muted);
+}
+.slider {
+  margin-top: 6px;
+}
+.limits {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.slider input[type='range'] {
+  padding: 0;
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  accent-color: var(--accent);
+}

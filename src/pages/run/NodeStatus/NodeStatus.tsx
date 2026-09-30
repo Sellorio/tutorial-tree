@@ -12,11 +12,7 @@ export function NodeStatus({
   return (
     <section className={styles.overlaySection} aria-label="Node status">
       <div className={styles.row}>
-        <span className={styles.eyebrow}>
-          {node.kind === 'start'
-            ? 'THE BEGINNING'
-            : status.replace('-', ' ').toUpperCase()}
-        </span>
+        <span className={styles.eyebrow}>{node.name}</span>
         <button
           className={styles.iconButton}
           aria-label="Close node details"

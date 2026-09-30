@@ -9,6 +9,7 @@ export function createNode(
   return {
     id: crypto.randomUUID(),
     kind,
+    name: '',
     title: kind === 'start' ? 'Start' : 'New skill',
     position,
     description: '',

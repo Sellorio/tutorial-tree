@@ -34,6 +34,26 @@
   color: var(--muted);
   margin-right: 7px;
 }
+.historyButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  background: var(--surface);
+  cursor: pointer;
+}
+.historyButton:hover:not(:disabled) {
+  background: var(--hover);
+}
+.historyButton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
 @media (max-width: 1100px) {
   .saveState {
     display: none;

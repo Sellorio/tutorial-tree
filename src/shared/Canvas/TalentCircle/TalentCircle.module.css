@@ -12,12 +12,11 @@
   background: var(--canvas);
   color: var(--node-accent);
   transition:
-    box-shadow 160ms,
-    filter 160ms;
+    box-shadow 0.05s linear,
+    filter 0.05s linear;
 }
 .selected {
-  box-shadow: 0 0 18px 4px
-    color-mix(in srgb, var(--node-accent) 38%, transparent);
+  box-shadow: 0 0 18px 4px color-mix(in srgb, var(--node-accent) 38%, transparent);
 }
 .connectionTarget {
   background: color-mix(in srgb, var(--node-accent) 24%, var(--canvas));

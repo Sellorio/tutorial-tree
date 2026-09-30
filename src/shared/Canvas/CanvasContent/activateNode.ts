@@ -8,8 +8,12 @@ export function activateNode(
   setContext: Dispatch<SetStateAction<CanvasMenuState>>,
   node: TalentNode,
 ) {
-  const { editing, statuses, onSelect } = props
+  const { editing, statuses, onSelect, selection } = props
   if (!editing && statuses[node.id] === 'locked') return
-  onSelect({ kind: 'node', id: node.id })
+  onSelect(
+    editing && selection?.kind === 'node' && selection.ids?.includes(node.id)
+      ? { ...selection, id: node.id }
+      : { kind: 'node', id: node.id },
+  )
   setContext(null)
 }

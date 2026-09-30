@@ -10,13 +10,22 @@ import { useCanvasSelection } from './useCanvasSelection'
 import { activateNode } from './activateNode'
 import type { CanvasContextEvent } from '../types/CanvasContextEvent'
 import { openCanvasContext } from './openCanvasContext'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useReactFlow, useViewport } from '@xyflow/react'
 
 export function useCanvasState(props: CanvasProps) {
   const flow = useReactFlow<FlowNode, FlowEdge>()
   const viewport = useViewport()
   const canvasRef = useRef<HTMLDivElement>(null)
+  const selecting = useRef(false)
+  const selectionRef = useRef(props.selection)
+  useEffect(() => {
+    selectionRef.current = props.selection
+  }, [props.selection])
+  const onSelect = (selection: Selection) => {
+    selectionRef.current = selection
+    props.onSelect(selection)
+  }
   const [context, setContext] = useState<CanvasMenuState>(null)
   useCanvasSelection({ ...props, flow, canvasRef })
 
@@ -28,9 +37,12 @@ export function useCanvasState(props: CanvasProps) {
     openCanvasContext({ ...props, canvasRef, flow, setContext }, event, target)
   return {
     ...props,
+    onSelect,
     flow,
     viewport,
     canvasRef,
+    selecting,
+    selectionRef,
     context,
     setContext,
     activate,

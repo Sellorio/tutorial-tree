@@ -2,6 +2,7 @@ import { youtubeEmbed } from '../../../shared/model/youtubeEmbed'
 import { NodeTips } from '../NodeTips/NodeTips'
 import { NodeStatus } from '../NodeStatus/NodeStatus'
 import type { RunOverlayProps } from './RunOverlayProps'
+import { useRunOverlayViewport } from './useRunOverlayViewport'
 import { useState } from 'react'
 import styles from './RunOverlay.module.css'
 
@@ -12,15 +13,17 @@ export function RunOverlay({
   onClose,
 }: RunOverlayProps) {
   const [expanded, setExpanded] = useState<string[]>([])
+  const viewport = useRunOverlayViewport(node)
   const status = instance.statuses[node.id]
   const embed = youtubeEmbed(node.youtube)
   return (
-    <div className={styles.overlay}>
+    <div className={styles.overlay} {...viewport}>
       {node.tips.length > 0 && (
         <NodeTips node={node} expanded={expanded} setExpanded={setExpanded} />
       )}
       <div
         className={styles.runDetails}
+        data-run-panel
         role="region"
         aria-label="Node details"
       >

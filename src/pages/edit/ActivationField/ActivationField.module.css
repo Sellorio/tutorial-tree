@@ -1,0 +1,57 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+  text-align: left;
+}
+.field legend {
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.field .option,
+.field .defaults {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+}
+.field .option {
+  min-height: 34px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: var(--canvas);
+}
+.option[data-checked='true'] {
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+.option:hover:not([data-disabled='true']) {
+  background: var(--hover);
+}
+.option[data-disabled='true'] {
+  cursor: default;
+  color: var(--muted);
+}
+.field .defaults {
+  margin-bottom: 8px;
+  min-height: 28px;
+}
+.field input[type='checkbox'] {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--accent);
+}
+.inactive {
+  color: var(--muted);
+  font-size: 11px;
+  padding-top: 4px;
+}

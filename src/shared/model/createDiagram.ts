@@ -9,6 +9,7 @@ export function createDiagram(name: string): Diagram {
     image: '',
     nodes: [createNode({ x: 80, y: 260 }, 'start')],
     connections: [],
+    activeStatuses: ['in-progress', 'completed'],
     updatedAt: now(),
   }
 }

@@ -1,4 +1,4 @@
-import type { Diagram } from '../model/types/Diagram'
+import { useDiagramHistory } from '../../pages/edit/actions/useDiagramHistory'
 import { parseRoute } from '../model/parseRoute'
 import { useTheme } from '../ThemePicker/useTheme'
 import type { Selection } from '../Canvas/types/Selection'
@@ -12,7 +12,7 @@ export function useWorkspaceStore() {
   const [library, setLibrary] = useState(initial.library)
   const libraryRef = useRef(initial.library)
   const [route, setRoute] = useState(() => parseRoute(window.location.hash))
-  const [draft, setDraft] = useState<Diagram | null>(() => {
+  const history = useDiagramHistory(() => {
     const target = parseRoute(window.location.hash)
     return target?.mode === 'edit'
       ? (initial.library.diagrams.find((diagram) => diagram.id === target.id) ??
@@ -35,8 +35,7 @@ export function useWorkspaceStore() {
     libraryRef,
     route,
     setRoute,
-    draft,
-    setDraft,
+    ...history,
     selection,
     setSelection,
     theme,

@@ -26,11 +26,15 @@ Vite prints the local URL. A starter tree, Creative foundations, is included and
 
 - Right-click the canvas and choose **Add Node**, or use the circular-node button in the canvas toolbar.
 - Drag a node to move it. Drag from one of its four edge handles onto another node to connect them.
+- Hold Shift and drag on empty canvas to box-select multiple nodes, then drag the group to move them together. Shift-click adds or removes individual nodes. The canvas cursor becomes a crosshair while Shift is held.
+- Undo or redo diagram edits with the title-bar arrow buttons, Ctrl+Z, and Ctrl+Y or Ctrl+Shift+Z, including while editing settings fields. The selected node or connection stays selected. Node/group drags count as one edit. History lasts for the current editor session and is cleared when opening another tree.
 - Left-drag empty canvas or middle-drag to pan. Scroll/pinch or use the zoom and fit controls.
 - Select a node to edit its text, description, Small/Medium/Large size (default Medium), one of ten accent colors, all/any prerequisite rule, YouTube video, and tips. Size is shared by Edit and Run modes.
 - Choose **Icon** and a Lucide icon, or **Image** and a URL/upload. With no node selected, the overview offers the diagram's cover image instead of a color palette.
 - Images accept HTTP(S) URLs or PNG/JPEG/WebP/GIF uploads under 1.5 MB. Uploaded images are embedded in exports.
 - Select a connection to switch clockwise/counterclockwise curvature or delete it. Curves run center-to-center, masked beneath the nodes; subtle arrows repeat every 64 canvas units instead of appearing at endpoints. Nearby connections curve more steeply, up to 60 degrees.
+- Choose **Manual** curve size to set a connection's angle from 0 to 60 degrees with the slider or numeric field. **Automatic** restores distance-based curvature and displays the calculated angle.
+- In Tree overview, choose which source statuses activate connections: Unlocked, In Progress, and Completed are independent checkboxes, with In Progress and Completed checked by default. Uncheck **Use diagram defaults** on a selected connection to customize these statuses; no checked statuses means it is never active.
 - Right-click a node or connection to delete it with confirmation. Selected nodes use a glow instead of extra border rings.
 - Drag the **Properties** header to undock or move the inspector. Drop near either window edge or use its dock buttons to redock. On small screens, the docked inspector sits below the canvas.
 - Start is always completed, cannot be deleted, and cannot receive a connection. Duplicate, self-referencing, and cyclic connections are rejected.
@@ -42,7 +46,7 @@ Vite prints the local URL. A starter tree, Creative foundations, is included and
 - Selecting an available node opens separate status, description, tutorial, and prerequisite sections. Expandable tips have an opaque theme-aware background and no count. Desktop tips appear to the left; the separate detail sections appear to the right. Mobile stacks the sections below the selected node.
 - Changing status saves immediately and closes the overlay. Clicking the canvas, pressing Escape, or panning also closes it.
 - Reverting a completed node requires confirmation because dependent unfinished nodes may become locked.
-- A node unlocks when every input is completed (**all**) or at least one input is completed (**any**). Nodes without inputs stay locked, except Start.
+- A node unlocks when every incoming connection is active (**all**) or at least one incoming connection is active (**any**), using each connection's allowed source statuses or the diagram defaults. Unlocks and relocking propagate through the tree. Nodes without inputs stay locked, except Start.
 - Completed nodes stay completed through prerequisite changes. In-progress nodes keep that status only while their prerequisites remain satisfied. Removed node IDs are discarded.
 - Inactive connections are dimmed. Each journey keeps separate progress against the same diagram.
 

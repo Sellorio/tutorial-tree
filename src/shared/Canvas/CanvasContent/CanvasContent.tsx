@@ -6,12 +6,14 @@ import { CanvasContextMenu } from '../../../pages/edit/CanvasContextMenu/CanvasC
 import { useCanvasState } from './useCanvasState'
 import { createFlowProps } from './createFlowProps'
 import { useConnectionDrag } from './useConnectionDrag'
+import { useShiftSelection } from './useShiftSelection'
 import { Background, BackgroundVariant, ReactFlow } from '@xyflow/react'
 import styles from './CanvasContent.module.css'
 
 export function CanvasContent(props: CanvasProps) {
   const state = useCanvasState(props)
   const connection = useConnectionDrag(state)
+  const shiftSelection = useShiftSelection(state.editing)
   const {
     canvasRef,
     onSelect,
@@ -31,6 +33,7 @@ export function CanvasContent(props: CanvasProps) {
       className={styles.canvas}
       data-testid="canvas"
       data-editing={editing}
+      data-selecting={shiftSelection}
       data-connecting={Boolean(connection.preview)}
       {...connection.handlers}
       onKeyDown={(event) => {

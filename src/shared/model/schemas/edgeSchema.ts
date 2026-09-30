@@ -1,4 +1,5 @@
 import { idSchema } from './idSchema'
+import { activeStatusesSchema } from './activeStatusesSchema'
 import { z } from 'zod'
 
 export const edgeSchema = z.object({
@@ -6,4 +7,6 @@ export const edgeSchema = z.object({
   source: idSchema,
   target: idSchema,
   clockwise: z.boolean(),
+  curveAngle: z.number().min(0).max(60).optional(),
+  activeStatuses: activeStatusesSchema.optional(),
 })

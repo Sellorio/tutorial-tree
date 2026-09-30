@@ -8,8 +8,9 @@ export function connectionGeometry(
   clockwise: boolean,
   sourceRadius: number,
   targetRadius: number,
+  curveAngle?: number,
 ) {
-  const { path } = connectionCurve(source, target, clockwise)
+  const { path } = connectionCurve(source, target, clockwise, curveAngle)
   const properties = new svgPathProperties(path)
   const length = properties.getTotalLength()
   const arrows: { x: number; y: number; angle: number; distance: number }[] = []

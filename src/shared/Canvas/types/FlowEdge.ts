@@ -4,6 +4,7 @@ import type { Edge } from '@xyflow/react'
 export type FlowEdge = Edge<
   {
     clockwise: boolean
+    curveAngle?: number
     source: Point
     target: Point
     sourceRadius: number

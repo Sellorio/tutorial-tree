@@ -19,5 +19,7 @@ export type CanvasProps = {
   ) => void
   onAdd: (position: Point) => void
   onDelete?: (selection: NonNullable<Selection>) => void
+  onMoveStart?: () => void
+  onMoveEnd?: () => void
   children?: ReactNode
 }

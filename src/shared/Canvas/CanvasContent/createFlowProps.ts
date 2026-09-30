@@ -17,6 +17,10 @@ export function createFlowProps({
   onSelect,
   openContext,
   setContext,
+  onMoveStart,
+  onMoveEnd,
+  selecting,
+  selectionRef,
 }: CanvasState): ReactFlowProps<FlowNode, FlowEdge> {
   return {
     nodes: nodes,
@@ -38,19 +42,61 @@ export function createFlowProps({
       const selected = changes.find(
         (change) => change.type === 'select' && change.selected,
       )
-      if (selected?.type === 'select') {
+      if (editing) {
+        const selectionChanges = changes.filter(
+          (change) =>
+            change.type === 'select' &&
+            diagram.nodes.some((node) => node.id === change.id),
+        )
+        if (!selectionChanges.length) return
+        const selection = selectionRef.current
+        const ids = new Set(
+          selection?.kind === 'node' ? (selection.ids ?? [selection.id]) : [],
+        )
+        for (const change of selectionChanges) {
+          if (change.type !== 'select') continue
+          if (change.selected) ids.add(change.id)
+          else ids.delete(change.id)
+        }
+        const selectedIds = [...ids]
+        const id = selectedIds[0]
+        if (!id) {
+          if (selecting.current || selectionRef.current?.kind !== 'connection')
+            onSelect(null)
+          return
+        }
+        onSelect(
+          selectedIds.length > 1
+            ? { kind: 'node', id, ids: selectedIds }
+            : { kind: 'node', id },
+        )
+        setContext(null)
+      } else if (selected?.type === 'select') {
         const node = diagram.nodes.find((entry) => entry.id === selected.id)
         if (node) activate(node)
       }
     },
+    onNodeDragStart: () => onMoveStart?.(),
+    onNodeDragStop: () => onMoveEnd?.(),
+    onSelectionDragStart: () => onMoveStart?.(),
+    onSelectionDragStop: () => onMoveEnd?.(),
+    onSelectionStart: () => {
+      selecting.current = true
+    },
+    onSelectionEnd: () => {
+      selecting.current = false
+    },
     onEdgesChange: (changes) => {
+      if (selecting.current) return
       const selected = changes.find(
         (change) => change.type === 'select' && change.selected,
       )
       if (editing && selected?.type === 'select')
         onSelect({ kind: 'connection', id: selected.id })
     },
-    onNodeClick: (_event, node) => activate(node.data.talent),
+    onNodeClick: (event, node) => {
+      if (!editing || !event.shiftKey) activate(node.data.talent)
+    },
     onNodeContextMenu: (event, node) =>
       openContext(event, { kind: 'node', id: node.id }),
     onEdgeContextMenu: (event, edge) =>
@@ -72,6 +118,8 @@ export function createFlowProps({
     onPaneContextMenu: (event) => openContext(event),
     panOnDrag: [0, 1],
     selectionOnDrag: false,
+    selectionKeyCode: editing ? 'Shift' : null,
+    multiSelectionKeyCode: editing ? 'Shift' : null,
     nodesDraggable: editing,
     nodesConnectable: false,
     elementsSelectable: true,

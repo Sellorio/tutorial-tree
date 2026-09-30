@@ -20,6 +20,14 @@ export function NodeInspector({
         {node.kind === 'start' ? 'START NODE' : 'SKILL NODE'}
       </div>
       <label>
+        Node name
+        <input
+          maxLength={80}
+          value={node.name}
+          onChange={(event) => patch({ name: event.target.value })}
+        />
+      </label>
+      <label>
         Node text
         <input
           aria-label="Node text"

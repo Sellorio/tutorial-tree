@@ -15,10 +15,12 @@ import { changeJourneyStatus } from '../../pages/run/actions/changeJourneyStatus
 import { downloadExport } from './actions/downloadExport'
 import { importWorkspaceFile } from './actions/importWorkspaceFile'
 import { submitWorkspaceName } from './actions/submitWorkspaceName'
+import { useEditHistoryShortcuts } from '../../pages/edit/actions/useEditHistoryShortcuts'
 
 export function useWorkspace() {
   const state = useWorkspaceState()
   useWorkspaceEffects(state)
+  useEditHistoryShortcuts(state)
   const commit = (next: Library) => commitLibrary(state, next)
   const navigate = (path: string, skipGuard = false) =>
     navigateWorkspace(state, path, skipGuard)

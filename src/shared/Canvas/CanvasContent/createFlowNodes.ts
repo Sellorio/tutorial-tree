@@ -19,7 +19,9 @@ export function createFlowNodes({
       editing,
       activate: () => activate(talent),
     },
-    selected: selection?.kind === 'node' && selection.id === talent.id,
+    selected:
+      selection?.kind === 'node' &&
+      (selection.ids ?? [selection.id]).includes(talent.id),
     draggable: editing,
     selectable: editing || statuses[talent.id] !== 'locked',
     focusable: editing || statuses[talent.id] !== 'locked',

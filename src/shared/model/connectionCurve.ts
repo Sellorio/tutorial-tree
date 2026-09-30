@@ -4,9 +4,13 @@ export function connectionCurve(
   source: Point,
   target: Point,
   clockwise: boolean,
+  curveAngle?: number,
 ) {
   const distance = Math.hypot(target.x - source.x, target.y - source.y)
-  const angle = Math.max(0, Math.min(60, 60 * (1 - distance / 900)))
+  const angle =
+    curveAngle === undefined
+      ? Math.max(0, Math.min(60, 60 * (1 - distance / 900)))
+      : Math.max(0, Math.min(60, curveAngle))
   const offset =
     ((Math.tan((angle * Math.PI) / 180) * distance) / 3) * (clockwise ? 1 : -1)
   const normal = distance

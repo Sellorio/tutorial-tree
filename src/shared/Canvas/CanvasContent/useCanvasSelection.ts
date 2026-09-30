@@ -12,19 +12,15 @@ export function useCanvasSelection({
   const selectedNodeId = selection?.kind === 'node' ? selection.id : null
   const centerSelection = useEffectEvent(() => {
     const selected = diagram.nodes.find((node) => node.id === selectedNodeId)
-    if (!selected || (editing && window.innerWidth > 700)) return
-    const offset =
-      !editing && window.innerWidth <= 700
-        ? (canvasRef.current?.clientHeight ?? 0) * 0.25
-        : 0
+    if (!selected || !editing || window.innerWidth > 700) return
     void flow.setCenter(
       nodeCenter(selected).x,
-      nodeCenter(selected).y + offset,
+      nodeCenter(selected).y,
       { zoom: 1, duration: 0 },
     )
   })
   useEffect(() => {
-    if (!selectedNodeId || !canvasRef.current) return
+    if (!editing || !selectedNodeId || !canvasRef.current) return
     let frame = 0
     const recenter = () => {
       cancelAnimationFrame(frame)

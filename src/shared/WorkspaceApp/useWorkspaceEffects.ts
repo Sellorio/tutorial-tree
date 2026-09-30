@@ -6,7 +6,7 @@ export function useWorkspaceEffects({
   libraryRef,
   route,
   setRoute,
-  setDraft,
+  resetDraft,
   setSelection,
   notice,
   setNotice,
@@ -30,7 +30,7 @@ export function useWorkspaceEffects({
     setNavigationGuard(false)
     const next = parseRoute(location.hash)
     setRoute(next)
-    setDraft(
+    resetDraft(
       next?.mode === 'edit'
         ? (libraryRef.current.diagrams.find((entry) => entry.id === next.id) ??
             null)

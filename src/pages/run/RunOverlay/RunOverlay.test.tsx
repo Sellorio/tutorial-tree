@@ -1,9 +1,24 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 
-import { expect, it, vi } from 'vitest'
+import { beforeEach, expect, it, vi } from 'vitest'
 import { RunOverlay } from './RunOverlay'
 import { createInstance } from '../../../shared/model/createInstance'
 import { starterLibrary } from '../../../shared/storage/starterLibrary'
+
+vi.mock('@xyflow/react', () => ({
+  useReactFlow: () => ({ setViewport: vi.fn() }),
+  useViewport: () => ({ x: 0, y: 0, zoom: 1 }),
+}))
+
+beforeEach(() => {
+  vi.stubGlobal(
+    'ResizeObserver',
+    vi.fn(function () {
+      return { observe: vi.fn(), disconnect: vi.fn() }
+    }),
+  )
+})
+
 it('expands and collapses tips, embeds video, and selects every status', () => {
   const diagram = starterLibrary().diagrams[0]
   const node = diagram.nodes.find((entry) => entry.id === 'color')!

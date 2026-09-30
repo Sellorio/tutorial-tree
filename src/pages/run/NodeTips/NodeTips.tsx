@@ -4,8 +4,8 @@ import styles from './NodeTips.module.css'
 
 export function NodeTips({ node, expanded, setExpanded }: NodeTipsProps) {
   return (
-    <section className={styles.tips} aria-label="Node tips">
-      <div className={styles.sectionHeading}>FIELD NOTES</div>
+    <section className={styles.tips} aria-label="Node tips" data-run-panel>
+      <div className={styles.sectionHeading}>TIPS</div>
       {node.tips.map((tip, index) => (
         <button
           key={tip.id}

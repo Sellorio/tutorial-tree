@@ -9,6 +9,7 @@ export const nodeSchema = z
   .object({
     id: idSchema,
     kind: z.enum(['start', 'task']),
+    name: z.string().max(80).default(''),
     title: z.string().max(80),
     description: z.string().max(10000),
     position: z.object({ x: z.number().finite(), y: z.number().finite() }),

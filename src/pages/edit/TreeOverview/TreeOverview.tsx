@@ -1,4 +1,5 @@
 import { ImageField } from '../ImageField/ImageField'
+import { ActivationField } from '../ActivationField/ActivationField'
 import type { TreeOverviewProps } from './TreeOverviewProps'
 import { Circle } from 'lucide-react'
 import styles from './TreeOverview.module.css'
@@ -28,6 +29,13 @@ export function TreeOverview({
           <dd>1</dd>
         </div>
       </dl>
+      <div className={styles.sectionHeading}>CONNECTION DEFAULTS</div>
+      <ActivationField
+        value={diagram.activeStatuses ?? ['in-progress', 'completed']}
+        onChange={(activeStatuses) =>
+          onDiagram?.({ ...diagram, activeStatuses })
+        }
+      />
       <div className={styles.sectionHeading}>DIAGRAM COVER</div>
       <ImageField
         kind="diagram"

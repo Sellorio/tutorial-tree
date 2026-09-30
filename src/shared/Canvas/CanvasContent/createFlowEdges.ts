@@ -1,4 +1,5 @@
 import { NodeSizeConstants } from '../../model/constants/NodeSizeConstants'
+import { isConnectionActive } from '../../model/isConnectionActive'
 import { nodeCenter } from '../geometry/nodeCenter'
 import type { FlowEdge } from '../types/FlowEdge'
 import type { CanvasProps } from '../types/CanvasProps'
@@ -18,6 +19,7 @@ export function createFlowEdges({
     type: 'curved',
     data: {
       clockwise: connection.clockwise,
+      curveAngle: connection.curveAngle,
       source: nodeCenter(
         diagram.nodes.find((node) => node.id === connection.source)!,
       ),
@@ -40,7 +42,10 @@ export function createFlowEdges({
     ariaLabel: `Connection from ${diagram.nodes.find((node) => node.id === connection.source)?.title} to ${diagram.nodes.find((node) => node.id === connection.target)?.title}`,
     style: {
       opacity:
-        editing || statuses[connection.source] === 'completed' ? 1 : 0.24,
+        editing ||
+        isConnectionActive(diagram, connection, statuses[connection.source])
+          ? 1
+          : 0.24,
     },
   }))
 }

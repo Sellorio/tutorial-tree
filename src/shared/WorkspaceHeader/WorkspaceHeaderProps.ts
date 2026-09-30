@@ -21,6 +21,10 @@ export type WorkspaceHeaderProps = {
   fileRef: RefObject<HTMLInputElement | null>
   setDialog: (dialog: Dialog | null) => void
   dirty: boolean
+  canUndo: boolean
+  canRedo: boolean
+  undo: () => void
+  redo: () => void
   save: () => boolean
   completedCount: number
   preference: ThemePreference

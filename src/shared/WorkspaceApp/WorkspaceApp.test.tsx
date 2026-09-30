@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { ComponentProps } from 'react'
+import { ReactFlowProvider } from '@xyflow/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { WorkspaceApp as App } from './WorkspaceApp'
 import type { Canvas } from '../Canvas/Canvas'
@@ -11,39 +12,47 @@ import { saved } from './testing/saved'
 
 vi.mock('../Canvas/Canvas', () => ({
   Canvas: (props: ComponentProps<typeof Canvas>) => (
-    <div>
-      {props.diagram.nodes.map((node) => (
-        <button
-          key={node.id}
-          data-testid={`mock-${node.id}`}
-          onClick={() => props.onSelect({ kind: 'node', id: node.id })}
-        >
-          {node.title}
+    <ReactFlowProvider>
+      <div>
+        {props.diagram.nodes.map((node) => (
+          <button
+            key={node.id}
+            data-testid={`mock-${node.id}`}
+            onClick={() => props.onSelect({ kind: 'node', id: node.id })}
+          >
+            {node.title}
+          </button>
+        ))}
+        <button onClick={() => props.onSelect(null)}>Clear selection</button>
+        <button onClick={() => props.onAdd({ x: 100, y: 100 })}>
+          Canvas add
         </button>
-      ))}
-      <button onClick={() => props.onSelect(null)}>Clear selection</button>
-      <button onClick={() => props.onAdd({ x: 100, y: 100 })}>
-        Canvas add
-      </button>
-      <button onClick={() => props.onConnect('start', 'series')}>
-        Canvas connect
-      </button>
-      <button onClick={() => props.onConnect('start', 'seeing')}>
-        Canvas duplicate
-      </button>
-      <button
-        onClick={() =>
-          props.onMove([{ id: 'seeing', position: { x: 300, y: 300 } }])
-        }
-      >
-        Canvas move
-      </button>
-      {props.children}
-    </div>
+        <button onClick={() => props.onConnect('start', 'series')}>
+          Canvas connect
+        </button>
+        <button onClick={() => props.onConnect('start', 'seeing')}>
+          Canvas duplicate
+        </button>
+        <button
+          onClick={() =>
+            props.onMove([{ id: 'seeing', position: { x: 300, y: 300 } }])
+          }
+        >
+          Canvas move
+        </button>
+        {props.children}
+      </div>
+    </ReactFlowProvider>
   ),
 }))
 
 beforeEach(() => {
+  vi.stubGlobal(
+    'ResizeObserver',
+    vi.fn(function () {
+      return { observe: vi.fn(), disconnect: vi.fn() }
+    }),
+  )
   localStorage.clear()
   history.replaceState(null, '', '/#/')
   vi.spyOn(window, 'confirm').mockReturnValue(true)
@@ -56,6 +65,63 @@ function openEditor(library = starterLibrary()) {
 }
 
 describe('workspace orchestration', () => {
+  it('undoes and redoes edits with buttons and shortcuts inside settings', () => {
+    openEditor()
+    expect(screen.getByRole('button', { name: 'Undo' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Redo' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Canvas add' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }))
+    expect(screen.queryByText('Untitled skill')).not.toBeInTheDocument()
+    fireEvent.keyDown(window, { key: 'y', ctrlKey: true })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    expect(saved().diagrams[0].nodes).toHaveLength(9)
+    fireEvent.keyDown(window, { key: 'z', ctrlKey: true })
+    fireEvent.keyDown(window, { key: 'Z', ctrlKey: true, shiftKey: true })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    expect(saved().diagrams[0].nodes).toHaveLength(9)
+    const name = screen.getByLabelText('Diagram name')
+    fireEvent.change(name, { target: { value: 'Typed title' } })
+    fireEvent.keyDown(name, { key: 'z', ctrlKey: true })
+    expect(name).toHaveValue('Creative foundations')
+    fireEvent.click(screen.getByRole('button', { name: 'Redo' }))
+    expect(name).toHaveValue('Typed title')
+  })
+  it('saves diagram defaults and connection overrides with a manual curve', () => {
+    openEditor()
+    expect(screen.getByRole('checkbox', { name: 'Unlocked' })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'In Progress' })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Completed' })).toBeChecked()
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Unlocked' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Canvas connect' }))
+    expect(screen.getByRole('checkbox', { name: 'Completed' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('radio', { name: 'Manual curve' }))
+    fireEvent.change(screen.getByRole('slider', { name: /Curve angle/ }), {
+      target: { value: '60' },
+    })
+    fireEvent.click(
+      screen.getByRole('checkbox', { name: 'Use diagram defaults' }),
+    )
+    fireEvent.click(screen.getByRole('checkbox', { name: 'In Progress' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    expect(saved().diagrams[0].activeStatuses).toEqual([
+      'in-progress',
+      'completed',
+      'unlocked',
+    ])
+    expect(saved().diagrams[0].connections.at(-1)).toMatchObject({
+      curveAngle: 60,
+      activeStatuses: ['completed', 'unlocked'],
+    })
+    fireEvent.click(screen.getByRole('radio', { name: 'Automatic curve' }))
+    fireEvent.click(
+      screen.getByRole('checkbox', { name: 'Use diagram defaults' }),
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    expect(saved().diagrams[0].connections.at(-1)!.curveAngle).toBeUndefined()
+    expect(
+      saved().diagrams[0].connections.at(-1)!.activeStatuses,
+    ).toBeUndefined()
+  })
   it('opens journeys first and places tab-specific import beside New in the title bar', () => {
     render(<App />)
     expect(screen.getAllByRole('tab')[0]).toHaveTextContent('My journeys')

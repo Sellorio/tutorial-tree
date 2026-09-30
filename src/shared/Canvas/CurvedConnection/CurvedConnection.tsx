@@ -26,6 +26,7 @@ export function CurvedConnection({
     data?.clockwise ?? true,
     sourceRadius,
     targetRadius,
+    data?.curveAngle,
   )
   const extent = Math.max(curve.length * 2, 200)
   return (
@@ -77,7 +78,13 @@ export function CurvedConnection({
             data-arrow-distance={arrow.distance}
             transform={`translate(${arrow.x} ${arrow.y}) rotate(${arrow.angle})`}
           >
-            <ChevronRight x={-6} y={-6} width={12} height={12} strokeWidth={2.5} />
+            <ChevronRight
+              x={-6}
+              y={-6}
+              width={12}
+              height={12}
+              strokeWidth={2.5}
+            />
           </g>
         ))}
       </g>

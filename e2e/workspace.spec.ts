@@ -53,9 +53,263 @@ async function openNode(page: Page, id: string) {
   ).toBeVisible()
 }
 
+async function selectConnection(page: Page, id: string) {
+  await page.getByTestId('talent-seeing').hover()
+  const point = await page
+    .locator(`.react-flow__edge[data-id="${id}"] .react-flow__edge-path`)
+    .evaluate((element) => {
+      const path = element as SVGPathElement
+      const midpoint = path.getPointAtLength(path.getTotalLength() / 2)
+      const screen = new DOMPoint(midpoint.x, midpoint.y).matrixTransform(
+        path.getScreenCTM()!,
+      )
+      return { x: screen.x, y: screen.y }
+    })
+  await page.mouse.click(point.x, point.y)
+}
+
 test.beforeEach(async ({ page }) => {
   await page.goto('/')
   await page.getByRole('tab', { name: /Skill trees/ }).click()
+})
+
+test('edit history supports title-bar buttons and all undo redo shortcuts', async ({
+  page,
+}) => {
+  await page.getByRole('button', { name: 'Edit Creative foundations' }).click()
+  const nodes = page.locator('.react-flow__node')
+  await expect(nodes).toHaveCount(8)
+  await expect(
+    page.getByRole('button', { name: 'Undo', exact: true }),
+  ).toBeDisabled()
+  await page.getByRole('button', { name: 'Add node', exact: true }).click()
+  await expect(nodes).toHaveCount(9)
+  await page.getByRole('button', { name: 'Undo', exact: true }).click()
+  await expect(nodes).toHaveCount(8)
+  await page.getByRole('button', { name: 'Redo', exact: true }).click()
+  await expect(nodes).toHaveCount(9)
+  await page.getByRole('button', { name: 'Undo', exact: true }).focus()
+  await page.keyboard.press('Control+z')
+  await expect(nodes).toHaveCount(8)
+  await page.keyboard.press('Control+y')
+  await expect(nodes).toHaveCount(9)
+  await page.keyboard.press('Control+z')
+  await page.keyboard.press('Control+Shift+z')
+  await expect(nodes).toHaveCount(9)
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  await page.getByRole('button', { name: 'Undo', exact: true }).click()
+  await expect(nodes).toHaveCount(8)
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  await page.reload()
+  await expect(nodes).toHaveCount(8)
+  await expect(
+    page.getByRole('button', { name: 'Undo', exact: true }),
+  ).toBeDisabled()
+})
+
+test('shift box selection moves multiple nodes and undoes the drag in one step', async ({
+  page,
+}) => {
+  const library = starterLibrary()
+  const diagram = library.diagrams[0]
+  diagram.nodes = diagram.nodes.slice(0, 3)
+  diagram.nodes[0].position = { x: 0, y: 180 }
+  diagram.nodes[1].position = { x: 260, y: 80 }
+  diagram.nodes[2].position = { x: 260, y: 280 }
+  diagram.connections = diagram.connections.filter(
+    (edge) =>
+      diagram.nodes.some((node) => node.id === edge.target) &&
+      diagram.nodes.some((node) => node.id === edge.source),
+  )
+  await page.evaluate(
+    ({ key, library }) => localStorage.setItem(key, JSON.stringify(library)),
+    { key: STORAGE_KEY, library },
+  )
+  await page.reload()
+  await page.getByRole('tab', { name: /Skill trees/ }).click()
+  await page.getByRole('button', { name: 'Edit Creative foundations' }).click()
+  await page.getByRole('button', { name: 'Fit tree' }).click()
+  const first = page.getByTestId(`talent-${diagram.nodes[1].id}`)
+  const second = page.getByTestId(`talent-${diagram.nodes[2].id}`)
+  await first.hover()
+  const firstBounds = (await first.boundingBox())!
+  const secondBounds = (await second.boundingBox())!
+  const viewport = page.locator('.react-flow__viewport')
+  const transform = await viewport.getAttribute('style')
+  await first.click()
+  await page.getByLabel('Node text', { exact: true }).focus()
+  await page.keyboard.down('Shift')
+  await expect(page.locator('.react-flow__pane')).toHaveCSS(
+    'cursor',
+    'crosshair',
+  )
+  await drag(
+    page,
+    { x: firstBounds.x - 24, y: firstBounds.y - 24 },
+    {
+      x: secondBounds.x + secondBounds.width + 24,
+      y: secondBounds.y + secondBounds.height + 24,
+    },
+  )
+  await page.keyboard.up('Shift')
+  await expect(page.locator('.react-flow__node.selected')).toHaveCount(2)
+  await expect(viewport).toHaveAttribute('style', transform!)
+  const source = await center(first)
+  await drag(page, source, { x: source.x + 65, y: source.y + 40 })
+  await expect(page.locator('.react-flow__node.selected')).toHaveCount(2)
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  const moved = (await stored(page)).diagrams[0].nodes
+  for (const node of diagram.nodes.slice(1)) {
+    expect(
+      moved.find((entry) => entry.id === node.id)!.position.x,
+    ).toBeGreaterThan(node.position.x + 20)
+  }
+  await page.getByRole('button', { name: 'Undo', exact: true }).click()
+  await expect(
+    page.getByRole('button', { name: 'Undo', exact: true }),
+  ).toBeDisabled()
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  expect(
+    (await stored(page)).diagrams[0].nodes.map((node) => node.position),
+  ).toEqual(diagram.nodes.map((node) => node.position))
+  await page.getByRole('button', { name: 'Redo', exact: true }).click()
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  expect(
+    (await stored(page)).diagrams[0].nodes.map((node) => node.position),
+  ).toEqual(moved.map((node) => node.position))
+})
+
+test('shift click adds and removes nodes from the selection', async ({
+  page,
+}) => {
+  await page.getByRole('button', { name: 'Edit Creative foundations' }).click()
+  await page.getByTestId('talent-seeing').click()
+  await page.getByTestId('talent-color').click({ modifiers: ['Shift'] })
+  await expect(page.locator('.react-flow__node.selected')).toHaveCount(2)
+  await page.getByTestId('talent-color').click({ modifiers: ['Shift'] })
+  await expect(page.locator('.react-flow__node.selected')).toHaveCount(1)
+  await expect(page.locator('.react-flow__node[data-id="seeing"]')).toHaveClass(
+    /selected/,
+  )
+})
+
+test('undo settings keeps the selected item and works from focused controls', async ({
+  page,
+}) => {
+  await page.getByRole('button', { name: 'Edit Creative foundations' }).click()
+  const node = page.locator('.react-flow__node[data-id="seeing"]')
+  await page.getByTestId('talent-seeing').click()
+  const text = page.getByLabel('Node text', { exact: true })
+  await text.fill('Changed node')
+  await text.press('Control+z')
+  await expect(text).toHaveValue('See differently')
+  await expect(text).toBeFocused()
+  await expect(node).toHaveClass(/selected/)
+  await text.press('Control+Shift+z')
+  await expect(text).toHaveValue('Changed node')
+  await page.getByRole('button', { name: 'Undo', exact: true }).click()
+  await expect(text).toHaveValue('See differently')
+  await expect(text).toBeFocused()
+  await page.getByRole('button', { name: 'Redo', exact: true }).click()
+  await expect(text).toHaveValue('Changed node')
+  await expect(node).toHaveClass(/selected/)
+
+  await selectConnection(page, 'connection-1')
+  const edge = page.locator('.react-flow__edge[data-id="connection-1"]')
+  await page.getByRole('radio', { name: 'Manual curve' }).check()
+  const slider = page.getByRole('slider', { name: 'Curve angle', exact: true })
+  const initialAngle = await slider.inputValue()
+  await slider.fill('12')
+  await slider.press('Control+z')
+  await expect(slider).toHaveValue(initialAngle)
+  await expect(slider).toBeFocused()
+  await expect(edge).toHaveClass(/selected/)
+  await slider.press('Control+y')
+  await expect(slider).toHaveValue('12')
+  const angle = page.getByRole('spinbutton', { name: 'Curve angle in degrees' })
+  await angle.fill('23')
+  await angle.press('Control+z')
+  await expect(angle).toHaveValue('12')
+  await page.getByRole('button', { name: 'Redo', exact: true }).click()
+  await expect(angle).toHaveValue('23')
+  await expect(angle).toBeFocused()
+
+  const defaults = page.getByRole('checkbox', { name: 'Use diagram defaults' })
+  await defaults.uncheck()
+  const completed = page.getByRole('checkbox', {
+    name: 'Completed',
+    exact: true,
+  })
+  await completed.uncheck()
+  await completed.press('Control+z')
+  await expect(completed).toBeChecked()
+  await expect(completed).toBeFocused()
+  await expect(edge).toHaveClass(/selected/)
+  await completed.press('Control+Shift+z')
+  await expect(completed).not.toBeChecked()
+  await page.getByRole('button', { name: 'Undo', exact: true }).click()
+  await expect(completed).toBeChecked()
+  await expect(edge).toHaveClass(/selected/)
+})
+
+test('connection curve slider and activation settings render and persist', async ({
+  page,
+}) => {
+  await page.getByRole('button', { name: 'Edit Creative foundations' }).click()
+  await expect(
+    page.getByRole('checkbox', { name: 'Unlocked', exact: true }),
+  ).not.toBeChecked()
+  await expect(
+    page.getByRole('checkbox', { name: 'In Progress', exact: true }),
+  ).toBeChecked()
+  await expect(
+    page.getByRole('checkbox', { name: 'Completed', exact: true }),
+  ).toBeChecked()
+  await page.getByRole('checkbox', { name: 'Unlocked', exact: true }).check()
+  const edge = page.locator('.react-flow__edge[data-id="connection-1"]')
+  await selectConnection(page, 'connection-1')
+  await expect(
+    page.getByRole('radio', { name: 'Automatic curve' }),
+  ).toBeChecked()
+  const path = edge.locator('.react-flow__edge-path')
+  const automatic = await path.getAttribute('d')
+  await page.getByRole('radio', { name: 'Manual curve' }).check()
+  const slider = page.getByRole('slider', { name: /Curve angle/ })
+  await expect(slider).toHaveAttribute('min', '0')
+  await expect(slider).toHaveAttribute('max', '60')
+  await slider.fill('0')
+  const straight = await path.getAttribute('d')
+  expect(straight).not.toBe(automatic)
+  await slider.fill('60')
+  await expect(path).not.toHaveAttribute('d', straight!)
+  await page.getByRole('checkbox', { name: 'Use diagram defaults' }).uncheck()
+  await page.getByRole('checkbox', { name: 'Unlocked', exact: true }).uncheck()
+  await page.getByRole('checkbox', { name: 'Completed', exact: true }).uncheck()
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  const diagram = (await stored(page)).diagrams[0]
+  expect(diagram.activeStatuses).toEqual([
+    'in-progress',
+    'completed',
+    'unlocked',
+  ])
+  expect(diagram.connections[1]).toMatchObject({
+    curveAngle: 60,
+    activeStatuses: ['in-progress'],
+  })
+  await page.reload()
+  await selectConnection(page, 'connection-1')
+  await expect(slider).toHaveValue('60')
+  await expect(
+    page.getByRole('checkbox', { name: 'Completed', exact: true }),
+  ).not.toBeChecked()
+  await page.setViewportSize({ width: 390, height: 844 })
+  await expect(slider).toBeVisible()
+  const bounds = (await slider.boundingBox())!
+  expect(bounds.x).toBeGreaterThanOrEqual(0)
+  expect(bounds.x + bounds.width).toBeLessThanOrEqual(390)
+  await expect(
+    page.getByRole('button', { name: 'Undo', exact: true }),
+  ).toBeVisible()
 })
 
 test('creates, edits metadata, connects from an edge, saves, reloads, and exports a diagram', async ({
@@ -162,6 +416,50 @@ test('creates, edits metadata, connects from an edge, saves, reloads, and export
   const data = JSON.parse(await readFile((await download.path())!, 'utf8'))
   expect(data.diagram.id).toBe(saved.id)
   expect(data.diagram.nodes).toEqual(saved.nodes)
+})
+
+test('node names persist and replace the Run status eyebrow', async ({
+  page,
+}) => {
+  await page.getByRole('button', { name: 'Edit Creative foundations' }).click()
+  await page.getByTestId('talent-seeing').click()
+  const nodeName = 'Observation and creative foundations'
+  const nodeText = await page
+    .getByLabel('Node text', { exact: true })
+    .inputValue()
+  await page.getByLabel('Node name', { exact: true }).fill(nodeName)
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  await page.reload()
+  await page.getByTestId('talent-seeing').click()
+  await expect(page.getByLabel('Node name', { exact: true })).toHaveValue(
+    nodeName,
+  )
+  await expect(page.getByLabel('Node text', { exact: true })).toHaveValue(
+    nodeText,
+  )
+  await startJourney(page)
+  await openNode(page, 'seeing')
+  const status = page.getByRole('region', { name: 'Node status', exact: true })
+  await expect(status.getByText(nodeName, { exact: true })).toBeVisible()
+  await expect(
+    status.getByRole('heading', { name: nodeText, exact: true }),
+  ).toBeVisible()
+  await expect(status.getByText('UNLOCKED', { exact: true })).toHaveCount(0)
+  await status.getByRole('button', { name: 'Completed', exact: true }).click()
+  await openNode(page, 'seeing')
+  await expect(
+    status.getByRole('button', { name: 'Completed', exact: true }),
+  ).toHaveAttribute('aria-pressed', 'true')
+  await expect(status.getByText(nodeName, { exact: true })).toBeVisible()
+  await page.setViewportSize({ width: 390, height: 844 })
+  await expect(status.getByText(nodeName, { exact: true })).toBeVisible()
+  const nameBounds = (await status
+    .getByText(nodeName, { exact: true })
+    .boundingBox())!
+  const closeBounds = (await status
+    .getByRole('button', { name: 'Close node details' })
+    .boundingBox())!
+  expect(nameBounds.x + nameBounds.width).toBeLessThanOrEqual(closeBounds.x)
 })
 
 test('connection rings support every node size and zoom, cancel cleanly, and reject invalid drops', async ({
@@ -607,6 +905,11 @@ test('light/dark desktop and mobile layouts render with images, readable control
   await expect
     .poll(async () => {
       const node = await center(page.getByTestId('talent-seeing'))
+      await page.getByTestId('talent-seeing').click({ modifiers: ['Shift'] })
+      await expect(page.locator('.react-flow__node.selected')).toHaveCount(0)
+      await expect(
+        page.getByRole('heading', { name: 'Tree overview' }),
+      ).toBeVisible()
       const canvas = (await page.getByTestId('canvas').boundingBox())!
       return Math.abs(node.x - (canvas.x + canvas.width / 2))
     })
@@ -719,6 +1022,118 @@ test('keyboard selects editable nodes and connections', async ({ page }) => {
   ).toBeVisible()
 })
 
+test('run selection pans only for clipped content and preserves zoom', async ({
+  page,
+}) => {
+  await startJourney(page, 'Minimal viewport movement')
+  const node = page.getByTestId('talent-seeing')
+  const canvas = page.getByTestId('canvas')
+  const details = page.getByRole('region', {
+    name: 'Node details',
+    exact: true,
+  })
+  const tips = page.getByRole('region', { name: 'Node tips', exact: true })
+  const viewport = page.locator('.react-flow__viewport')
+  await page.getByRole('button', { name: 'Zoom out', exact: true }).click()
+  await node.hover()
+  const zoom = await page
+    .getByRole('button', { name: 'Reset zoom to 100%' })
+    .textContent()
+
+  for (const width of [1440, 900]) {
+    await page.setViewportSize({ width, height: 1000 })
+    const bounds = (await canvas.boundingBox())!
+    await node.hover()
+    await drag(
+      page,
+      await center(node),
+      { x: bounds.x + width / 2, y: bounds.y + 300 },
+      'middle',
+    )
+    await node.hover()
+    const before = await viewport.getAttribute('style')
+    await openNode(page, 'seeing')
+    await expect(viewport).toHaveAttribute('style', before!)
+    expect((await details.boundingBox())!.x).toBeCloseTo(
+      (await center(node)).x + (width > 1000 ? 91 : 75),
+      0,
+    )
+
+    await page.getByRole('button', { name: 'Close node details' }).click()
+    await drag(
+      page,
+      await center(node),
+      { x: bounds.x + bounds.width - 100, y: bounds.y + 300 },
+      'middle',
+    )
+    const beforeRight = await center(node)
+    await openNode(page, 'seeing')
+    const rightPanel = (await details.boundingBox())!
+    expect(rightPanel.x + rightPanel.width).toBeCloseTo(
+      bounds.x + bounds.width - 12,
+      0,
+    )
+    expect((await center(node)).y).toBeCloseTo(beforeRight.y, 0)
+
+    await page.getByRole('button', { name: 'Close node details' }).click()
+    await drag(
+      page,
+      await center(node),
+      { x: bounds.x + 100, y: bounds.y + 300 },
+      'middle',
+    )
+    await openNode(page, 'seeing')
+    expect((await tips.boundingBox())!.x).toBeCloseTo(bounds.x + 12, 0)
+    const settled = await viewport.getAttribute('style')
+    await tips.getByRole('button').first().click()
+    await expect(viewport).toHaveAttribute('style', settled!)
+    await expect(
+      page.getByRole('button', { name: 'Reset zoom to 100%' }),
+    ).toHaveText(zoom!)
+    await page.getByRole('button', { name: 'Close node details' }).click()
+    await drag(
+      page,
+      await center(node),
+      { x: bounds.x + width / 2, y: bounds.y + bounds.height - 45 },
+      'middle',
+    )
+    const beforeBottom = await center(node)
+    await openNode(page, 'seeing')
+    await expect
+      .poll(async () => (await center(node)).y)
+      .toBeLessThan(beforeBottom.y - 20)
+    expect((await center(node)).x).toBeCloseTo(beforeBottom.x, 0)
+    expect(
+      await details.evaluate(
+        (element) => element.scrollHeight <= element.clientHeight,
+      ),
+    ).toBe(true)
+    const bottomPanel = (await details.boundingBox())!
+    expect(bottomPanel.y + bottomPanel.height).toBeCloseTo(
+      bounds.y + bounds.height - 20,
+      0,
+    )
+    await expect(
+      page.getByRole('button', { name: 'Reset zoom to 100%' }),
+    ).toHaveText(zoom!)
+    await page.getByRole('button', { name: 'Close node details' }).click()
+  }
+
+  await page.setViewportSize({ width: 390, height: 900 })
+  await page.getByRole('button', { name: 'Fit tree' }).click()
+  await node.hover()
+  await openNode(page, 'seeing')
+  const mobileNode = (await node.boundingBox())!
+  const mobileDetails = (await details.boundingBox())!
+  expect(mobileNode.y + mobileNode.height).toBeLessThanOrEqual(mobileDetails.y)
+  expect(mobileDetails.x).toBeGreaterThanOrEqual(0)
+  expect(mobileDetails.x + mobileDetails.width).toBeLessThanOrEqual(390)
+  const mobileViewport = await viewport.getAttribute('style')
+  await page.getByRole('button', { name: 'Close node details' }).click()
+  await openNode(page, 'seeing')
+  await expect(viewport).toHaveAttribute('style', mobileViewport!)
+})
+
 test('long labels and descriptions fit their controls and floating panels stay reachable after resize', async ({
   page,
 }) => {
@@ -819,7 +1234,7 @@ test('sizes, icons, cover images and split run panels persist across save and re
   await expect(
     page.getByRole('region', { name: 'Node description', exact: true }),
   ).toBeVisible()
-  await expect(page.getByText('FIELD NOTES', { exact: true })).toBeVisible()
+  await expect(page.getByText('TIPS', { exact: true })).toBeVisible()
   const tips = page.getByRole('region', { name: 'Node tips', exact: true })
   expect(
     await tips.evaluate((element) => getComputedStyle(element).backgroundColor),
