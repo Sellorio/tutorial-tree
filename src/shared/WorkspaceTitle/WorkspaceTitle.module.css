@@ -1,0 +1,48 @@
+.workspaceTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.workspaceTitle > div {
+  min-width: 0;
+}
+.workspaceTitle h1 {
+  font-size: 17px;
+  font-weight: 500;
+  margin: 0 0 5px;
+  overflow-wrap: anywhere;
+}
+.nameInput {
+  font: inherit;
+  font-size: 17px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text);
+  width: min(340px, 28vw);
+  padding: 0 0 3px;
+  text-overflow: ellipsis;
+  border-radius: 2px;
+}
+.nameInput:focus {
+  border-bottom-color: var(--accent);
+  outline: none;
+}
+.subtitle {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+}
+@media (max-width: 700px) {
+  .workspaceTitle {
+    gap: 8px;
+  }
+  .workspaceTitle h1 {
+    font-size: 17px;
+  }
+  .nameInput {
+    width: 100%;
+    font-size: 15px;
+  }
+}

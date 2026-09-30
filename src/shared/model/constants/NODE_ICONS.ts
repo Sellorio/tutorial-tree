@@ -1,0 +1,15 @@
+export const NODE_ICONS = [
+  'sparkles',
+  'book',
+  'code',
+  'palette',
+  'camera',
+  'music',
+  'target',
+  'lightbulb',
+  'heart',
+  'trophy',
+  'leaf',
+  'star',
+  'flag',
+] as const

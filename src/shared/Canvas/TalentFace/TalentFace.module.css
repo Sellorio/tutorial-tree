@@ -1,0 +1,45 @@
+.nodeFace {
+  height: 100%;
+  width: 100%;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--node-accent) 9%, var(--surface));
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+  text-align: center;
+  overflow: hidden;
+  padding: 10px 6px;
+}
+.nodeFace span {
+  max-width: 100%;
+  font-size: var(--node-font-size);
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.nodeFace[data-long='true'] {
+  padding: 6px;
+}
+.nodeFace[data-long='true'] svg {
+  display: none;
+}
+.nodeFace svg {
+  flex-shrink: 0;
+}
+.nodeFace[data-image='true'] {
+  color: white;
+}
+
+.nodeFaceTitle {
+  position: absolute;
+  padding: 1px;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+
+.nodeFaceIcon:not(:only-child) {
+  opacity: 0.4;
+}

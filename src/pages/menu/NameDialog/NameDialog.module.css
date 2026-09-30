@@ -1,0 +1,105 @@
+.dialog label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+}
+.dialog input,
+.dialog select {
+  font: inherit;
+  font-size: 12px;
+  color: var(--text);
+  background: var(--canvas);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 7px 9px;
+  width: 100%;
+  resize: vertical;
+  line-height: 1.5;
+}
+.dialog input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.iconButton {
+  padding: 5px;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.iconButton:hover {
+  color: var(--text);
+  background: var(--hover);
+}
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  padding: 10px 13px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+.primaryButton {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+.secondaryButton:hover {
+  background: var(--hover);
+}
+.dialog {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--surface);
+  padding: 20px;
+  width: min(440px, calc(100vw - 32px));
+  box-shadow: var(--shadow);
+}
+.dialog::backdrop {
+  background: #10292166;
+  backdrop-filter: blur(3px);
+}
+.dialog h2 {
+  font-size: 21px;
+  font-weight: 500;
+  margin: 0 0 16px;
+}
+.dialog .row {
+  align-items: flex-start;
+}
+.dialog form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}

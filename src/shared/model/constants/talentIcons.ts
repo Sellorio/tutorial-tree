@@ -1,0 +1,31 @@
+import {
+  BookOpen,
+  Camera,
+  Code2,
+  Flag,
+  Heart,
+  Leaf,
+  Lightbulb,
+  Music,
+  Palette,
+  Sparkles,
+  Star,
+  Target,
+  Trophy,
+} from 'lucide-react'
+
+export const talentIcons = {
+  sparkles: Sparkles,
+  book: BookOpen,
+  code: Code2,
+  palette: Palette,
+  camera: Camera,
+  music: Music,
+  target: Target,
+  lightbulb: Lightbulb,
+  heart: Heart,
+  trophy: Trophy,
+  leaf: Leaf,
+  star: Star,
+  flag: Flag,
+}

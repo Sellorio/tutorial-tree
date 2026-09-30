@@ -1,0 +1,43 @@
+.primaryButton {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 8px 11px;
+  color: var(--text);
+  background: var(--surface);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.primaryButton {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+.primaryButton:hover {
+  background: var(--accent-hover);
+}
+.notFound {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 80px 24px;
+  text-align: center;
+  gap: 20px;
+}
+.notFound h1 {
+  font-size: 26px;
+  font-weight: 500;
+  margin: 0;
+}
+.notFound p {
+  color: var(--muted);
+  margin: 0;
+}

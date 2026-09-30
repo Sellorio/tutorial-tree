@@ -1,0 +1,58 @@
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 5px;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  color: var(--muted);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.iconButton:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--hover);
+}
+.iconButton:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+.textButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.textButton:hover {
+  color: var(--accent);
+}
+.startButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  border: 0;
+  padding: 7px 0 7px 7px;
+  color: var(--accent);
+  background: transparent;
+  cursor: pointer;
+}

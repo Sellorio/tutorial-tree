@@ -1,0 +1,15 @@
+.pathArrows {
+  color: var(--edge);
+  pointer-events: none;
+}
+.pathArrows svg {
+  opacity: 0.65;
+}
+.connection {
+  stroke: var(--edge);
+  stroke-width: 1.7;
+}
+.selectedConnection {
+  stroke: var(--accent);
+  stroke-width: 3;
+}

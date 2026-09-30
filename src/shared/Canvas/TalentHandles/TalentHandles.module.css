@@ -1,0 +1,22 @@
+.handle {
+  width: 13px;
+  height: 13px;
+  border: 2px solid var(--node-accent);
+  background: var(--surface);
+  opacity: 0;
+  transition: opacity 120ms;
+}
+:global(.react-flow__node:hover) .handle,
+:global(.react-flow__node.selected) .handle,
+:global(.react-flow__node:focus-within) .handle {
+  opacity: 1;
+}
+.handle:hover {
+  background: var(--node-accent);
+  width: 17px;
+  height: 17px;
+}
+.hiddenHandle {
+  opacity: 0;
+  pointer-events: none;
+}

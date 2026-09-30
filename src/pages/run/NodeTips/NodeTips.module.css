@@ -1,0 +1,89 @@
+.sectionHeading {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+.tips {
+  position: absolute;
+  right: calc(50% + 91px);
+  top: max(68px, calc(50% - 130px));
+  width: 225px;
+  max-height: calc(100% - max(68px, 50% - 130px) - 20px);
+  overflow-y: auto;
+  pointer-events: auto;
+  animation: appear 180ms ease-out;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  box-shadow: var(--shadow);
+}
+.tips .sectionHeading {
+  margin-bottom: 15px;
+}
+.tip {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  line-height: 1.6;
+}
+.tip span:nth-child(2) {
+  flex: 1;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.tipNumber {
+  color: var(--accent);
+  font-size: 10px;
+  padding-top: 2px;
+}
+.tip svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.tip[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 1000px) {
+  .tips {
+    width: 190px;
+    right: calc(50% + 75px);
+  }
+}
+@media (max-width: 700px) {
+  .tips {
+    position: static;
+    width: auto;
+    max-height: none;
+    margin: 8px 2px 2px;
+    flex-shrink: 0;
+  }
+  .tip {
+    background: transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tips {
+    animation: none;
+  }
+}

@@ -1,0 +1,27 @@
+.contextMenu {
+  position: absolute;
+  z-index: 15;
+  width: 154px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 5px;
+  box-shadow: var(--shadow);
+}
+.contextMenu button {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  background: transparent;
+  color: var(--text);
+  border: 0;
+  width: 100%;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  border-radius: 3px;
+}
+.contextMenu button:hover {
+  background: var(--hover);
+}

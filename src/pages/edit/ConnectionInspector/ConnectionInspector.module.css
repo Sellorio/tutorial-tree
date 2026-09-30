@@ -1,0 +1,119 @@
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+}
+.fields input,
+.fields textarea {
+  font: inherit;
+  font-size: 12px;
+  color: var(--text);
+  background: var(--canvas);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 7px 9px;
+  width: 100%;
+  resize: vertical;
+  line-height: 1.5;
+}
+.fields input[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+.fields input:focus,
+.fields textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.fields fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.fields legend {
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+.eyebrow {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+.segmented {
+  display: flex;
+  background: var(--canvas);
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  gap: 3px;
+}
+.segmented button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex: 1;
+  padding: 7px 4px;
+  font: inherit;
+  font-size: 11px;
+  border: 0;
+  border-radius: 3px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+}
+.segmented button[aria-pressed='true'] {
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: 0 1px 4px #00000012;
+}
+.dangerButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  padding: 10px 13px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+.dangerButton {
+  color: var(--danger);
+  background: transparent;
+}
+.dangerButton:hover {
+  background: var(--hover);
+}
+.direction {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.direction span {
+  flex: 1;
+  min-width: 0;
+}
+.direction svg {
+  flex-shrink: 0;
+}
+@media (max-width: 700px) {
+  .fields {
+    gap: 12px;
+  }
+}

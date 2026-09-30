@@ -1,0 +1,43 @@
+.secondaryButton {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 8px 11px;
+  color: var(--text);
+  background: var(--surface);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.secondaryButton:hover {
+  background: var(--hover);
+}
+.progressSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 165px;
+  font-size: 11px;
+  margin-right: 10px;
+}
+@media (max-width: 700px) {
+  .secondaryButton {
+    padding: 7px 9px;
+    font-size: 11px;
+  }
+  .progressSummary {
+    flex-direction: row;
+    align-items: center;
+    min-width: 0;
+    flex: 1;
+    margin-right: 0;
+  }
+  .progressSummary progress {
+    width: 60px;
+  }
+}

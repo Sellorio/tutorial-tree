@@ -1,0 +1,16 @@
+.miniTree {
+  width: 100%;
+  height: 100%;
+}
+.miniTree path {
+  fill: none;
+  stroke: var(--edge);
+  stroke-width: 1.3;
+}
+.miniTree circle {
+  fill: var(--surface);
+  stroke-width: 1.7;
+}
+.miniTree circle:last-child {
+  stroke: none;
+}

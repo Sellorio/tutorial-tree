@@ -1,0 +1,73 @@
+.treeCard {
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+  animation: reveal 250ms ease-out;
+  background: var(--surface);
+}
+.treePreview {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 178px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  padding: 15px;
+  background-color: var(--canvas);
+  background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+  background-size: 17px 17px;
+  cursor: pointer;
+  overflow: hidden;
+}
+.treePreview > img {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  object-fit: cover;
+  object-position: center 48%;
+}
+.treeInfo {
+  padding: 12px;
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.treeInfo h2 {
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 500;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.treeInfo p {
+  color: var(--muted);
+  font-size: 10px;
+  margin: 4px 0 14px;
+}
+.treeInfo p span {
+  padding: 0 8px;
+}
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 700px) {
+  .treePreview {
+    height: 185px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .treeCard {
+    animation: none;
+  }
+}

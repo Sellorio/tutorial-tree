@@ -1,0 +1,11 @@
+.canvasWrap {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  order: 0;
+}
+@media (max-width: 700px) {
+  .canvasWrap {
+    min-height: 180px;
+  }
+}

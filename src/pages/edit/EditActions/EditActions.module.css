@@ -1,0 +1,48 @@
+.primaryButton,
+.secondaryButton {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 8px 11px;
+  color: var(--text);
+  background: var(--surface);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.primaryButton {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+.primaryButton:hover {
+  background: var(--accent-hover);
+}
+.secondaryButton:hover {
+  background: var(--hover);
+}
+.saveState {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--muted);
+  margin-right: 7px;
+}
+@media (max-width: 1100px) {
+  .saveState {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  .primaryButton,
+  .secondaryButton {
+    padding: 7px 9px;
+    font-size: 11px;
+  }
+}

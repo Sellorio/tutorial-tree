@@ -1,0 +1,50 @@
+.segmented {
+  display: flex;
+  background: var(--canvas);
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  gap: 3px;
+}
+.segmented button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex: 1;
+  padding: 7px 4px;
+  font: inherit;
+  font-size: 11px;
+  border: 0;
+  border-radius: 3px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+}
+.segmented button[aria-pressed='true'] {
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: 0 1px 4px #00000012;
+}
+.iconGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+}
+.iconChoice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 4px;
+  background: var(--canvas);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.iconChoice[aria-pressed='true'] {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}

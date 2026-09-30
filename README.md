@@ -1,0 +1,120 @@
+# Branch
+
+A browser-local skill-tree editor and learning-progress tracker, built with React, TypeScript, Vite, and React Flow. No account or backend is required.
+
+## Run
+
+Use Node.js 22.12 or later.
+
+```sh
+npm install
+npm run dev
+```
+
+Vite prints the local URL. A starter tree, Creative foundations, is included and can be edited or deleted.
+
+## Workspace
+
+- **My journeys** (the default tab): create, continue, export, or delete independent instances. **New journey** lets you choose its source tree.
+- **Skill trees**: create, edit, export, or delete diagrams. Start a named journey from any diagram's menu card.
+- Deletion requires confirmation. Deleting a diagram also deletes every journey linked to it.
+- The compact title bar contains the current title and actions. On the menu, **Import** sits next to **New** and accepts the selected tab's export type. Export and delete actions live alongside each tree or journey.
+- Theme defaults to **System**, follows OS changes, and supports persistent **Light** and **Dark** overrides.
+- The hash URL identifies the open diagram or journey. Refresh restores it; unknown IDs show a recoverable empty state.
+
+## Editor
+
+- Right-click the canvas and choose **Add Node**, or use the circular-node button in the canvas toolbar.
+- Drag a node to move it. Drag from one of its four edge handles onto another node to connect them.
+- Left-drag empty canvas or middle-drag to pan. Scroll/pinch or use the zoom and fit controls.
+- Select a node to edit its text, description, Small/Medium/Large size (default Medium), one of ten accent colors, all/any prerequisite rule, YouTube video, and tips. Size is shared by Edit and Run modes.
+- Choose **Icon** and a Lucide icon, or **Image** and a URL/upload. With no node selected, the overview offers the diagram's cover image instead of a color palette.
+- Images accept HTTP(S) URLs or PNG/JPEG/WebP/GIF uploads under 1.5 MB. Uploaded images are embedded in exports.
+- Select a connection to switch clockwise/counterclockwise curvature or delete it. Curves run center-to-center, masked beneath the nodes; subtle arrows repeat every 64 canvas units instead of appearing at endpoints. Nearby connections curve more steeply, up to 60 degrees.
+- Right-click a node or connection to delete it with confirmation. Selected nodes use a glow instead of extra border rings.
+- Drag the **Properties** header to undock or move the inspector. Drop near either window edge or use its dock buttons to redock. On small screens, the docked inspector sits below the canvas.
+- Start is always completed, cannot be deleted, and cannot receive a connection. Duplicate, self-referencing, and cyclic connections are rejected.
+- **Save** writes the diagram to browser storage and reconciles existing journeys. **Save & return** saves and opens the menu. Journeys can only be started from the menu. Navigation and refresh warn about unsaved edits.
+
+## Run Mode
+
+- States are Locked, Unlocked, In Progress, and Completed. Locked nodes cannot be selected.
+- Selecting an available node opens separate status, description, tutorial, and prerequisite sections. Expandable tips have an opaque theme-aware background and no count. Desktop tips appear to the left; the separate detail sections appear to the right. Mobile stacks the sections below the selected node.
+- Changing status saves immediately and closes the overlay. Clicking the canvas, pressing Escape, or panning also closes it.
+- Reverting a completed node requires confirmation because dependent unfinished nodes may become locked.
+- A node unlocks when every input is completed (**all**) or at least one input is completed (**any**). Nodes without inputs stay locked, except Start.
+- Completed nodes stay completed through prerequisite changes. In-progress nodes keep that status only while their prerequisites remain satisfied. Removed node IDs are discarded.
+- Inactive connections are dimmed. Each journey keeps separate progress against the same diagram.
+
+## Portable Data
+
+Exports are versioned JSON with stable diagram, node, connection, and instance IDs.
+
+- A **diagram export** contains the diagram. Importing it replaces the diagram with the same ID and reconciles every linked instance.
+- An **instance export** includes both its diagram and progress. Importing into an empty browser restores both. When that diagram already exists locally, its current structure takes precedence; imported statuses are merged by node ID and reconciled against it.
+- Imports require confirmation and reject malformed JSON, invalid graphs, unsupported versions, unsafe media values, and mismatched instance ownership. Maximum import size is 10 MB.
+- Data lives under `branch.library.v1` in localStorage. Theme lives under `branch.theme`. Quota or permission failures are reported without silently declaring a successful save. Export important work before clearing browser data.
+- YouTube embeds and remote images need network access. Uploaded images, the included starter photo, and saved progress remain local. Typography has a local fallback when Google Fonts is unavailable.
+
+## Verification
+
+```sh
+npm test
+npm run test:coverage
+npm run lint
+npm run format:check
+npm run build
+npx playwright install chromium
+npm run test:e2e
+```
+
+`npm run format` applies the repository's Prettier configuration. Playwright starts Vite when needed, or reuses the local server. Tests use isolated browser contexts and do not alter your normal browser's progress.
+
+| Area                                                                    | Tests                                                                                                               |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Validation, migrations, transfers, Start protection, progression        | [shared model tests](src/shared/model/model.test.ts)                                                                |
+| Persistence and corrupt-storage recovery                                | [storage tests](src/shared/storage/storage.test.ts)                                                                 |
+| Metadata, images, tips, prerequisites                                   | [inspector tests](src/edit/Inspector/Inspector.test.tsx)                                                            |
+| Status controls, tips, videos                                           | [run overlay tests](src/run/RunOverlay/RunOverlay.test.tsx)                                                         |
+| Docking and naming dialogs                                              | [panel tests](src/edit/MovablePanel/MovablePanel.test.tsx), [dialog tests](src/menu/NameDialog/NameDialog.test.tsx) |
+| Canvas callbacks, selection, context menus, viewport                    | [canvas tests](src/shared/Canvas/Canvas.test.tsx)                                                                   |
+| Routing, save/return, confirmations, imports, independent progress      | [application tests](src/shared/WorkspaceApp/WorkspaceApp.test.tsx)                                                  |
+| File ownership, individual declarations, component size, CSS colocation | [structural guard](src/shared/architecture/structure.test.ts)                                                       |
+| Pointer gestures, downloads, refresh, desktop/mobile themes             | [browser tests](e2e/workspace.spec.ts)                                                                              |
+
+Coverage reports are generated in `coverage/`; the shared model is gated at 100% line and function coverage. Browser screenshots and failure traces are written to `test-results/`. CI runs formatting, lint, unit coverage, the production build, and Chromium workflows.
+
+## Structure
+
+The first source folder identifies UI ownership: `menu`, `edit`, `run`, or `shared`. The only root source file is the React entry point. Components have their own folder, matching CSS module when needed, separate props type, and colocated tests or component-specific helpers. Tests of a composed screen also exercise its smaller child components.
+
+```text
+src/
+	main.tsx
+	menu/       MenuScreen, TreeCard, JourneyRow, NameDialog, ...
+	edit/       Inspector, NodeInspector, ImageField, MovablePanel, ...
+	run/        RunOverlay, NodeStatus, NodeTips, ...
+	shared/
+		WorkspaceApp/    composition, state, routing effects, shared actions
+		Canvas/          adapter, node/edge components, geometry, flow types
+		ThemePicker/     theme control, preference hook and constants
+		model/           one operation per file; types, schemas and constants
+		storage/         persistence and starter data
+		styles/          global design tokens and resets
+		testing/         shared test setup
+		architecture/    source-structure regression guard
+```
+
+### Finding The Right File
+
+- Start at [WorkspaceApp](src/shared/WorkspaceApp/WorkspaceApp.tsx) for screen composition. Its [store](src/shared/WorkspaceApp/useWorkspaceStore.ts), [derived view](src/shared/WorkspaceApp/getWorkspaceView.ts), [effects](src/shared/WorkspaceApp/useWorkspaceEffects.ts), and [action wiring](src/shared/WorkspaceApp/useWorkspace.ts) are separate.
+- Change editor fields in their folders under `edit`, for example [NodeVisualField](src/edit/NodeVisualField/NodeVisualField.tsx). Workflow operations shared by editor controls live under `edit/actions`; progress operations live under `run/actions`.
+- Change node appearance in [TalentCircle](src/shared/Canvas/TalentCircle/TalentCircle.tsx), paths in [CurvedConnection](src/shared/Canvas/CurvedConnection/CurvedConnection.tsx), and pointer behavior in [createFlowProps](src/shared/Canvas/CanvasContent/createFlowProps.ts).
+- Change default node sizes, colors, or icon choices in `shared/model/constants`. Starter content lives in [STARTER_SKILLS](src/shared/storage/STARTER_SKILLS.ts) and [STARTER_CONNECTIONS](src/shared/storage/STARTER_CONNECTIONS.ts).
+- Change palette and global typography in [Global.module.css](src/shared/styles/Global.module.css). Component styling lives beside the component, including its responsive rules.
+
+Production files contain one named function, component, class, or type declaration. Component files stay below 100 lines; the structural test enforces this. Event callbacks remain beside the interaction they handle, while named reusable helpers live in separate files. Prefer direct imports over aggregation barrels so dependencies remain visible.
+
+Keep React Flow's explicit `measured` dimensions in [createFlowNodes](src/shared/Canvas/CanvasContent/createFlowNodes.ts). Omitting them makes React Flow clear handle bounds and temporarily remove edges during dragging. The browser suite samples rendered connection geometry across drag frames to guard against this regression.
+
+The starter photograph is bundled from [Unsplash](https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85). Icons are provided by Lucide. React Flow attribution remains visible on the canvas.

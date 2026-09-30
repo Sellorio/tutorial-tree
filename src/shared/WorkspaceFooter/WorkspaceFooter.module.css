@@ -1,0 +1,49 @@
+.workspaceFooter {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  justify-content: space-between;
+  height: 28px;
+  flex-shrink: 0;
+  padding: 0 18px;
+  border-top: 1px solid var(--border);
+  font-size: 9px;
+  color: var(--muted);
+}
+.workspaceFooter > span {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.legendTeal,
+.legendAmber,
+.legendGray {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.legendAmber {
+  background: #bc8623;
+  margin-left: 9px;
+}
+.legendGray {
+  background: #a4ada9;
+  margin-left: 9px;
+}
+@media (max-width: 700px) {
+  .workspaceFooter {
+    padding: 0 12px;
+    gap: 8px;
+    font-size: 8px;
+  }
+  .workspaceFooter > span:last-child {
+    display: none;
+  }
+}

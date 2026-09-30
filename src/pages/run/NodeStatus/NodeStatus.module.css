@@ -1,0 +1,64 @@
+.eyebrow {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.iconButton {
+  padding: 5px;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.iconButton:hover {
+  color: var(--text);
+  background: var(--hover);
+}
+.overlaySection {
+  flex-shrink: 0;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  box-shadow: var(--shadow);
+}
+.statusButtons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+.statusButtons button {
+  border: 1px solid var(--border);
+  background: var(--canvas);
+  color: var(--muted);
+  font: inherit;
+  font-size: 9px;
+  padding: 8px 2px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 7px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.statusButtons button[aria-pressed='true'] {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.statusButtons button:hover {
+  border-color: var(--accent);
+}

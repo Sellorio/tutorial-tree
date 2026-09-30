@@ -1,0 +1,32 @@
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 5px;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  color: var(--muted);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.iconButton:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--hover);
+}
+.iconButton:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.errorBanner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 25px;
+  font-size: 12px;
+  color: var(--danger);
+  background: var(--surface);
+  border-bottom: 1px solid var(--danger);
+}

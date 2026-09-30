@@ -1,0 +1,32 @@
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+.swatch {
+  height: 26px;
+  width: 26px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid transparent;
+  color: white;
+}
+.swatch {
+  cursor: pointer;
+}
+.swatch[aria-pressed='true'] {
+  outline: 1px solid var(--text);
+  outline-offset: 3px;
+}
+@media (max-width: 700px) {
+  .swatches {
+    grid-template-columns: repeat(10, 1fr);
+    gap: 5px;
+  }
+  .swatch {
+    width: 23px;
+    height: 23px;
+  }
+}

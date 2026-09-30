@@ -1,0 +1,17 @@
+.app {
+  height: 100dvh;
+  background: var(--surface);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+}
+.workspace {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+@media (max-width: 700px) {
+  .workspace {
+    flex-direction: column;
+  }
+}
