@@ -3,7 +3,6 @@ import { NodeTips } from '../NodeTips/NodeTips'
 import { NodeStatus } from '../NodeStatus/NodeStatus'
 import type { RunOverlayProps } from './RunOverlayProps'
 import { useState } from 'react'
-import { ArrowDownToLine } from 'lucide-react'
 import styles from './RunOverlay.module.css'
 
 export function RunOverlay({
