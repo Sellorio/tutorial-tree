@@ -73,7 +73,7 @@ export function createFlowProps({
     panOnDrag: [0, 1],
     selectionOnDrag: false,
     nodesDraggable: editing,
-    nodesConnectable: editing,
+    nodesConnectable: false,
     elementsSelectable: true,
     deleteKeyCode: null,
     minZoom: 0.2,

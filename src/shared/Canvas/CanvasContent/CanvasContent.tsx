@@ -5,11 +5,13 @@ import { CanvasToolbar } from '../CanvasToolbar/CanvasToolbar'
 import { CanvasContextMenu } from '../../../pages/edit/CanvasContextMenu/CanvasContextMenu'
 import { useCanvasState } from './useCanvasState'
 import { createFlowProps } from './createFlowProps'
+import { useConnectionDrag } from './useConnectionDrag'
 import { Background, BackgroundVariant, ReactFlow } from '@xyflow/react'
 import styles from './CanvasContent.module.css'
 
 export function CanvasContent(props: CanvasProps) {
   const state = useCanvasState(props)
+  const connection = useConnectionDrag(state)
   const {
     canvasRef,
     onSelect,
@@ -28,14 +30,35 @@ export function CanvasContent(props: CanvasProps) {
       ref={canvasRef}
       className={styles.canvas}
       data-testid="canvas"
+      data-editing={editing}
+      data-connecting={Boolean(connection.preview)}
+      {...connection.handlers}
       onKeyDown={(event) => {
         if (event.key === 'Escape') {
+          connection.reset()
           onSelect(null)
           setContext(null)
         }
       }}
     >
-      <ReactFlow<FlowNode, FlowEdge> {...createFlowProps(state)}>
+      <ReactFlow<FlowNode, FlowEdge>
+        {...createFlowProps(state)}
+        edges={
+          connection.preview
+            ? [
+                ...state.edges,
+                { ...connection.preview, className: styles.connectionPreview },
+              ]
+            : state.edges
+        }
+        nodes={state.nodes.map((node) => ({
+          ...node,
+          data: {
+            ...node.data,
+            connectionTarget: node.id === connection.target,
+          },
+        }))}
+      >
         <Background
           variant={BackgroundVariant.Dots}
           gap={24}

@@ -11,6 +11,10 @@
   background: none;
   outline: none;
 }
+.canvas :global(.react-flow__node),
+.canvas[data-editing='true'] :global(.react-flow__edge) {
+  cursor: pointer !important;
+}
 .canvas :global(.react-flow__attribution) {
   background: var(--surface);
   color: var(--muted);
@@ -18,6 +22,14 @@
 }
 .canvas :global(.react-flow__attribution a) {
   color: inherit;
+}
+.canvas .connectionPreview,
+.canvas .connectionPreview * {
+  pointer-events: none !important;
+}
+.canvas[data-connecting='true'],
+.canvas[data-connecting='true'] * {
+  cursor: crosshair !important;
 }
 .canvasLabel {
   position: absolute;

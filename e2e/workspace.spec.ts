@@ -87,16 +87,53 @@ test('creates, edits metadata, connects from an edge, saves, reloads, and export
   await page.getByLabel('Upload node image').setInputFiles('public/studio.jpg')
   await expect(page.locator('[data-image="true"]')).toHaveCount(1)
   await page.getByRole('button', { name: 'Fit tree' }).click()
-  const startHandle = page
-    .locator('.react-flow__node')
-    .filter({ hasText: 'Start' })
-    .locator('[data-handleid="right"]')
+  const start = page.locator('.react-flow__node').filter({ hasText: 'Start' })
   const target = page
     .locator('.react-flow__node')
     .filter({ hasText: 'Practice' })
-  await page.locator('.react-flow__node').filter({ hasText: 'Start' }).hover()
-  await drag(page, await center(startHandle), await center(target))
+  await start.hover()
+  const startBounds = (await start.boundingBox())!
+  const sourcePoint = {
+    x: startBounds.x + startBounds.width + 5,
+    y: startBounds.y + startBounds.height / 2,
+  }
+  const targetBounds = (await target.boundingBox())!
+  await page.mouse.move(sourcePoint.x, sourcePoint.y)
+  await expect(start.locator('[data-connection-handle]')).toHaveCSS(
+    'cursor',
+    'crosshair',
+  )
+  await expect(start.locator('[data-connection-handle] + circle')).toHaveCSS(
+    'opacity',
+    '1',
+  )
+  await page.mouse.down()
+  await page.mouse.move(
+    targetBounds.x + targetBounds.width * 0.3,
+    targetBounds.y + targetBounds.height * 0.4,
+    { steps: 16 },
+  )
+  await expect(target.locator('[data-node-id]')).toHaveClass(/connectionTarget/)
+  const preview = page.locator(
+    '.react-flow__edge[data-id="connection-preview"]',
+  )
+  const previewPath = await preview
+    .locator('.react-flow__edge-path')
+    .getAttribute('d')
+  await expect(preview.locator('.react-flow__edge-path')).toHaveCSS(
+    'stroke-dasharray',
+    'none',
+  )
+  expect(
+    await preview.locator('[data-arrow-distance]').count(),
+  ).toBeGreaterThan(0)
+  await page.mouse.up()
+  await expect(preview).toHaveCount(0)
   await expect(page.locator('.react-flow__edge')).toHaveCount(1)
+  await expect(page.locator('.react-flow__edge-path')).toHaveAttribute(
+    'd',
+    previewPath!,
+  )
   await page.getByRole('button', { name: 'Counterclockwise curve' }).click()
   await page.getByRole('button', { name: 'Save', exact: true }).click()
   const saved = (await stored(page)).diagrams.find(
@@ -125,6 +162,88 @@ test('creates, edits metadata, connects from an edge, saves, reloads, and export
   const data = JSON.parse(await readFile((await download.path())!, 'utf8'))
   expect(data.diagram.id).toBe(saved.id)
   expect(data.diagram.nodes).toEqual(saved.nodes)
+})
+
+test('connection rings support every node size and zoom, cancel cleanly, and reject invalid drops', async ({
+  page,
+}) => {
+  await page.getByRole('button', { name: 'Edit Creative foundations' }).click()
+  const source = page.getByTestId('talent-seeing')
+  await source.hover()
+  await expect(source).toHaveCSS('cursor', 'pointer')
+  await expect(page.locator('.react-flow__edge-path').first()).toHaveCSS(
+    'cursor',
+    'pointer',
+  )
+  await expect(source.locator('[data-connection-handle]')).toHaveCSS(
+    'cursor',
+    'crosshair',
+  )
+  await source.click()
+  const preview = page.locator(
+    '.react-flow__edge[data-id="connection-preview"]',
+  )
+  const viewport = page.locator('.react-flow__viewport')
+  for (const size of ['Small', 'Medium', 'Large']) {
+    await source.click()
+    await page.getByRole('button', { name: size, exact: true }).click()
+    await page.getByRole('button', { name: 'Zoom out', exact: true }).click()
+    await source.hover()
+    const bounds = (await source.boundingBox())!
+    const beforeViewport = await viewport.getAttribute('style')
+    for (const angle of [0, Math.PI / 2, Math.PI, Math.PI * 1.5, Math.PI / 4]) {
+      const point = {
+        x:
+          bounds.x +
+          bounds.width / 2 +
+          (bounds.width / 2 + 9) * Math.cos(angle),
+        y:
+          bounds.y +
+          bounds.height / 2 +
+          (bounds.height / 2 + 9) * Math.sin(angle),
+      }
+      await page.mouse.move(point.x, point.y)
+      await expect(
+        source.locator('[data-connection-handle] + circle'),
+      ).toHaveCSS('opacity', '1')
+      await page.mouse.down()
+      await page.mouse.move(point.x + 25, point.y + 25)
+      await expect(preview).toHaveCount(1)
+      await page.keyboard.press('Escape')
+      await expect(preview).toHaveCount(0)
+      await page.mouse.up()
+      expect(await source.boundingBox()).toEqual(bounds)
+      await expect(viewport).toHaveAttribute('style', beforeViewport!)
+    }
+  }
+  for (const destination of ['start', 'seeing', 'color']) {
+    await source.hover()
+    const bounds = (await source.boundingBox())!
+    await page.mouse.move(bounds.x - 6, bounds.y + bounds.height / 2)
+    await page.mouse.down()
+    await expect(preview).toHaveCount(1)
+    const target = page.getByTestId(`talent-${destination}`)
+    const targetCenter = await center(target)
+    await page.mouse.move(targetCenter.x, targetCenter.y, { steps: 12 })
+    await expect(target).not.toHaveClass(/connectionTarget/)
+    await page.mouse.up()
+    await expect(preview).toHaveCount(0)
+    await expect(page.locator('.react-flow__edge')).toHaveCount(8)
+  }
+  const bounds = (await source.boundingBox())!
+  await page.mouse.move(bounds.x - 6, bounds.y + bounds.height / 2)
+  await page.mouse.down()
+  await expect(preview).toHaveCount(1)
+  await page.mouse.move(bounds.x - 70, bounds.y - 70)
+  await page.mouse.up()
+  await expect(preview).toHaveCount(0)
+  await expect(page.locator('.react-flow__edge')).toHaveCount(8)
+  await page.mouse.move(bounds.x - 6, bounds.y + bounds.height / 2)
+  await page.mouse.down()
+  await expect(preview).toHaveCount(1)
+  await page.getByTestId('canvas').dispatchEvent('pointercancel')
+  await expect(preview).toHaveCount(0)
+  await page.mouse.up()
 })
 
 test('right-click adds nodes; node drag and left/middle panning work; panel undocks and redocks', async ({

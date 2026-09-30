@@ -5,5 +5,6 @@ export type TalentData = {
   talent: TalentNode
   status: Status
   editing: boolean
+  connectionTarget?: boolean
   activate: () => void
 }

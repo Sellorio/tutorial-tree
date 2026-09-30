@@ -17,9 +17,14 @@ export function CanvasToolbar({
       >
         <Minus size={17} />
       </button>
-      <output aria-label="Zoom level">
+      <button
+        className={styles.zoomLevel}
+        aria-label="Reset zoom to 100%"
+        title="Reset zoom to 100%"
+        onClick={() => void flow.zoomTo(1, { duration: 160 })}
+      >
         {Math.round(viewport.zoom * 100)}%
-      </output>
+      </button>
       <button
         aria-label="Zoom in"
         title="Zoom in"

@@ -14,7 +14,7 @@ export function TalentCircle({ data, selected }: NodeProps<FlowNode>) {
   const image = talent.media === 'image' ? talent.image : ''
   return (
     <div
-      className={`${styles.node} ${selected ? styles.selected : ''} ${!editing ? styles[status] : ''}`}
+      className={`${styles.node} ${selected ? styles.selected : ''} ${data.connectionTarget ? styles.connectionTarget : ''} ${!editing ? styles[status] : ''}`}
       style={
         {
           '--node-accent': talent.accent,
@@ -25,6 +25,7 @@ export function TalentCircle({ data, selected }: NodeProps<FlowNode>) {
       data-status={status}
       data-size={talent.size}
       data-testid={`talent-${talent.id}`}
+      data-node-id={talent.id}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault()

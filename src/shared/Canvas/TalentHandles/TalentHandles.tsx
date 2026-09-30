@@ -1,41 +1,51 @@
 import type { TalentHandlesProps } from './TalentHandlesProps'
-import { Handle, Position } from '@xyflow/react'
+import { NodeSizeConstants } from '../../model/constants/NodeSizeConstants'
+import { Handle, Position, useViewport } from '@xyflow/react'
 import styles from './TalentHandles.module.css'
 
 export function TalentHandles({ editing, talent }: TalentHandlesProps) {
+  const { zoom } = useViewport()
+  const thickness = 12 / zoom
+  const size = NodeSizeConstants[talent.size].nodeSize + thickness * 2
   return (
     <>
-      {editing &&
-        [Position.Left, Position.Top, Position.Right, Position.Bottom].map(
-          (position) => (
-            <Handle
-              key={position}
-              id={position}
-              type="source"
-              position={position}
-              className={styles.handle}
-              aria-label={`Connect ${talent.title} ${position}`}
-            />
-          ),
-        )}
-      {!editing && (
-        <>
-          <Handle
-            id="right"
-            type="source"
-            position={Position.Right}
-            className={styles.hiddenHandle}
-            isConnectable={false}
+      {editing && (
+        <svg
+          className={styles.connectionRing}
+          width={size}
+          height={size}
+          aria-hidden="true"
+        >
+          <circle
+            data-connection-handle
+            className={`${styles.hitArea} nodrag nopan`}
+            cx={size / 2}
+            cy={size / 2}
+            r={(size - thickness) / 2}
+            strokeWidth={thickness}
           />
-          <Handle
-            id="left"
-            type="target"
-            position={Position.Left}
-            className={styles.hiddenHandle}
-            isConnectable={false}
+          <circle
+            className={styles.hoverBorder}
+            cx={size / 2}
+            cy={size / 2}
+            r={(size - thickness) / 2}
           />
-        </>
+        </svg>
       )}
+      <Handle
+        id="right"
+        type="source"
+        position={Position.Right}
+        className={styles.hiddenHandle}
+        isConnectable={false}
+      />
+      <Handle
+        id="left"
+        type="target"
+        position={Position.Left}
+        className={styles.hiddenHandle}
+        isConnectable={false}
+      />
     </>
   )
 }

@@ -15,6 +15,7 @@ const harness = vi.hoisted(() => ({
     setCenter: vi.fn(),
     zoomIn: vi.fn(),
     zoomOut: vi.fn(),
+    zoomTo: vi.fn(),
     fitView: vi.fn(),
     screenToFlowPosition: vi.fn((point: { x: number; y: number }) => point),
   },
@@ -37,8 +38,8 @@ vi.mock('@xyflow/react', () => ({
   useReactFlow: () => harness.flow,
   useViewport: () => ({ zoom: 1, x: 0, y: 0 }),
   Background: () => null,
-  Handle: ({ position }: { position: string }) => (
-    <span data-testid={`handle-${position}`} />
+  Handle: ({ position, type }: { position: string; type: string }) => (
+    <span data-testid={`${type}-handle-${position}`} />
   ),
   BaseEdge: ({ path }: { path: string }) => (
     <svg>
@@ -219,6 +220,13 @@ describe('canvas adapter', () => {
     fireEvent.keyDown(screen.getByTestId('canvas'), { key: 'Escape' })
     expect(onSelect).toHaveBeenLastCalledWith(null)
   })
+  it.each([true, false])('resets zoom to 100%% with editing=%s', (editing) => {
+    canvas(editing)
+    const reset = screen.getByRole('button', { name: 'Reset zoom to 100%' })
+    expect(reset).toHaveTextContent('100%')
+    fireEvent.click(reset)
+    expect(harness.flow.zoomTo).toHaveBeenCalledWith(1, { duration: 160 })
+  })
   it('disables locked nodes, movement, creation, and edge selection in run mode', () => {
     const { onSelect, onMove } = canvas(false)
     expect(harness.props.nodes![2]).toMatchObject({
@@ -267,7 +275,7 @@ describe('canvas adapter', () => {
     act(() => harness.props.onMoveStart!(null, { x: 0, y: 0, zoom: 1 }))
     expect(onSelect).not.toHaveBeenCalled()
   })
-  it('renders wrapped node images, status states, four handles and keyboard activation', () => {
+  it('renders wrapped node images, status states, invisible edge endpoints and keyboard activation', () => {
     const { onSelect } = canvas()
     const Talent = harness.props.nodeTypes!.talent
     const node = harness.props.nodes![1]
@@ -276,8 +284,9 @@ describe('canvas adapter', () => {
     expect(
       screen.getByTestId('talent-seeing').querySelector('[data-image="true"]'),
     ).toHaveAttribute('style')
-    for (const position of ['left', 'top', 'right', 'bottom'])
-      expect(screen.getByTestId(`handle-${position}`)).toBeInTheDocument()
+    expect(screen.getByTestId('source-handle-right')).toBeInTheDocument()
+    expect(screen.getByTestId('target-handle-left')).toBeInTheDocument()
+    expect(screen.queryByTestId('source-handle-top')).not.toBeInTheDocument()
     fireEvent.keyDown(screen.getByTestId('talent-seeing'), { key: 'Enter' })
     expect(onSelect).toHaveBeenLastCalledWith({ kind: 'node', id: 'seeing' })
     rerender(

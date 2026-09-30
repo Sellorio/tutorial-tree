@@ -3,7 +3,7 @@
   pointer-events: none;
 }
 .pathArrows svg {
-  opacity: 0.65;
+  opacity: 0.9;
 }
 .connection {
   stroke: var(--edge);

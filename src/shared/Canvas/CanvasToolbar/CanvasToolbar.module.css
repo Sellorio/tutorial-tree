@@ -27,9 +27,9 @@
 .tools button:hover {
   background: var(--hover);
 }
-.tools output {
+.tools .zoomLevel {
   font-size: 11px;
-  min-width: 42px;
+  width: 42px;
   text-align: center;
   color: var(--muted);
 }
