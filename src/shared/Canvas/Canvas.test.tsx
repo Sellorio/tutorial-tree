@@ -48,6 +48,7 @@ vi.mock('@xyflow/react', () => ({
   ),
   Position: { Left: 'left', Right: 'right', Top: 'top', Bottom: 'bottom' },
   ConnectionMode: { Loose: 'loose' },
+  SelectionMode: { Partial: 'partial' },
   MarkerType: { ArrowClosed: 'arrowclosed' },
   BackgroundVariant: { Dots: 'dots' },
 }))
@@ -219,6 +220,7 @@ describe('canvas adapter', () => {
   it('preserves box-selected nodes and groups their movement in edit mode', () => {
     const { onSelect, diagram, rerender, ...props } = canvas()
     expect(harness.props.selectionKeyCode).toBe('Shift')
+    expect(harness.props.selectionMode).toBe('partial')
     act(() => harness.props.onSelectionStart!(event))
     act(() =>
       harness.props.onNodesChange!([

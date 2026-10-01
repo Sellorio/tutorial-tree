@@ -4,7 +4,7 @@ import type { FlowEdge } from '../types/FlowEdge'
 import { nodeTypes } from '../nodeTypes'
 import { edgeTypes } from '../edgeTypes'
 import type { CanvasState } from '../types/CanvasState'
-import { ConnectionMode } from '@xyflow/react'
+import { ConnectionMode, SelectionMode } from '@xyflow/react'
 import type { ReactFlowProps } from '@xyflow/react'
 export function createFlowProps({
   nodes,
@@ -118,6 +118,7 @@ export function createFlowProps({
     onPaneContextMenu: (event) => openContext(event),
     panOnDrag: [0, 1],
     selectionOnDrag: false,
+    selectionMode: SelectionMode.Partial,
     selectionKeyCode: editing ? 'Shift' : null,
     multiSelectionKeyCode: editing ? 'Shift' : null,
     nodesDraggable: editing,

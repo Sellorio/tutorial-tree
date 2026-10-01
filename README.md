@@ -26,7 +26,7 @@ Vite prints the local URL. A starter tree, Creative foundations, is included and
 
 - Right-click the canvas and choose **Add Node**, or use the circular-node button in the canvas toolbar.
 - Drag a node to move it. Drag from one of its four edge handles onto another node to connect them.
-- Hold Shift and drag on empty canvas to box-select multiple nodes, then drag the group to move them together. Shift-click adds or removes individual nodes. The canvas cursor becomes a crosshair while Shift is held.
+- Hold Shift and drag on empty canvas to box-select multiple nodes, including nodes partially intersecting the selection area, then drag the group to move them together. Shift-click adds or removes individual nodes. The canvas cursor becomes a crosshair while Shift is held.
 - Undo or redo diagram edits with the title-bar arrow buttons, Ctrl+Z, and Ctrl+Y or Ctrl+Shift+Z, including while editing settings fields. The selected node or connection stays selected. Node/group drags count as one edit. History lasts for the current editor session and is cleared when opening another tree.
 - Left-drag empty canvas or middle-drag to pan. Scroll/pinch or use the zoom and fit controls.
 - Select a node to edit its text, description, Small/Medium/Large size (default Medium), one of ten accent colors, all/any prerequisite rule, YouTube video, and tips. Size is shared by Edit and Run modes.

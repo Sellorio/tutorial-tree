@@ -107,7 +107,7 @@ test('edit history supports title-bar buttons and all undo redo shortcuts', asyn
   ).toBeDisabled()
 })
 
-test('shift box selection moves multiple nodes and undoes the drag in one step', async ({
+test('shift box selection includes partially intersecting nodes and undoes group movement in one step', async ({
   page,
 }) => {
   const library = starterLibrary()
@@ -147,12 +147,15 @@ test('shift box selection moves multiple nodes and undoes the drag in one step',
     page,
     { x: firstBounds.x - 24, y: firstBounds.y - 24 },
     {
-      x: secondBounds.x + secondBounds.width + 24,
-      y: secondBounds.y + secondBounds.height + 24,
+      x: secondBounds.x + secondBounds.width / 2,
+      y: secondBounds.y + secondBounds.height / 2,
     },
   )
   await page.keyboard.up('Shift')
   await expect(page.locator('.react-flow__node.selected')).toHaveCount(2)
+  await expect(
+    page.locator('.react-flow__node[data-id="start"]'),
+  ).not.toHaveClass(/selected/)
   await expect(viewport).toHaveAttribute('style', transform!)
   const source = await center(first)
   await drag(page, source, { x: source.x + 65, y: source.y + 40 })
