@@ -13,11 +13,10 @@ export function useCanvasSelection({
   const centerSelection = useEffectEvent(() => {
     const selected = diagram.nodes.find((node) => node.id === selectedNodeId)
     if (!selected || !editing || window.innerWidth > 700) return
-    void flow.setCenter(
-      nodeCenter(selected).x,
-      nodeCenter(selected).y,
-      { zoom: 1, duration: 0 },
-    )
+    void flow.setCenter(nodeCenter(selected).x, nodeCenter(selected).y, {
+      zoom: 1,
+      duration: 0,
+    })
   })
   useEffect(() => {
     if (!editing || !selectedNodeId || !canvasRef.current) return
