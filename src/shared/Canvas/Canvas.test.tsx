@@ -138,8 +138,8 @@ describe('canvas adapter', () => {
     expect(harness.props.edges).toHaveLength(8)
     expect(harness.props.panOnDrag).toEqual([0, 1])
     expect(harness.props.nodes![0]).toMatchObject({
-      width: 80,
-      height: 80,
+      width: 50,
+      height: 50,
       draggable: true,
     })
     const connection = {

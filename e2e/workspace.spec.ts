@@ -396,6 +396,7 @@ test('creates, edits metadata, connects from an edge, saves, reloads, and export
   const saved = (await stored(page)).diagrams.find(
     (diagram) => diagram.name === 'Browser test tree',
   )!
+  expect(saved.nodes[0]).toMatchObject({ kind: 'start', size: 'small' })
   expect(saved.connections[0].clockwise).toBe(false)
   expect(saved.nodes[1]).toMatchObject({
     title: 'Practice',
@@ -465,7 +466,7 @@ test('node names persist and replace the Run status eyebrow', async ({
   expect(nameBounds.x + nameBounds.width).toBeLessThanOrEqual(closeBounds.x)
 })
 
-test('connection rings support every node size and zoom, cancel cleanly, and reject invalid drops', async ({
+test('connection rings support every node size and zoom, create nodes on empty drops, cancel cleanly, and reject invalid drops', async ({
   page,
 }) => {
   await page.getByRole('button', { name: 'Edit Creative foundations' }).click()
@@ -530,6 +531,7 @@ test('connection rings support every node size and zoom, cancel cleanly, and rej
     await page.mouse.up()
     await expect(preview).toHaveCount(0)
     await expect(page.locator('.react-flow__edge')).toHaveCount(8)
+    await expect(page.locator('.react-flow__node')).toHaveCount(8)
   }
   const bounds = (await source.boundingBox())!
   await page.mouse.move(bounds.x - 6, bounds.y + bounds.height / 2)
@@ -538,7 +540,25 @@ test('connection rings support every node size and zoom, cancel cleanly, and rej
   await page.mouse.move(bounds.x - 70, bounds.y - 70)
   await page.mouse.up()
   await expect(preview).toHaveCount(0)
+  await expect(page.locator('.react-flow__node')).toHaveCount(9)
+  await expect(page.locator('.react-flow__edge')).toHaveCount(9)
+  await expect(page.getByLabel('Node text', { exact: true })).toHaveValue(
+    'New skill',
+  )
+  await page.getByRole('button', { name: 'Undo', exact: true }).click()
+  await expect(page.locator('.react-flow__node')).toHaveCount(8)
   await expect(page.locator('.react-flow__edge')).toHaveCount(8)
+  await page.getByRole('button', { name: 'Redo', exact: true }).click()
+  await expect(page.locator('.react-flow__node')).toHaveCount(9)
+  await expect(page.locator('.react-flow__edge')).toHaveCount(9)
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  const saved = (await stored(page)).diagrams[0]
+  const added = saved.nodes.find((node) => node.title === 'New skill')!
+  expect(added.size).toBe('medium')
+  expect(saved.connections).toContainEqual(
+    expect.objectContaining({ source: 'seeing', target: added.id }),
+  )
+  await page.getByRole('button', { name: 'Undo', exact: true }).click()
   await page.mouse.move(bounds.x - 6, bounds.y + bounds.height / 2)
   await page.mouse.down()
   await expect(preview).toHaveCount(1)

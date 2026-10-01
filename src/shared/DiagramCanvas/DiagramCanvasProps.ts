@@ -14,7 +14,7 @@ export type DiagramCanvasProps = {
   statuses: Record<string, Status>
   selection: Selection
   setSelection: (selection: Selection) => void
-  addNode: (position: Point) => void
+  addNode: (position: Point, source?: string) => void
   connect: (source: string, target: string) => void
   removeSelected: (selection?: Selection) => void
   setDraft: Dispatch<SetStateAction<Diagram | null>>

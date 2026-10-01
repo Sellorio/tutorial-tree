@@ -14,7 +14,7 @@ export function createNode(
     position,
     description: '',
     accent: ACCENTS[0],
-    size: 'medium',
+    size: kind === 'start' ? 'small' : 'medium',
     media: 'icon',
     icon: 'sparkles',
     image: '',

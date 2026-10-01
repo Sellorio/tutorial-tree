@@ -1,16 +1,37 @@
 import type { Point } from './types/Point'
+import { ConnectionCurveConstants } from './constants/ConnectionCurveConstants'
+import { NodeSizeConstants } from './constants/NodeSizeConstants'
 
 export function connectionCurve(
   source: Point,
   target: Point,
   clockwise: boolean,
   curveAngle?: number,
+  sourceRadius = NodeSizeConstants.medium.nodeSize / 2,
+  targetRadius = NodeSizeConstants.medium.nodeSize / 2,
 ) {
   const distance = Math.hypot(target.x - source.x, target.y - source.y)
+  const diameter = Math.max(sourceRadius, targetRadius) * 2
+  const size =
+    diameter <= NodeSizeConstants.small.nodeSize
+      ? NodeSizeConstants.small
+      : diameter <= NodeSizeConstants.medium.nodeSize
+        ? NodeSizeConstants.medium
+        : NodeSizeConstants.large
+  const automaticAngle =
+    ConnectionCurveConstants.automaticMaxAngle *
+    (1 -
+      distance / (ConnectionCurveConstants.distance * size.curveDistanceWeight))
   const angle =
     curveAngle === undefined
-      ? Math.max(0, Math.min(60, 60 * (1 - distance / 900)))
-      : Math.max(0, Math.min(60, curveAngle))
+      ? Math.max(
+          0,
+          Math.min(ConnectionCurveConstants.automaticMaxAngle, automaticAngle),
+        )
+      : Math.max(
+          0,
+          Math.min(ConnectionCurveConstants.manualMaxAngle, curveAngle),
+        )
   const offset =
     ((Math.tan((angle * Math.PI) / 180) * distance) / 3) * (clockwise ? 1 : -1)
   const normal = distance

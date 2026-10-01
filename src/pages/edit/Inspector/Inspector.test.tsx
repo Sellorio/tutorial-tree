@@ -168,6 +168,41 @@ it('edits curve direction and deletes connections', () => {
   fireEvent.click(screen.getByRole('button', { name: 'Delete connection' }))
   expect(onDelete).toHaveBeenCalledOnce()
 })
+it('shows size-weighted automatic angles and preserves the angle when switching to manual', () => {
+  const diagram = starterLibrary().diagrams[0]
+  const connection = diagram.connections[0]
+  const source = diagram.nodes.find((node) => node.id === connection.source)!
+  const target = diagram.nodes.find((node) => node.id === connection.target)!
+  source.size = 'small'
+  source.position = { x: 0, y: 0 }
+  const onConnection = vi.fn()
+  const props = {
+    diagram,
+    selection: { kind: 'connection' as const, id: connection.id },
+    onNode: vi.fn(),
+    onConnection,
+    onDelete: vi.fn(),
+    onError: vi.fn(),
+  }
+  const { rerender } = render(<Inspector {...props} />)
+  for (const [size, radius, angle] of [
+    ['small', 25, 9],
+    ['medium', 40, 23],
+    ['large', 55, 29],
+  ] as const) {
+    target.size = size
+    target.position = { x: 475 - radius, y: 25 - radius }
+    rerender(<Inspector {...props} />)
+    expect(
+      screen.getByRole('spinbutton', { name: 'Curve angle in degrees' }),
+    ).toHaveValue(angle)
+    fireEvent.click(screen.getByRole('radio', { name: 'Manual curve' }))
+    expect(onConnection).toHaveBeenLastCalledWith({
+      ...connection,
+      curveAngle: angle,
+    })
+  }
+})
 it('shows validation feedback and diagram overview', () => {
   const { diagram, rerender } = renderInspector()
   diagram.nodes[1].image = 'javascript:bad'

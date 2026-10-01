@@ -13,6 +13,7 @@ export function useConnectionDrag({
   flow,
   canvasRef,
   onConnect,
+  onAdd,
 }: CanvasState) {
   const [drag, setDrag] = useState<{
     source: string
@@ -21,15 +22,18 @@ export function useConnectionDrag({
     target: string | null
   } | null>(null)
   const suppressClick = useRef(false)
-  const findTarget = (point: Point, source: string) =>
+  const nodeAtPoint = (point: Point) =>
     diagram.nodes.find((node) => {
       const center = nodeCenter(node)
       return (
         Math.hypot(point.x - center.x, point.y - center.y) <=
-          NodeSizeConstants[node.size].nodeSize / 2 &&
-        !connectionError(diagram, source, node.id)
+        NodeSizeConstants[node.size].nodeSize / 2
       )
-    })?.id ?? null
+    })
+  const findTarget = (point: Point, source: string) => {
+    const node = nodeAtPoint(point)
+    return node && !connectionError(diagram, source, node.id) ? node.id : null
+  }
   const reset = () => {
     if (drag && canvasRef.current?.hasPointerCapture(drag.pointerId))
       canvasRef.current.releasePointerCapture(drag.pointerId)
@@ -73,6 +77,15 @@ export function useConnectionDrag({
     })
     const target = findTarget(point, drag.source)
     if (target) onConnect(drag.source, target)
+    else if (
+      !nodeAtPoint(point) &&
+      document
+        .elementFromPoint(event.clientX, event.clientY)
+        ?.closest('.react-flow__pane')
+    ) {
+      const radius = NodeSizeConstants.medium.nodeSize / 2
+      onAdd({ x: point.x - radius, y: point.y - radius }, drag.source)
+    }
     reset()
   }
   const source = diagram.nodes.find((node) => node.id === drag?.source)

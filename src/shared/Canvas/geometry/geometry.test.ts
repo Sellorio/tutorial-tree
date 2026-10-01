@@ -2,8 +2,23 @@ import { describe, expect, it } from 'vitest'
 import { connectionGeometry } from './connectionGeometry'
 import { nodeCenter } from './nodeCenter'
 import { createNode } from '../../model/createNode'
+import { connectionCurve } from '../../model/connectionCurve'
 
 describe('center-based connection geometry', () => {
+  it('uses the larger node radius for the rendered automatic curve', () => {
+    const source = { x: 0, y: 0 }
+    const target = { x: 450, y: 0 }
+    const result = connectionGeometry(source, target, true, 25, 55)
+    expect(result.path).toBe(
+      connectionCurve(source, target, true, undefined, 25, 55).path,
+    )
+    expect(result.path).not.toBe(
+      connectionGeometry(source, target, true, 25, 25).path,
+    )
+    expect(connectionGeometry(source, target, true, 25, 55, 60).path).toBe(
+      connectionGeometry(source, target, true, 25, 25, 60).path,
+    )
+  })
   it('derives centers from every supported node size', () => {
     const node = createNode({ x: 10, y: 20 })
     expect(nodeCenter(node)).toEqual({ x: 50, y: 60 })

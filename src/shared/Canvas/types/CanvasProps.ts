@@ -17,7 +17,7 @@ export type CanvasProps = {
     sourceHandle?: string | null,
     targetHandle?: string | null,
   ) => void
-  onAdd: (position: Point) => void
+  onAdd: (position: Point, source?: string) => void
   onDelete?: (selection: NonNullable<Selection>) => void
   onMoveStart?: () => void
   onMoveEnd?: () => void

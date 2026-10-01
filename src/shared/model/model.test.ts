@@ -237,7 +237,7 @@ describe('editing and validation', () => {
       icon: 'sparkles',
     })
     expect(migrated.nodes[0].media).toBe('icon')
-    expect(NodeSizeConstants).toEqual({
+    expect(NodeSizeConstants).toMatchObject({
       small: { nodeSize: 50, iconSize: 24, fontSize: '0.6rem' },
       medium: { nodeSize: 80, iconSize: 36, fontSize: '1.0rem' },
       large: { nodeSize: 110, iconSize: 48, fontSize: '1.4rem' },
@@ -300,6 +300,8 @@ describe('editing and validation', () => {
   it('creates unique nodes with ten valid accents and an immutable Start', () => {
     const { diagram, start, first } = fixture()
     expect(ACCENTS).toHaveLength(10)
+    expect(start.size).toBe('small')
+    expect(first.size).toBe('medium')
     expect(createNode({ x: 0, y: 0 }).id).not.toBe(first.id)
     expect(removeNode(diagram, start.id)).toBe(diagram)
     const removed = removeNode(diagram, first.id)
@@ -430,9 +432,37 @@ describe('portable data', () => {
 })
 
 describe('view helpers', () => {
+  it('caps automatic curves at 45 degrees and weights distance by the larger node', () => {
+    const source = { x: 0, y: 0 }
+    const target = { x: 450, y: 0 }
+    expect(connectionCurve(source, source, true).angle).toBe(45)
+    const small = connectionCurve(source, target, true, undefined, 25, 25)
+    const medium = connectionCurve(source, target, true, undefined, 40, 40)
+    const large = connectionCurve(source, target, true, undefined, 55, 55)
+    expect(small.angle).toBeCloseTo(9)
+    expect(medium.angle).toBe(22.5)
+    expect(large.angle).toBeCloseTo(28.63636)
+    expect(connectionCurve(source, target, true, undefined, 25, 55)).toEqual(
+      large,
+    )
+    expect(connectionCurve(source, target, true, undefined, 55, 25)).toEqual(
+      large,
+    )
+    expect(connectionCurve(source, target, true, undefined, 40, 25)).toEqual(
+      medium,
+    )
+    for (const radius of [25, 40, 55]) {
+      expect(
+        connectionCurve(source, target, true, 60, radius, radius).angle,
+      ).toBe(60)
+      expect(
+        connectionCurve(source, target, true, 90, radius, radius).angle,
+      ).toBe(60)
+    }
+  })
   it('curves nearby edges more steeply, reverses direction, and flattens distant edges', () => {
     const close = connectionCurve({ x: 0, y: 0 }, { x: 90, y: 0 }, true)
-    expect(close.angle).toBe(54)
+    expect(close.angle).toBe(40.5)
     expect(connectionCurve({ x: 0, y: 0 }, { x: 900, y: 0 }, true).angle).toBe(
       0,
     )
