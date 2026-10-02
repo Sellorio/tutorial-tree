@@ -32,6 +32,7 @@ export function DiagramCanvas(props: DiagramCanvasProps) {
       {!editing && sidebarOpen && (
         <InProgressSidebar
           nodes={inProgressNodes}
+          categories={diagram.categories}
           onSelectNode={(id) => setSelection({ kind: 'node', id })}
         />
       )}

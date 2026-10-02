@@ -31,20 +31,19 @@ it('offers three sizes and an exclusive icon/image mode with selectable icons', 
 it('edits a diagram cover instead of showing an unselected color palette', () => {
   const diagram = starterLibrary().diagrams[0]
   const onDiagram = vi.fn()
-  render(
-    <Inspector
-      diagram={diagram}
-      selection={null}
-      onNode={vi.fn()}
-      onConnection={vi.fn()}
-      onDelete={vi.fn()}
-      onError={vi.fn()}
-      onDiagram={onDiagram}
-    />,
-  )
+  const props = {
+    diagram,
+    selection: null,
+    onNode: vi.fn(),
+    onConnection: vi.fn(),
+    onDelete: vi.fn(),
+    onError: vi.fn(),
+    onDiagram,
+  }
+  render(<Inspector {...props} />)
   expect(screen.queryByText('COLOR PALETTE')).not.toBeInTheDocument()
   expect(
-    screen.queryByRole('button', { name: 'Accent Green' }),
+    screen.queryByRole('button', { name: 'Category Green' }),
   ).not.toBeInTheDocument()
   fireEvent.change(screen.getByLabelText('Diagram image URL'), {
     target: { value: 'https://example.com/cover.jpg' },
@@ -70,9 +69,9 @@ it('edits text, description, accent, requirement, image, and tutorial', () => {
       expect.objectContaining({ [key]: value }),
     )
   }
-  fireEvent.click(screen.getByRole('button', { name: 'Accent Teal' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Category Teal' }))
   expect(onNode).toHaveBeenLastCalledWith(
-    expect.objectContaining({ accent: 'teal' }),
+    expect.objectContaining({ categoryId: 'category-teal' }),
   )
   fireEvent.click(screen.getByRole('button', { name: 'Any input' }))
   expect(onNode).toHaveBeenLastCalledWith(
@@ -103,10 +102,10 @@ it('applies accent, size, and visual changes to every selected node', () => {
   )
 
   expect(screen.getByText('2 NODES SELECTED')).toBeInTheDocument()
-  fireEvent.click(screen.getByRole('button', { name: 'Accent Red' }))
-  expect(onNodes.mock.lastCall![0].map((node) => node.accent)).toEqual([
-    'red',
-    'red',
+  fireEvent.click(screen.getByRole('button', { name: 'Category Red' }))
+  expect(onNodes.mock.lastCall![0].map((node) => node.categoryId)).toEqual([
+    'category-red',
+    'category-red',
   ])
   fireEvent.click(screen.getByRole('button', { name: 'Large' }))
   expect(onNodes.mock.lastCall![0].map((node) => node.size)).toEqual([
@@ -268,7 +267,128 @@ it('shows validation feedback and diagram overview', () => {
     'true',
   )
   rerender(<Inspector {...props} selection={null} />)
-  expect(screen.getByText('Tree overview')).toBeInTheDocument()
+  expect(screen.getByText('Tree Settings')).toBeInTheDocument()
   expect(screen.getByText('Connections')).toBeInTheDocument()
+})
+it('adds, edits, and removes categories while reassigning their nodes', () => {
+  const diagram = starterLibrary().diagrams[0]
+  const onDiagram = vi.fn()
+  const props = {
+    diagram,
+    selection: null,
+    onNode: vi.fn(),
+    onConnection: vi.fn(),
+    onDelete: vi.fn(),
+    onError: vi.fn(),
+    onDiagram,
+  }
+  const { rerender } = render(<Inspector {...props} />)
+
+  fireEvent.click(screen.getByRole('button', { name: 'Add category' }))
+  expect(onDiagram.mock.lastCall![0].categories).toHaveLength(9)
+  rerender(<Inspector {...props} diagram={onDiagram.mock.lastCall![0]} />)
+  const categoryName = screen.getAllByLabelText('Category name')[0]
+  const callsBeforeNameEdit = onDiagram.mock.calls.length
+  fireEvent.change(categoryName, {
+    target: { value: 'Studio' },
+  })
+  expect(onDiagram).toHaveBeenCalledTimes(callsBeforeNameEdit)
+  fireEvent.blur(categoryName)
+  expect(onDiagram.mock.lastCall![0].categories[0].name).toBe('Studio')
+  rerender(<Inspector {...props} diagram={onDiagram.mock.lastCall![0]} />)
+  const categoryColor = screen.getByLabelText('Category color Studio')
+  const callsBeforeColorEdit = onDiagram.mock.calls.length
+  fireEvent.change(categoryColor, {
+    target: { value: '#123456' },
+  })
+  expect(onDiagram).toHaveBeenCalledTimes(callsBeforeColorEdit)
+  fireEvent.blur(categoryColor)
+  expect(onDiagram.mock.lastCall![0].categories[0].color).toBe('#123456')
+  rerender(<Inspector {...props} diagram={onDiagram.mock.lastCall![0]} />)
+
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Remove category Studio' }),
+  )
+  let dialog = screen.getByRole('dialog', { name: 'Delete Studio?' })
+  expect(dialog).toBeVisible()
+  expect(
+    screen.getByRole('button', { name: 'Move and remove Studio' }),
+  ).toBeDisabled()
+  expect(onDiagram).toHaveBeenCalledTimes(callsBeforeColorEdit + 1)
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Cancel removing Studio' }),
+  )
+  expect(screen.queryByRole('dialog', { name: 'Delete Studio?' })).toBeNull()
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Remove category Studio' }),
+  )
+  dialog = screen.getByRole('dialog', { name: 'Delete Studio?' })
+  fireEvent.change(
+    screen.getByRole('combobox', { name: 'Move 3 nodes from Studio to' }),
+    { target: { value: 'category-red' } },
+  )
+  expect(
+    screen.getByRole('button', { name: 'Move and remove Studio' }),
+  ).toBeEnabled()
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Move and remove Studio' }),
+  )
+  const updated = onDiagram.mock.lastCall![0]
+  expect(updated.categories).toHaveLength(8)
+  expect(
+    updated.nodes
+      .filter((node: { id: string }) =>
+        ['start', 'seeing', 'study'].includes(node.id),
+      )
+      .every(
+        (node: { categoryId: string }) => node.categoryId === 'category-red',
+      ),
+  ).toBe(true)
+})
+it('previews category insertion before and after a hovered row', () => {
+  const diagram = starterLibrary().diagrams[0]
+  render(
+    <Inspector
+      diagram={diagram}
+      selection={null}
+      onNode={vi.fn()}
+      onConnection={vi.fn()}
+      onDelete={vi.fn()}
+      onError={vi.fn()}
+      onDiagram={vi.fn()}
+    />,
+  )
+  const dataTransfer = {
+    effectAllowed: 'none',
+    dropEffect: 'none',
+    getData: vi.fn(() => 'category-orange'),
+    setData: vi.fn(),
+    setDragImage: vi.fn(),
+  } as unknown as DataTransfer
+  fireEvent.dragStart(screen.getByRole('button', { name: 'Reorder Orange' }), {
+    dataTransfer,
+    clientX: 1,
+    clientY: 1,
+  })
+  const targetRow = screen
+    .getByRole('button', { name: 'Reorder Green' })
+    .closest<HTMLElement>('[data-category-row]')
+  expect(targetRow).not.toBeNull()
+  vi.spyOn(targetRow!, 'getBoundingClientRect').mockReturnValue(
+    new DOMRect(0, 10, 100, 20),
+  )
+  const dragOverAt = (clientY: number) => {
+    const event = new MouseEvent('dragover', {
+      bubbles: true,
+      cancelable: true,
+      clientY,
+    })
+    Object.defineProperty(event, 'dataTransfer', { value: dataTransfer })
+    fireEvent(targetRow!, event)
+  }
+  dragOverAt(11)
+  expect(targetRow).toHaveAttribute('data-drop-position', 'before')
+  dragOverAt(29)
+  expect(targetRow).toHaveAttribute('data-drop-position', 'after')
 })
 import { renderInspector } from './testing/renderInspector'

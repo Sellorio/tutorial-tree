@@ -380,6 +380,15 @@ describe('canvas adapter', () => {
     )
     expect(onSelect).toHaveBeenLastCalledWith(null)
   })
+  it('does not expose locked status for nodes in edit mode', () => {
+    canvas(true)
+    expect(harness.props.nodes![2]).toMatchObject({
+      focusable: true,
+      selectable: true,
+      draggable: true,
+      data: { status: 'unlocked', editing: true },
+    })
+  })
   it('does not center run selections and leaves programmatic moves open', () => {
     const { onSelect } = canvas(false, { kind: 'node', id: 'seeing' })
     expect(harness.flow.setCenter).not.toHaveBeenCalled()

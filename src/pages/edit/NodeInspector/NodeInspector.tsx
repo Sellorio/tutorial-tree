@@ -10,6 +10,7 @@ import styles from './NodeInspector.module.css'
 
 export function NodeInspector({
   node,
+  categories,
   patch,
   onError,
   onDelete,
@@ -47,7 +48,7 @@ export function NodeInspector({
         />
       </label>
       <NodeSizeField node={node} patch={patch} />
-      <AccentField node={node} patch={patch} />
+      <AccentField node={node} categories={categories} patch={patch} />
       <NodeVisualField node={node} patch={patch} onError={onError} />
       {node.kind !== 'start' && <RequirementField node={node} patch={patch} />}
       <label>

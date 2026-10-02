@@ -1,4 +1,4 @@
-import { ACCENTS } from './constants/ACCENTS'
+import { DEFAULT_CATEGORIES } from './constants/CATEGORIES'
 import type { Point } from './types/Point'
 import type { TalentNode } from './types/TalentNode'
 
@@ -13,7 +13,7 @@ export function createNode(
     title: kind === 'start' ? 'Start' : 'New skill',
     position,
     description: '',
-    accent: ACCENTS[0],
+    categoryId: DEFAULT_CATEGORIES[0].id,
     size: kind === 'start' ? 'small' : 'medium',
     media: 'icon',
     icon: 'sparkles',

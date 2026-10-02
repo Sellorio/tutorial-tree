@@ -6,6 +6,7 @@ import styles from './MultiNodeInspector.module.css'
 
 export function MultiNodeInspector({
   node,
+  categories,
   selectedCount,
   patch,
   onError,
@@ -14,7 +15,7 @@ export function MultiNodeInspector({
     <div className={styles.fields}>
       <div className={styles.eyebrow}>{selectedCount} NODES SELECTED</div>
       <NodeSizeField node={node} patch={patch} />
-      <AccentField node={node} patch={patch} />
+      <AccentField node={node} categories={categories} patch={patch} />
       <NodeVisualField node={node} patch={patch} onError={onError} />
     </div>
   )

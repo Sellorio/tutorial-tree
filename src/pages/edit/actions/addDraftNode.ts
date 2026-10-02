@@ -13,6 +13,7 @@ export function addDraftNode(
 
   if (!draft) return
   const node = createNode(openPosition(draft, position))
+  node.categoryId = draft.categories[0].id
   const next = { ...draft, nodes: [...draft.nodes, node] }
   if (source) connectDraftNodes({ ...state, draft: next }, source, node.id)
   else setDraft(next)

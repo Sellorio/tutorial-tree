@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ACCENTS } from './constants/ACCENTS'
+import { DEFAULT_CATEGORIES, LEGACY_CATEGORY_IDS } from './constants/CATEGORIES'
 import { connectionCurve } from './connectionCurve'
 import { connectionError } from './connectionError'
 import { createDiagram } from './createDiagram'
@@ -298,9 +298,9 @@ describe('editing and validation', () => {
       y: 2000,
     })
   })
-  it('creates unique nodes with eight named accents and an immutable Start', () => {
+  it('creates nodes with a default category and an immutable Start', () => {
     const { diagram, start, first } = fixture()
-    expect(ACCENTS).toHaveLength(8)
+    expect(DEFAULT_CATEGORIES).toHaveLength(8)
     expect(start.size).toBe('small')
     expect(first.size).toBe('medium')
     expect(createNode({ x: 0, y: 0 }).id).not.toBe(first.id)
@@ -312,7 +312,7 @@ describe('editing and validation', () => {
       ),
     ).toBe(false)
   })
-  it('normalizes legacy accent colors to named accents', () => {
+  it('normalizes legacy accent colors to category IDs', () => {
     const node = createNode({ x: 0, y: 0 })
     const legacyAccents = [
       ['#19877d', 'teal'],
@@ -334,10 +334,14 @@ describe('editing and validation', () => {
       ['#ff7300', 'orange'],
       ['rgb(109, 109, 109)', 'gray'],
     ] as const
-    for (const [legacyAccent, namedAccent] of legacyAccents)
-      expect(nodeSchema.parse({ ...node, accent: legacyAccent }).accent).toBe(
-        namedAccent,
-      )
+    for (const [legacyAccent] of legacyAccents)
+      expect(
+        nodeSchema.parse({
+          ...node,
+          categoryId: undefined,
+          accent: legacyAccent,
+        }).categoryId,
+      ).toBe(LEGACY_CATEGORY_IDS[legacyAccent])
   })
   it('rejects missing nodes, self links, incoming Start links, duplicates and cycles', () => {
     const { diagram, start, first, final } = fixture()
@@ -356,6 +360,18 @@ describe('editing and validation', () => {
     const invalid: Diagram[] = [
       { ...diagram, nodes: [] },
       { ...diagram, nodes: [...diagram.nodes, start] },
+      {
+        ...diagram,
+        categories: [...diagram.categories, { ...diagram.categories[0] }],
+      },
+      {
+        ...diagram,
+        nodes: diagram.nodes.map((node) =>
+          node.id === start.id
+            ? { ...node, categoryId: 'missing-category' }
+            : node,
+        ),
+      },
       {
         ...diagram,
         nodes: diagram.nodes.map((node) => ({
@@ -413,19 +429,25 @@ describe('portable data', () => {
     const { diagram, instance, first, second } = fixture()
     const legacyExport = JSON.parse(exportData(diagram, instance))
     delete legacyExport.instance.showAllSkills
-    legacyExport.diagram.nodes.find(
+    const firstLegacyNode = legacyExport.diagram.nodes.find(
       (node: { id: string }) => node.id === first.id,
-    ).accent = '#19877d'
-    legacyExport.diagram.nodes.find(
+    )
+    delete firstLegacyNode.categoryId
+    firstLegacyNode.accent = '#19877d'
+    const secondLegacyNode = legacyExport.diagram.nodes.find(
       (node: { id: string }) => node.id === second.id,
-    ).accent = '#cf5e46'
+    )
+    delete secondLegacyNode.categoryId
+    secondLegacyNode.accent = '#cf5e46'
 
     const result = importData(
       { version: 1, diagrams: [], instances: [] },
       JSON.stringify(legacyExport),
     )
-    expect(result.library.diagrams[0].nodes[1].accent).toBe('teal')
-    expect(result.library.diagrams[0].nodes[2].accent).toBe('orange')
+    expect(result.library.diagrams[0].nodes[1].categoryId).toBe('category-teal')
+    expect(result.library.diagrams[0].nodes[2].categoryId).toBe(
+      'category-orange',
+    )
     expect(result.library.instances[0].showAllSkills).toBe(true)
   })
   it('transfers an instance to an empty browser including its diagram', () => {

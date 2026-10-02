@@ -1,0 +1,41 @@
+import type { Category } from '../types/Category'
+
+export const DEFAULT_CATEGORIES: Category[] = [
+  { id: 'category-green', name: 'Green', color: '#0c9400' },
+  { id: 'category-teal', name: 'Teal', color: '#0093ad' },
+  { id: 'category-purple', name: 'Purple', color: '#5100ff' },
+  { id: 'category-pink', name: 'Pink', color: '#db0079' },
+  { id: 'category-red', name: 'Red', color: '#d10000' },
+  { id: 'category-brown', name: 'Brown', color: '#9e6700' },
+  { id: 'category-orange', name: 'Orange', color: '#ff7300' },
+  { id: 'category-gray', name: 'Gray', color: '#6d6d6d' },
+]
+
+export const LEGACY_CATEGORY_IDS: Record<string, string> = {
+  green: 'category-green',
+  teal: 'category-teal',
+  purple: 'category-purple',
+  pink: 'category-pink',
+  red: 'category-red',
+  brown: 'category-brown',
+  orange: 'category-orange',
+  gray: 'category-gray',
+  '#19877d': 'category-teal',
+  '#3478c6': 'category-teal',
+  '#7758b8': 'category-purple',
+  '#be5684': 'category-pink',
+  '#cf5e46': 'category-orange',
+  '#bc8623': 'category-brown',
+  '#789640': 'category-green',
+  '#429ca8': 'category-teal',
+  '#8d7765': 'category-brown',
+  '#6e7c8d': 'category-gray',
+  '#0c9400': 'category-green',
+  '#0093ad': 'category-teal',
+  '#5100ff': 'category-purple',
+  '#db0079': 'category-pink',
+  '#d10000': 'category-red',
+  '#9e6700': 'category-brown',
+  '#ff7300': 'category-orange',
+  'rgb(109, 109, 109)': 'category-gray',
+}

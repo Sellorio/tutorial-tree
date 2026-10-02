@@ -16,7 +16,7 @@ export function starterLibrary(): Library {
       ...createNode({ x: skill.x, y: skill.y }),
       id: skill.id,
       title: skill.title,
-      accent: skill.accent,
+      categoryId: skill.categoryId,
       description: skill.description,
       image: skill.id === 'seeing' ? '/studio.jpg' : '',
       media: skill.id === 'seeing' ? ('image' as const) : ('icon' as const),

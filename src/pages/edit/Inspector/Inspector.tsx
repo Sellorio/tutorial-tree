@@ -47,6 +47,7 @@ export function Inspector({
       {node && selectedNodes.length > 1 && onNodes && (
         <MultiNodeInspector
           node={node}
+          categories={diagram.categories}
           selectedCount={selectedNodes.length}
           patch={patchSelected}
           onError={onError}
@@ -55,6 +56,7 @@ export function Inspector({
       {node && (selectedNodes.length <= 1 || !onNodes) && (
         <NodeInspector
           node={node}
+          categories={diagram.categories}
           patch={patch}
           onError={onError}
           onDelete={onDelete}

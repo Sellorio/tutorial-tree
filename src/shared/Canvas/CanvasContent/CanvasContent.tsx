@@ -77,10 +77,6 @@ export function CanvasContent(props: CanvasProps) {
           color="var(--dot)"
         />
       </ReactFlow>
-      <div className={styles.canvasLabel}>
-        <span className={styles.liveDot} />
-        {editing ? 'DESIGN CANVAS' : 'YOUR JOURNEY'}
-      </div>
       <CanvasToolbar flow={flow} editing={editing} onAdd={onAdd} />
       {context && (
         <CanvasContextMenu

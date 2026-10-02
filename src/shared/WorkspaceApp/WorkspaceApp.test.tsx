@@ -86,6 +86,22 @@ describe('workspace orchestration', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Redo' }))
     expect(name).toHaveValue('Typed title')
   })
+  it('adds nodes to an existing category after the original default is removed', () => {
+    const library = starterLibrary()
+    const diagram = library.diagrams[0]
+    diagram.categories = diagram.categories.filter(
+      (category) => category.id !== 'category-green',
+    )
+    diagram.nodes.forEach((node) => {
+      if (node.categoryId === 'category-green')
+        node.categoryId = 'category-teal'
+    })
+    openEditor(library)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Canvas add' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    expect(saved().diagrams[0].nodes.at(-1)?.categoryId).toBe('category-teal')
+  })
   it('saves diagram defaults and connection overrides with a manual curve', () => {
     openEditor()
     expect(screen.getByRole('checkbox', { name: 'Unlocked' })).not.toBeChecked()

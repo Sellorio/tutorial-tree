@@ -1,7 +1,7 @@
 import { ImageField } from '../ImageField/ImageField'
 import { ActivationField } from '../ActivationField/ActivationField'
+import { CategoryEditor } from '../CategoryEditor/CategoryEditor'
 import type { TreeOverviewProps } from './TreeOverviewProps'
-import { Circle } from 'lucide-react'
 import styles from './TreeOverview.module.css'
 
 export function TreeOverview({
@@ -11,10 +11,7 @@ export function TreeOverview({
 }: TreeOverviewProps) {
   return (
     <div className={styles.emptyInspector}>
-      <div className={styles.inspectorSymbol}>
-        <Circle size={26} />
-      </div>
-      <h3>Tree overview</h3>
+      <h3>Tree Settings</h3>
       <dl>
         <div>
           <dt>Skills</dt>
@@ -24,11 +21,33 @@ export function TreeOverview({
           <dt>Connections</dt>
           <dd>{diagram.connections.length}</dd>
         </div>
-        <div>
-          <dt>Start nodes</dt>
-          <dd>1</dd>
-        </div>
       </dl>
+      <div className={styles.sectionHeading}>CATEGORIES</div>
+      <CategoryEditor
+        categories={diagram.categories}
+        categoryNodeCounts={Object.fromEntries(
+          diagram.categories.map((category) => [
+            category.id,
+            diagram.nodes.filter((node) => node.categoryId === category.id)
+              .length,
+          ]),
+        )}
+        onChange={(categories) => onDiagram?.({ ...diagram, categories })}
+        onRemove={(categoryId, targetCategoryId) => {
+          const categories = diagram.categories.filter(
+            (category) => category.id !== categoryId,
+          )
+          onDiagram?.({
+            ...diagram,
+            categories,
+            nodes: diagram.nodes.map((node) =>
+              node.categoryId === categoryId
+                ? { ...node, categoryId: targetCategoryId }
+                : node,
+            ),
+          })
+        }}
+      />
       <div className={styles.sectionHeading}>CONNECTION DEFAULTS</div>
       <ActivationField
         value={diagram.activeStatuses ?? ['in-progress', 'completed']}

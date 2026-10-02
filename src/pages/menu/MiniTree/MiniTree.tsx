@@ -8,6 +8,9 @@ export function MiniTree({ diagram }: MiniTreeProps) {
   const maxY = Math.max(...diagram.nodes.map((node) => node.position.y), 1)
   const minY = Math.min(...diagram.nodes.map((node) => node.position.y), 0)
   const bounds = { maxX, minX, maxY, minY }
+  const categoryColors = new Map(
+    diagram.categories.map((category) => [category.id, category.color]),
+  )
   return (
     <svg className={styles.miniTree} viewBox="0 0 360 170" aria-hidden="true">
       {diagram.connections.map((edge) => {
@@ -28,13 +31,17 @@ export function MiniTree({ diagram }: MiniTreeProps) {
               cx={position.x}
               cy={position.y}
               r={13}
-              style={{ stroke: `var(--talent-accent-${node.accent})` }}
+              style={{
+                stroke: categoryColors.get(node.categoryId) ?? '#0c9400',
+              }}
             />
             <circle
               cx={position.x}
               cy={position.y}
               r={4}
-              style={{ fill: `var(--talent-accent-${node.accent})` }}
+              style={{
+                fill: categoryColors.get(node.categoryId) ?? '#0c9400',
+              }}
             />
           </g>
         )

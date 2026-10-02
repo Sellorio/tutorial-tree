@@ -158,6 +158,7 @@ test('Show All Skills hides deeper locked skills and persists per journey', asyn
     'border-top-color',
     'rgb(75, 75, 75)',
   )
+  await expect(lockedNode).toHaveAttribute('data-status', 'unlocked')
 })
 
 test('edit history supports title-bar buttons and all undo redo shortcuts', async ({
@@ -192,6 +193,64 @@ test('edit history supports title-bar buttons and all undo redo shortcuts', asyn
   await expect(
     page.getByRole('button', { name: 'Undo', exact: true }),
   ).toBeDisabled()
+})
+
+test('custom categories can be colored, assigned to skills, and persisted', async ({
+  page,
+}) => {
+  await page.getByRole('button', { name: 'Edit Creative foundations' }).click()
+  await page.getByRole('button', { name: 'Add category' }).click()
+  await page
+    .getByRole('textbox', { name: 'Category name' })
+    .last()
+    .fill('Workshop')
+  await page.getByRole('textbox', { name: 'Category name' }).last().press('Tab')
+  await page.getByLabel('Category color Workshop').fill('#123456')
+  await page
+    .getByRole('button', { name: 'Reorder Workshop' })
+    .dragTo(page.locator('[data-category-id="category-green"]'), {
+      targetPosition: { x: 12, y: 2 },
+    })
+  await page.getByTestId('talent-seeing').click()
+  await page.getByRole('button', { name: 'Category Workshop' }).click()
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+
+  const savedDiagram = (await stored(page)).diagrams[0]
+  const category = savedDiagram.categories.find(
+    (entry) => entry.name === 'Workshop',
+  )!
+  expect(savedDiagram.categories[0].id).toBe(category.id)
+  expect(category.color).toBe('#123456')
+  expect(
+    savedDiagram.nodes.find((node) => node.id === 'seeing')?.categoryId,
+  ).toBe(category.id)
+
+  await page.reload()
+  expect(
+    (await stored(page)).diagrams[0].nodes.find((node) => node.id === 'seeing')
+      ?.categoryId,
+  ).toBe(category.id)
+
+  await page.getByRole('button', { name: 'Remove category Workshop' }).click()
+  const deleteDialog = page.getByRole('dialog', { name: 'Delete Workshop?' })
+  await expect(deleteDialog).toBeVisible()
+  await expect(
+    deleteDialog.getByRole('button', { name: 'Move and remove Workshop' }),
+  ).toBeDisabled()
+  await deleteDialog
+    .getByRole('combobox', { name: 'Move 1 node from Workshop to' })
+    .selectOption('category-green')
+  await deleteDialog
+    .getByRole('button', { name: 'Move and remove Workshop' })
+    .click()
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  const afterRemoval = (await stored(page)).diagrams[0]
+  expect(
+    afterRemoval.categories.some((entry) => entry.id === category.id),
+  ).toBe(false)
+  expect(
+    afterRemoval.nodes.find((node) => node.id === 'seeing')?.categoryId,
+  ).toBe('category-green')
 })
 
 test('shift box selection includes partially intersecting nodes and undoes group movement in one step', async ({
@@ -283,7 +342,7 @@ test('shift click adds and removes nodes from the selection', async ({
   )
 })
 
-test('multi-selection edits shared accents, size, and visuals', async ({
+test('multi-selection edits shared categories, size, and visuals', async ({
   page,
 }) => {
   await page.getByRole('button', { name: 'Edit Creative foundations' }).click()
@@ -291,7 +350,7 @@ test('multi-selection edits shared accents, size, and visuals', async ({
   await page.getByTestId('talent-color').click({ modifiers: ['Shift'] })
   await expect(page.locator('.react-flow__node.selected')).toHaveCount(2)
 
-  await page.getByRole('button', { name: 'Accent Red' }).click()
+  await page.getByRole('button', { name: 'Category Red' }).click()
   await page.getByRole('button', { name: 'Large', exact: true }).click()
   await page.getByRole('button', { name: 'Icon', exact: true }).click()
   await page.getByRole('button', { name: 'camera icon' }).click()
@@ -304,7 +363,7 @@ test('multi-selection edits shared accents, size, and visuals', async ({
   expect(nodes).toHaveLength(2)
   for (const node of nodes)
     expect(node).toMatchObject({
-      accent: 'red',
+      categoryId: 'category-red',
       size: 'large',
       icon: 'camera',
       media: 'image',
@@ -445,7 +504,7 @@ test('creates, edits metadata, connects from an edge, saves, reloads, and export
   await page
     .getByRole('textbox', { name: 'Description', exact: true })
     .fill('Practice for twenty minutes.')
-  await page.getByRole('button', { name: 'Accent Red', exact: true }).click()
+  await page.getByRole('button', { name: 'Category Red', exact: true }).click()
   await page.getByRole('button', { name: 'Any input', exact: true }).click()
   await page.getByLabel('YouTube tutorial').fill('https://youtu.be/dQw4w9WgXcQ')
   await page.getByRole('button', { name: 'Add tip', exact: true }).click()
@@ -516,7 +575,7 @@ test('creates, edits metadata, connects from an edge, saves, reloads, and export
   expect(saved.nodes[1]).toMatchObject({
     title: 'Practice',
     requirement: 'any',
-    accent: 'red',
+    categoryId: 'category-red',
     description: 'Practice for twenty minutes.',
   })
   expect(saved.nodes[1].image).toContain('data:image/jpeg;base64,')
@@ -1361,7 +1420,7 @@ test('sizes, icons, cover images and split run panels persist across save and re
     page.getByRole('banner').getByRole('button', { name: /Import|Export/ }),
   ).toHaveCount(0)
   await expect(
-    page.getByRole('button', { name: 'Accent Green', exact: true }),
+    page.getByRole('button', { name: 'Category Green', exact: true }),
   ).toHaveCount(0)
   await page
     .getByLabel('Upload diagram image')

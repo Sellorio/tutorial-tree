@@ -1,27 +1,25 @@
-import { ACCENTS } from '../../../shared/model/constants/ACCENTS'
 import type { AccentFieldProps } from './AccentFieldProps'
 import { Check } from 'lucide-react'
 import styles from './AccentField.module.css'
 
-export function AccentField({ node, patch }: AccentFieldProps) {
+export function AccentField({ node, categories, patch }: AccentFieldProps) {
   return (
     <fieldset>
-      <legend>Accent color</legend>
+      <legend>Category</legend>
       <div className={styles.swatches}>
-        {ACCENTS.map((accent) => {
-          const label = `${accent[0].toUpperCase()}${accent.slice(1)}`
+        {categories.map((category) => {
           return (
             <button
               type="button"
               className={styles.swatch}
-              key={accent}
-              style={{ backgroundColor: `var(--talent-accent-${accent})` }}
-              aria-label={`Accent ${label}`}
-              title={label}
-              aria-pressed={node.accent === accent}
-              onClick={() => patch({ accent })}
+              key={category.id}
+              style={{ backgroundColor: category.color }}
+              aria-label={`Category ${category.name}`}
+              title={category.name}
+              aria-pressed={node.categoryId === category.id}
+              onClick={() => patch({ categoryId: category.id })}
             >
-              {node.accent === accent && <Check size={15} />}
+              {node.categoryId === category.id && <Check size={15} />}
             </button>
           )
         })}

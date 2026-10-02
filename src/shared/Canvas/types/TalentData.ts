@@ -3,6 +3,7 @@ import type { TalentNode } from '../../model/types/TalentNode'
 
 export type TalentData = {
   talent: TalentNode
+  categoryColor: string
   status: Status
   editing: boolean
   connectionTarget?: boolean

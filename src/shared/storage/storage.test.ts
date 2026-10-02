@@ -46,6 +46,8 @@ describe('browser persistence', () => {
     library.instances.push(instance)
     const legacyLibrary = JSON.parse(JSON.stringify(library))
     delete legacyLibrary.instances[0].showAllSkills
+    delete legacyLibrary.diagrams[0].nodes[1].categoryId
+    delete legacyLibrary.diagrams[0].nodes[2].categoryId
     legacyLibrary.diagrams[0].nodes[1].accent = '#19877d'
     legacyLibrary.diagrams[0].nodes[2].accent = '#3478c6'
 
@@ -53,8 +55,10 @@ describe('browser persistence', () => {
     expect(loaded.error).toBe('')
     expect(loaded.library.instances[0].showAllSkills).toBe(true)
     expect(
-      loaded.library.diagrams[0].nodes.slice(1, 3).map((node) => node.accent),
-    ).toEqual(['teal', 'teal'])
+      loaded.library.diagrams[0].nodes
+        .slice(1, 3)
+        .map((node) => node.categoryId),
+    ).toEqual(['category-teal', 'category-teal'])
   })
   it('reports corrupt, unavailable, or orphaned data without silently replacing it', () => {
     const library = starterLibrary()

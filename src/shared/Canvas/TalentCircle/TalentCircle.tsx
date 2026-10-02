@@ -16,14 +16,14 @@ export function TalentCircle({ data, selected }: NodeProps<FlowNode>) {
       className={`${styles.node} ${selected ? styles.selected : ''} ${data.connectionTarget ? styles.connectionTarget : ''} ${!editing ? styles[status] : ''}`}
       style={
         {
-          '--talent-accent': `var(--talent-accent-${talent.accent})`,
+          '--talent-accent': data.categoryColor,
           '--node-size': `${NodeSizeConstants[talent.size].nodeSize}px`,
           '--node-font-size': NodeSizeConstants[talent.size].fontSize,
         } as CSSProperties
       }
       data-status={status}
       data-editing={editing}
-      data-accent={talent.accent}
+      data-category={talent.categoryId}
       data-size={talent.size}
       data-testid={`talent-${talent.id}`}
       data-node-id={talent.id}

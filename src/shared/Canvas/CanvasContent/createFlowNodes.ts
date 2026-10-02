@@ -12,6 +12,9 @@ export function createFlowNodes({
   activate,
 }: FlowNodesProps): FlowNode[] {
   const visibleNodeIds = getVisibleNodeIds(diagram, statuses, showAllSkills)
+  const categoryColors = new Map(
+    diagram.categories.map((category) => [category.id, category.color]),
+  )
   return diagram.nodes
     .filter((talent) => editing || visibleNodeIds.has(talent.id))
     .map((talent) => ({
@@ -20,7 +23,8 @@ export function createFlowNodes({
       position: talent.position,
       data: {
         talent,
-        status: statuses[talent.id] ?? 'unlocked',
+        categoryColor: categoryColors.get(talent.categoryId) ?? '#0c9400',
+        status: editing ? 'unlocked' : (statuses[talent.id] ?? 'unlocked'),
         editing,
         activate: () => activate(talent),
       },

@@ -37,24 +37,6 @@
 .canvas[data-selecting='true'] :global(.react-flow__nodesselection) {
   cursor: crosshair !important;
 }
-.canvasLabel {
-  position: absolute;
-  left: 25px;
-  top: 24px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 700;
-  pointer-events: none;
-}
-.liveDot {
-  width: 6px;
-  height: 6px;
-  background: var(--accent);
-  border-radius: 50%;
-}
 @media (max-width: 600px) {
   .canvasLabel {
     top: 15px;
