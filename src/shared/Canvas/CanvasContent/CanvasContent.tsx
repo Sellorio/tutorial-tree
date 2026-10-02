@@ -8,6 +8,7 @@ import { createFlowProps } from './createFlowProps'
 import { useConnectionDrag } from './useConnectionDrag'
 import { useShiftSelection } from './useShiftSelection'
 import { Background, BackgroundVariant, ReactFlow } from '@xyflow/react'
+import { useMemo } from 'react'
 import styles from './CanvasContent.module.css'
 
 export function CanvasContent(props: CanvasProps) {
@@ -26,6 +27,27 @@ export function CanvasContent(props: CanvasProps) {
     onDelete,
     children,
   } = state
+  const nodes = useMemo(
+    () =>
+      state.nodes.map((node) => ({
+        ...node,
+        data: {
+          ...node.data,
+          connectionTarget: node.id === connection.target,
+        },
+      })),
+    [state.nodes, connection.target],
+  )
+  const edges = useMemo(
+    () =>
+      connection.preview
+        ? [
+            ...state.edges,
+            { ...connection.preview, className: styles.connectionPreview },
+          ]
+        : state.edges,
+    [state.edges, connection.preview],
+  )
   return (
     <div
       ref={canvasRef}
@@ -45,21 +67,8 @@ export function CanvasContent(props: CanvasProps) {
     >
       <ReactFlow<FlowNode, FlowEdge>
         {...createFlowProps(state)}
-        edges={
-          connection.preview
-            ? [
-                ...state.edges,
-                { ...connection.preview, className: styles.connectionPreview },
-              ]
-            : state.edges
-        }
-        nodes={state.nodes.map((node) => ({
-          ...node,
-          data: {
-            ...node.data,
-            connectionTarget: node.id === connection.target,
-          },
-        }))}
+        edges={edges}
+        nodes={nodes}
       >
         <Background
           variant={BackgroundVariant.Dots}

@@ -3,6 +3,7 @@
 1. Investigate the code
 2. Implement the change
 3. Ensure changes are backwards compatible with persisted and exported data formats
+4. Ensure the mobile user experience is good for all UI changes - even if the prompt doens't explicitly mention it
 4. Update unit tests and e2e tests
 5. Verify change using `npm run verify`
 6. Test the change using the built-in browser (if you can)

@@ -10,7 +10,7 @@ import { useCanvasSelection } from './useCanvasSelection'
 import { activateNode } from './activateNode'
 import type { CanvasContextEvent } from '../types/CanvasContextEvent'
 import { openCanvasContext } from './openCanvasContext'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useReactFlow } from '@xyflow/react'
 
 export function useCanvasState(props: CanvasProps) {
@@ -28,12 +28,20 @@ export function useCanvasState(props: CanvasProps) {
   const [context, setContext] = useState<CanvasMenuState>(null)
   useCanvasSelection({ ...props, flow, canvasRef })
 
-  const activate = (node: TalentNode) => activateNode(props, setContext, node)
+  const activate = useCallback(
+    (node: TalentNode) => activateNode(props, setContext, node),
+    [props],
+  )
   const openContext = (
     event: CanvasContextEvent,
     target?: NonNullable<Selection>,
   ) =>
     openCanvasContext({ ...props, canvasRef, flow, setContext }, event, target)
+  const nodes = useMemo(
+    () => createFlowNodes({ ...props, activate }),
+    [props, activate],
+  )
+  const edges = useMemo(() => createFlowEdges(props), [props])
   return {
     ...props,
     onSelect,
@@ -45,7 +53,7 @@ export function useCanvasState(props: CanvasProps) {
     setContext,
     activate,
     openContext,
-    nodes: createFlowNodes({ ...props, activate }),
-    edges: createFlowEdges(props),
+    nodes,
+    edges,
   }
 }
