@@ -783,6 +783,10 @@ test('run mode persists states, closes overlays, warns on reversal, and locks de
   page,
 }) => {
   await startJourney(page)
+  await expect(
+    page.getByRole('checkbox', { name: 'Show All Skills' }),
+  ).toBeVisible()
+  await expect(page.getByRole('contentinfo')).toHaveCount(0)
   const url = page.url()
   await expect(page.getByTestId('talent-color')).toHaveAttribute(
     'data-status',
@@ -812,6 +816,29 @@ test('run mode persists states, closes overlays, warns on reversal, and locks de
     'data-status',
     'in-progress',
   )
+  const controls = page.locator('[data-run-controls]')
+  const controlsWhenClosed = await controls.boundingBox()
+  await page.getByRole('button', { name: 'Show In Progress sidebar' }).click()
+  const sidebar = page.getByRole('complementary', {
+    name: 'In Progress nodes',
+  })
+  await expect(
+    sidebar.getByRole('button', { name: 'See differently' }),
+  ).toBeVisible()
+  const controlsWhenOpen = await controls.boundingBox()
+  expect(controlsWhenOpen!.x).toBeLessThan(controlsWhenClosed!.x)
+  await page.getByRole('button', { name: 'Hide In Progress sidebar' }).click()
+  await expect(sidebar).toHaveCount(0)
+  const originalViewport = page.viewportSize()!
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.getByRole('button', { name: 'Show In Progress sidebar' }).click()
+  const mobileControls = await controls.boundingBox()
+  const mobileSidebar = await sidebar.boundingBox()
+  expect(mobileControls!.y + mobileControls!.height).toBeLessThan(
+    mobileSidebar!.y,
+  )
+  await page.getByRole('button', { name: 'Hide In Progress sidebar' }).click()
+  await page.setViewportSize(originalViewport)
   await openNode(page, 'seeing')
   await page.getByRole('button', { name: 'Completed', exact: true }).click()
   await expect(page.getByTestId('talent-color')).toHaveAttribute(

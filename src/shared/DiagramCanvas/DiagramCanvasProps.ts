@@ -11,6 +11,8 @@ export type DiagramCanvasProps = {
   route: NonNullable<Route>
   diagram: Diagram
   editing: boolean
+  showAllSkills: boolean
+  setShowAllSkills: (showAllSkills: boolean) => void
   statuses: Record<string, Status>
   selection: Selection
   setSelection: (selection: Selection) => void

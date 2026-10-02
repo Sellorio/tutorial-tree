@@ -23,7 +23,7 @@ export function WorkspaceApp() {
             <DiagramCanvas {...workspace} route={route} diagram={diagram} />
             {editing && <DiagramInspector {...workspace} diagram={diagram} />}
           </main>
-          <WorkspaceFooter {...workspace} />
+          {editing && <WorkspaceFooter {...workspace} />}
         </>
       )}
       {route && !diagram && <MissingRoute {...workspace} />}

@@ -1,69 +1,40 @@
-import { RunOverlay } from '../../pages/run/RunOverlay/RunOverlay'
-import { Canvas } from '../Canvas/Canvas'
+import { RunCanvasControls } from '../../pages/run/RunCanvasControls/RunCanvasControls'
+import { InProgressSidebar } from '../../pages/run/InProgressSidebar/InProgressSidebar'
+import { getInProgressNodes } from '../../pages/run/InProgressSidebar/getInProgressNodes'
+import { DiagramCanvasFlow } from './DiagramCanvasFlow/DiagramCanvasFlow'
 import type { DiagramCanvasProps } from './DiagramCanvasProps'
+import { useMemo, useState } from 'react'
 import styles from './DiagramCanvas.module.css'
 
-export function DiagramCanvas({
-  route,
-  diagram,
-  editing,
-  statuses,
-  selection,
-  setSelection,
-  addNode,
-  connect,
-  removeSelected,
-  setDraft,
-  selectedNode,
-  instance,
-  changeStatus,
-  beginHistory,
-  endHistory,
-}: DiagramCanvasProps) {
+export function DiagramCanvas(props: DiagramCanvasProps) {
+  const { diagram, editing, statuses, setSelection } = props
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const inProgressNodes = useMemo(
+    () => getInProgressNodes(diagram, statuses),
+    [diagram, statuses],
+  )
   return (
-    <div className={styles.canvasWrap}>
-      <Canvas
-        key={`${route.mode}-${route.id}`}
-        diagram={diagram}
-        editing={editing}
-        statuses={statuses}
-        showAllSkills={instance?.showAllSkills ?? true}
-        selection={selection}
-        onSelect={setSelection}
-        onAdd={addNode}
-        onConnect={connect}
-        onDelete={removeSelected}
-        onMoveStart={beginHistory}
-        onMoveEnd={endHistory}
-        onMove={(positions) =>
-          setDraft((current) =>
-            current
-              ? {
-                  ...current,
-                  nodes: current.nodes.map((node) => {
-                    const moved = positions.find(
-                      (entry) => entry.id === node.id,
-                    )
-                    return moved ? { ...node, position: moved.position } : node
-                  }),
-                }
-              : current,
-          )
-        }
+    <div className={styles.diagramCanvas}>
+      <div
+        className={styles.canvasWrap}
+        data-sidebar-open={sidebarOpen && !editing}
       >
-        {!editing &&
-          selectedNode &&
-          instance &&
-          statuses[selectedNode.id] !== 'locked' && (
-            <RunOverlay
-              key={selectedNode.id}
-              node={selectedNode}
-              instance={instance}
-              onStatus={changeStatus}
-              onClose={() => setSelection(null)}
-            />
-          )}
-      </Canvas>
+        <DiagramCanvasFlow {...props} />
+        {!editing && (
+          <RunCanvasControls
+            showAllSkills={props.showAllSkills}
+            setShowAllSkills={props.setShowAllSkills}
+            sidebarOpen={sidebarOpen}
+            onToggleSidebar={() => setSidebarOpen((open) => !open)}
+          />
+        )}
+      </div>
+      {!editing && sidebarOpen && (
+        <InProgressSidebar
+          nodes={inProgressNodes}
+          onSelectNode={(id) => setSelection({ kind: 'node', id })}
+        />
+      )}
     </div>
   )
 }

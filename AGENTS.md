@@ -12,16 +12,20 @@
 
 * Ensure code is consistently formatted with related code
 * Ensure naming conventions in similar code is adhered to
+* Group related files into folders
 * Do not overload a file/function/class with too many lines of code - instead break down large blocks of code into smaller parts
 
-# Coding Conventions
+## TypeScript/TSX
 
-* Do not omit semi-colons in TypeScript code
+* Do not omit semi-colons
 * Do not use non-erasable syntax
 * Prefer `type` over `class` or `interface`
 * Prefer maximum of one type per file
 * Prefer maximum of one React component per file
-* Group related files into folders
+
+## CSS
+
+* Have a blank line between property blocks
 
 # Communication Guidelines
 

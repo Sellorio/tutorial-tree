@@ -1,0 +1,90 @@
+.sidebar {
+  display: flex;
+  flex: 0 0 270px;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--lighten);
+  border-left: 1px solid var(--border);
+  color: var(--text);
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  padding: 19px 16px 13px;
+  border-bottom: 1px solid var(--border);
+}
+.header h2 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 650;
+}
+.header > span {
+  color: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.nodeList {
+  overflow: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.nodeList button {
+  display: flex;
+  width: 100%;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px;
+  color: var(--text);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.nodeList button:hover {
+  background: var(--hover);
+}
+.nodeList button span {
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nodeList button svg {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+.empty {
+  margin: 0;
+  padding: 18px 16px;
+  color: var(--muted);
+  font-size: 12px;
+}
+@media (max-width: 700px) {
+  .sidebar {
+    position: absolute;
+    z-index: 5;
+    right: 12px;
+    bottom: 12px;
+    width: min(270px, calc(100% - 24px));
+    height: min(42vh, 320px);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: var(--shadow);
+  }
+  .header {
+    padding: 12px;
+  }
+  .nodeList button {
+    padding: 0 12px;
+  }
+  .empty {
+    padding: 14px 12px;
+  }
+}
