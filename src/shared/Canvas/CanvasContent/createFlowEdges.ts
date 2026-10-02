@@ -41,11 +41,11 @@ export function createFlowEdges({
     focusable: editing,
     ariaLabel: `Connection from ${diagram.nodes.find((node) => node.id === connection.source)?.title} to ${diagram.nodes.find((node) => node.id === connection.target)?.title}`,
     style: {
-      opacity:
+      color:
         editing ||
         isConnectionActive(diagram, connection, statuses[connection.source])
-          ? 1
-          : 0.24,
+          ? 'var(--edge)'
+          : 'color-mix(in srgb, var(--edge) 24%, var(--canvas))',
     },
   }))
 }

@@ -73,6 +73,46 @@ test.beforeEach(async ({ page }) => {
   await page.getByRole('tab', { name: /Skill trees/ }).click()
 })
 
+test('run rendering stays stable after panning and switching tabs', async ({
+  page,
+  context,
+}) => {
+  await startJourney(page)
+  const locked = page.locator('[data-node-id][data-status="locked"]').first()
+  await expect(locked).toBeVisible()
+  await expect(locked).toHaveCSS('filter', 'none')
+  await expect(locked).toHaveCSS('opacity', '1')
+  const edges = page.locator('.react-flow__edge-path')
+  await expect(edges).not.toHaveCount(0)
+  for (const edge of await edges.all()) {
+    await expect(edge).toHaveCSS('opacity', '1')
+    await expect(edge).not.toHaveCSS('stroke', 'none')
+  }
+  await page.getByRole('button', { name: 'Fit tree' }).click()
+  await locked.hover()
+  const canvas = page.getByTestId('canvas')
+  const bounds = (await canvas.boundingBox())!
+  const origin = { x: bounds.x + 30, y: bounds.y + 40 }
+  const destination = { x: origin.x + 90, y: origin.y + 60 }
+  await page.mouse.move(origin.x, origin.y)
+  const before = await canvas.screenshot({ animations: 'disabled' })
+  const viewport = page.locator('.react-flow__viewport')
+  const transform = await viewport.getAttribute('style')
+  await drag(page, origin, destination)
+  await expect(viewport).not.toHaveAttribute('style', transform!)
+  await drag(page, destination, origin)
+  await expect(viewport).toHaveAttribute('style', transform!)
+  const otherTab = await context.newPage()
+  await otherTab.bringToFront()
+  await page.bringToFront()
+  await otherTab.close()
+  await expect
+    .poll(async () =>
+      before.equals(await canvas.screenshot({ animations: 'disabled' })),
+    )
+    .toBe(true)
+})
+
 test('edit history supports title-bar buttons and all undo redo shortcuts', async ({
   page,
 }) => {
@@ -741,7 +781,14 @@ test('run mode persists states, closes overlays, warns on reversal, and locks de
     .locator('.react-flow__edge')
     .nth(1)
     .locator('.react-flow__edge-path')
-  await expect(inactive).toHaveCSS('opacity', '0.24')
+  await expect(inactive).toHaveCSS('opacity', '1')
+  expect(await inactive.evaluate((element) => element.style.color)).toBe(
+    'color-mix(in srgb, var(--edge) 24%, var(--canvas))',
+  )
+  await expect(inactive).toHaveCSS(
+    'stroke',
+    await inactive.evaluate((element) => getComputedStyle(element).color),
+  )
   await openNode(page, 'seeing')
   await page.locator('.react-flow__pane').click({ position: { x: 80, y: 80 } })
   await expect(

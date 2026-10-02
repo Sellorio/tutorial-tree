@@ -346,8 +346,11 @@ describe('canvas adapter', () => {
       selectable: false,
       draggable: false,
     })
-    expect(harness.props.edges![1].style?.opacity).toBe(0.24)
-    expect(harness.props.edges![0].style?.opacity).toBe(1)
+    expect(harness.props.edges![1].style?.color).toBe(
+      'color-mix(in srgb, var(--edge) 24%, var(--canvas))',
+    )
+    expect(harness.props.edges![0].style?.color).toBe('var(--edge)')
+    expect(harness.props.edges![1].style?.opacity).toBeUndefined()
     act(() => harness.props.onNodeClick!(event, harness.props.nodes![2]))
     act(() =>
       harness.props.onNodesChange!([

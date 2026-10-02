@@ -3,6 +3,7 @@
   outline-offset: 8px;
 }
 .node {
+  --node-accent: var(--talent-accent);
   width: var(--node-size);
   height: var(--node-size);
   border: 2px solid var(--node-accent);
@@ -11,9 +12,7 @@
   position: relative;
   background: var(--canvas);
   color: var(--node-accent);
-  transition:
-    box-shadow 0.05s linear,
-    filter 0.05s linear;
+  transition: box-shadow 0.05s linear;
 }
 .selected {
   box-shadow: 0 0 18px 4px
@@ -34,8 +33,7 @@
   color: var(--node-accent);
 }
 .locked {
-  filter: saturate(0.15);
-  opacity: 0.46;
+  --node-accent: color-mix(in srgb, var(--talent-accent) 15%, var(--muted));
   cursor: not-allowed;
 }
 .in-progress {

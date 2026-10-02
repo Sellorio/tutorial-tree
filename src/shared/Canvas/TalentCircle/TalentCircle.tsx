@@ -17,7 +17,7 @@ export function TalentCircle({ data, selected }: NodeProps<FlowNode>) {
       className={`${styles.node} ${selected ? styles.selected : ''} ${data.connectionTarget ? styles.connectionTarget : ''} ${!editing ? styles[status] : ''}`}
       style={
         {
-          '--node-accent': talent.accent,
+          '--talent-accent': talent.accent,
           '--node-size': `${NodeSizeConstants[talent.size].nodeSize}px`,
           '--node-font-size': NodeSizeConstants[talent.size].fontSize,
         } as CSSProperties

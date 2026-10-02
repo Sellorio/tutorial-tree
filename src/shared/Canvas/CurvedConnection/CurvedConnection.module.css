@@ -5,11 +5,11 @@
 .pathArrows svg {
   opacity: 0.9;
 }
-.connection {
-  stroke: var(--edge);
+.connection:global(.react-flow__edge-path) {
+  stroke: currentColor;
   stroke-width: 1.7;
 }
-.selectedConnection {
+.selectedConnection:global(.react-flow__edge-path) {
   stroke: var(--accent);
   stroke-width: 3;
 }
