@@ -1,5 +1,6 @@
 import type { TipEditorProps } from './TipEditorProps'
 import { Trash2 } from 'lucide-react'
+import { AutosizingTextarea } from '../../../shared/AutosizingTextarea/AutosizingTextarea'
 import styles from './TipEditor.module.css'
 
 export function TipEditor({ tip, index, patch, node }: TipEditorProps) {
@@ -38,8 +39,7 @@ export function TipEditor({ tip, index, patch, node }: TipEditorProps) {
       </label>
       <label>
         Long description
-        <textarea
-          rows={3}
+        <AutosizingTextarea
           maxLength={10000}
           value={tip.long}
           onChange={(event) =>

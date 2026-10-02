@@ -61,12 +61,23 @@ export function useRunOverlayViewport(node: RunOverlayProps['node']) {
         )
       }
     }
-    const observer = new ResizeObserver(reveal)
+    let frame: number | null = null
+    const scheduleReveal = () => {
+      if (frame !== null) return
+      frame = requestAnimationFrame(() => {
+        frame = null
+        reveal()
+      })
+    }
+    const observer = new ResizeObserver(scheduleReveal)
     observer.observe(canvas)
     observer.observe(overlay)
     panels.forEach((panel) => observer.observe(panel))
-    reveal()
-    return () => observer.disconnect()
+    scheduleReveal()
+    return () => {
+      observer.disconnect()
+      if (frame !== null) cancelAnimationFrame(frame)
+    }
   }, [flow, node.id, nodeX, nodeY, radius, viewportX, viewportY, zoom])
 
   return {

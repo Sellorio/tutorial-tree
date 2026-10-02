@@ -2,6 +2,7 @@ import type { Status } from '../model/types/Status'
 import type { Point } from '../model/types/Point'
 import type { Diagram } from '../model/types/Diagram'
 import type { Library } from '../model/types/Library'
+import type { TalentNode } from '../model/types/TalentNode'
 import type { Selection } from '../Canvas/types/Selection'
 import { useWorkspaceState } from './useWorkspaceState'
 import { useWorkspaceEffects } from './useWorkspaceEffects'
@@ -12,6 +13,7 @@ import { addDraftNode } from '../../pages/edit/actions/addDraftNode'
 import { connectDraftNodes } from '../../pages/edit/actions/connectDraftNodes'
 import { removeDraftSelection } from '../../pages/edit/actions/removeDraftSelection'
 import { changeJourneyStatus } from '../../pages/run/actions/changeJourneyStatus'
+import { patchRunNode } from '../../pages/run/actions/patchRunNode'
 import { setJourneyShowAllSkills } from '../../pages/run/actions/setJourneyShowAllSkills'
 import { downloadExport } from './actions/downloadExport'
 import { importWorkspaceFile } from './actions/importWorkspaceFile'
@@ -37,6 +39,7 @@ export function useWorkspace() {
       removeDraftSelection(context, target),
     changeStatus: (status: Exclude<Status, 'locked'>) =>
       changeJourneyStatus(context, status),
+    patchRunNode: (patch: Partial<TalentNode>) => patchRunNode(context, patch),
     setShowAllSkills: (showAllSkills: boolean) =>
       setJourneyShowAllSkills(context, showAllSkills),
     download: (target: Diagram, targetInstance = state.instance) =>

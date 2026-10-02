@@ -17,6 +17,7 @@ export function DiagramCanvasFlow({
   selectedNode,
   instance,
   changeStatus,
+  patchRunNode,
   beginHistory,
   endHistory,
 }: DiagramCanvasProps) {
@@ -56,6 +57,7 @@ export function DiagramCanvasFlow({
             key={selectedNode.id}
             node={selectedNode}
             instance={instance}
+            onNodePatch={patchRunNode}
             onStatus={changeStatus}
             onClose={() => setSelection(null)}
           />

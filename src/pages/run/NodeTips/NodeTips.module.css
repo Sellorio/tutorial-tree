@@ -6,8 +6,8 @@
 .tips {
   position: absolute;
   right: calc(100% - var(--node-x, 50%) + 91px);
-  top: max(68px, calc(var(--node-y, 50%) - 130px));
-  width: 225px;
+  top: max(68px, calc(var(--node-y, 50%) - 145px));
+  width: 310px;
   max-height: calc(100% - 88px);
   overflow-y: auto;
   pointer-events: auto;
@@ -20,6 +20,54 @@
 }
 .tips .sectionHeading {
   margin-bottom: 15px;
+}
+.userTip {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 3px 0;
+}
+.userTip textarea {
+  min-width: 0;
+  flex: 1;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--canvas);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.addButton,
+.removeButton {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+}
+.addButton {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  gap: 6px;
+  padding: 9px 0 2px;
+  font: inherit;
+  font-size: 11px;
+}
+.removeButton {
+  position: relative;
+  top: 2px;
+  padding: 5px;
+}
+.addButton:hover,
+.removeButton:hover {
+  color: var(--text);
 }
 .tip {
   width: 100%;

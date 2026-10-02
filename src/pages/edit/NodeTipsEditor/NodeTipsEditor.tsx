@@ -8,22 +8,6 @@ export function NodeTipsEditor({ node, patch }: NodeTipsEditorProps) {
     <>
       <div className={styles.row}>
         <span className={styles.sectionHeading}>TIPS</span>
-        <button
-          className={styles.iconButton}
-          aria-label="Add tip"
-          title="Add tip"
-          disabled={node.tips.length >= 100}
-          onClick={() =>
-            patch({
-              tips: [
-                ...node.tips,
-                { id: crypto.randomUUID(), short: '', long: '' },
-              ],
-            })
-          }
-        >
-          <Plus size={16} />
-        </button>
       </div>
       {node.tips.map((tip, index) => (
         <TipEditor
@@ -34,6 +18,22 @@ export function NodeTipsEditor({ node, patch }: NodeTipsEditorProps) {
           node={node}
         />
       ))}
+      <button
+        className={styles.iconButton}
+        aria-label="Add tip"
+        title="Add tip"
+        disabled={node.tips.length >= 100}
+        onClick={() =>
+          patch({
+            tips: [
+              ...node.tips,
+              { id: crypto.randomUUID(), short: '', long: '' },
+            ],
+          })
+        }
+      >
+        Add tip
+      </button>
     </>
   )
 }

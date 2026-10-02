@@ -459,6 +459,7 @@ describe('portable data', () => {
     const { diagram, first } = fixture()
     first.description = 'Description'
     first.tips = [{ id: 'tip', short: 'Short', long: 'Long' }]
+    first.userTips = [{ id: 'user-tip', text: 'Personal note' }]
     first.youtube = 'https://youtu.be/dQw4w9WgXcQ'
     const result = importData(
       { version: 1, diagrams: [], instances: [] },
@@ -466,6 +467,23 @@ describe('portable data', () => {
     )
     expect(result.library.diagrams[0].nodes).toEqual(diagram.nodes)
     expect(result.route).toContain(diagram.id)
+  })
+  it('defaults user tips when importing diagrams created before user tips', () => {
+    const { diagram } = fixture()
+    const legacyExport = JSON.parse(exportData(diagram))
+    legacyExport.diagram.nodes.forEach((node: Record<string, unknown>) => {
+      delete node.userTips
+    })
+
+    const result = importData(
+      { version: 1, diagrams: [], instances: [] },
+      JSON.stringify(legacyExport),
+    )
+    expect(
+      result.library.diagrams[0].nodes.every(
+        (node) => node.userTips.length === 0,
+      ),
+    ).toBe(true)
   })
   it('imports old accent colors and instances without the Show All Skills field', () => {
     const { diagram, instance, first, second } = fixture()

@@ -9,6 +9,7 @@ import styles from './RunOverlay.module.css'
 export function RunOverlay({
   node,
   instance,
+  onNodePatch,
   onStatus,
   onClose,
 }: RunOverlayProps) {
@@ -19,9 +20,12 @@ export function RunOverlay({
   const embed = youtubeEmbed(node.youtube)
   return (
     <div className={styles.overlay} {...viewport}>
-      {node.tips.length > 0 && (
-        <NodeTips node={node} expanded={expanded} setExpanded={setExpanded} />
-      )}
+      <NodeTips
+        node={node}
+        expanded={expanded}
+        setExpanded={setExpanded}
+        onUserTipsChange={(userTips) => onNodePatch({ userTips })}
+      />
       <div
         className={styles.runDetails}
         data-run-panel

@@ -5,4 +5,5 @@ export type NodeTipsProps = {
   node: TalentNode
   expanded: string[]
   setExpanded: Dispatch<SetStateAction<string[]>>
+  onUserTipsChange: (userTips: TalentNode['userTips']) => void
 }

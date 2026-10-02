@@ -126,7 +126,13 @@ it('applies accent, size, and visual changes to every selected node', () => {
 })
 it('adds, edits, and deletes tips', () => {
   const { onNode } = renderInspector()
-  fireEvent.click(screen.getByRole('button', { name: 'Add tip' }))
+  const addTip = screen.getByRole('button', { name: 'Add tip' })
+  const deleteTip = screen.getByRole('button', { name: 'Delete tip 1' })
+  expect(
+    deleteTip.compareDocumentPosition(addTip) &
+      Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy()
+  fireEvent.click(addTip)
   expect(onNode.mock.lastCall![0].tips).toHaveLength(2)
   fireEvent.change(screen.getByLabelText('Short description'), {
     target: { value: 'Short note' },

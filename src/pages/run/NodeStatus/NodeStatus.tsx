@@ -23,7 +23,6 @@ export function NodeStatus({
           <X size={18} />
         </button>
       </div>
-      <h2>{node.title}</h2>
       {node.kind !== 'start' && (
         <>
           <div className={styles.statusButtons}>

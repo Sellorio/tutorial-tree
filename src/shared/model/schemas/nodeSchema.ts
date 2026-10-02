@@ -48,6 +48,15 @@ export const nodeSchema = z.preprocess(
           }),
         )
         .max(100),
+      userTips: z
+        .array(
+          z.object({
+            id: idSchema,
+            text: z.string().max(10000),
+          }),
+        )
+        .max(100)
+        .default([]),
     })
     .transform((node) => ({
       ...node,

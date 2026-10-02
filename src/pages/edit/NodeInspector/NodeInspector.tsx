@@ -6,6 +6,7 @@ import { NodeVisualField } from '../NodeVisualField/NodeVisualField'
 import { RequirementField } from '../RequirementField/RequirementField'
 import { NodeTipsEditor } from '../NodeTipsEditor/NodeTipsEditor'
 import { Trash2 } from 'lucide-react'
+import { AutosizingTextarea } from '../../../shared/AutosizingTextarea/AutosizingTextarea'
 import styles from './NodeInspector.module.css'
 
 export function NodeInspector({
@@ -40,8 +41,7 @@ export function NodeInspector({
       </label>
       <label>
         Description
-        <textarea
-          rows={3}
+        <AutosizingTextarea
           maxLength={10000}
           value={node.description}
           onChange={(event) => patch({ description: event.target.value })}

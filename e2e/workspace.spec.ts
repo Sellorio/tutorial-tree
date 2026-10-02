@@ -621,7 +621,7 @@ test('node names persist and replace the Run status eyebrow', async ({
   await expect(status.getByText(nodeName, { exact: true })).toBeVisible()
   await expect(
     status.getByRole('heading', { name: nodeText, exact: true }),
-  ).toBeVisible()
+  ).toHaveCount(0)
   await expect(status.getByText('UNLOCKED', { exact: true })).toHaveCount(0)
   await status.getByRole('button', { name: 'Completed', exact: true }).click()
   await openNode(page, 'seeing')
@@ -961,6 +961,38 @@ test('run mode persists states, closes overlays, warns on reversal, and locks de
   await expect(
     page.getByRole('region', { name: 'Node details', exact: true }),
   ).toHaveCount(0)
+})
+
+test('Run mode saves user tips with their node', async ({ page }) => {
+  await startJourney(page)
+  await openNode(page, 'seeing')
+  await page.getByRole('button', { name: 'Add a tip' }).click()
+  const userTip = page.getByRole('textbox', { name: 'Your tip 1' })
+  const text = 'Watch the transitions between shapes.'
+  await userTip.fill(text)
+  await page.getByRole('button', { name: 'Completed', exact: true }).click()
+  await expect
+    .poll(async () => {
+      const library = await stored(page)
+      return {
+        text: library.diagrams[0].nodes.find((node) => node.id === 'seeing')
+          ?.userTips[0]?.text,
+        status: library.instances.find(
+          (entry) => entry.name === 'My first journey',
+        )?.statuses.seeing,
+      }
+    })
+    .toEqual({ text, status: 'completed' })
+
+  await page.reload()
+  await expect(page.getByTestId('talent-seeing')).toHaveAttribute(
+    'data-status',
+    'completed',
+  )
+  await openNode(page, 'seeing')
+  await expect(page.getByRole('textbox', { name: 'Your tip 1' })).toHaveValue(
+    text,
+  )
 })
 
 test('imports diagrams and instances, merges newer local graphs, and downloads portable progress', async ({

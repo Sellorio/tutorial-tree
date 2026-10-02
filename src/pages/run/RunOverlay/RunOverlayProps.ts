@@ -5,6 +5,7 @@ import type { Instance } from '../../../shared/model/types/Instance'
 export type RunOverlayProps = {
   node: TalentNode
   instance: Instance
+  onNodePatch: (patch: Partial<TalentNode>) => void
   onStatus: (status: Exclude<Status, 'locked'>) => void
   onClose: () => void
 }

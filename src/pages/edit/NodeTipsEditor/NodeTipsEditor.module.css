@@ -11,8 +11,6 @@
 }
 .iconButton {
   padding: 5px;
-  width: 28px;
-  height: 28px;
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;

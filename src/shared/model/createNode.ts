@@ -21,5 +21,6 @@ export function createNode(
     youtube: '',
     requirement: 'all',
     tips: [],
+    userTips: [],
   }
 }

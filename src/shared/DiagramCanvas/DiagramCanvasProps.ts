@@ -23,6 +23,7 @@ export type DiagramCanvasProps = {
   selectedNode: TalentNode | undefined
   instance: Instance | undefined
   changeStatus: (status: Exclude<Status, 'locked'>) => void
+  patchRunNode: (patch: Partial<TalentNode>) => void
   beginHistory?: () => void
   endHistory?: () => void
 }
