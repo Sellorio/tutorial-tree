@@ -6,6 +6,7 @@ import styles from './NodeStatus.module.css'
 export function NodeStatus({
   node,
   status,
+  statusTimestamps,
   onClose,
   onStatus,
 }: NodeStatusProps) {
@@ -24,18 +25,51 @@ export function NodeStatus({
       </div>
       <h2>{node.title}</h2>
       {node.kind !== 'start' && (
-        <div className={styles.statusButtons}>
-          {STATUS_OPTIONS.map(({ value, label, icon: Icon }) => (
-            <button
-              key={value}
-              aria-pressed={status === value}
-              onClick={() => onStatus(value)}
-            >
-              <Icon size={16} />
-              {label}
-            </button>
-          ))}
-        </div>
+        <>
+          <div className={styles.statusButtons}>
+            {STATUS_OPTIONS.map(({ value, label, icon: Icon }) => (
+              <button
+                key={value}
+                aria-pressed={status === value}
+                onClick={() => onStatus(value)}
+              >
+                <Icon size={16} />
+                {label}
+              </button>
+            ))}
+          </div>
+          {(statusTimestamps?.inProgressAt ||
+            statusTimestamps?.completedAt) && (
+            <dl className={styles.timestamps}>
+              {statusTimestamps.inProgressAt && (
+                <div>
+                  <dt>In progress</dt>
+                  <dd>
+                    <time
+                      aria-label="In progress date and time"
+                      dateTime={statusTimestamps.inProgressAt}
+                    >
+                      {new Date(statusTimestamps.inProgressAt).toLocaleString()}
+                    </time>
+                  </dd>
+                </div>
+              )}
+              {statusTimestamps.completedAt && (
+                <div>
+                  <dt>Completed</dt>
+                  <dd>
+                    <time
+                      aria-label="Completed date and time"
+                      dateTime={statusTimestamps.completedAt}
+                    >
+                      {new Date(statusTimestamps.completedAt).toLocaleString()}
+                    </time>
+                  </dd>
+                </div>
+              )}
+            </dl>
+          )}
+        </>
       )}
     </section>
   )

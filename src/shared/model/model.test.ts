@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { DEFAULT_CATEGORIES, LEGACY_CATEGORY_IDS } from './constants/CATEGORIES'
 import { connectionCurve } from './connectionCurve'
 import { connectionError } from './connectionError'
@@ -6,6 +6,7 @@ import { createDiagram } from './createDiagram'
 import { createInstance } from './createInstance'
 import { createNode } from './createNode'
 import { deleteDiagram } from './deleteDiagram'
+import { ensureStatusTimestamps } from './ensureStatusTimestamps'
 import { diagramSchema } from './schemas/diagramSchema'
 import { nodeSchema } from './schemas/nodeSchema'
 import { exportData } from './exportData'
@@ -50,6 +51,47 @@ function fixture() {
 }
 
 describe('progress rules', () => {
+  it('records progress and completion timestamps for status changes', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-10-02T10:00:00.000Z'))
+    try {
+      const { diagram, instance, first, second } = fixture()
+      const inProgress = setStatus(diagram, instance, first.id, 'in-progress')
+      expect(inProgress.statusTimestamps?.[first.id]?.inProgressAt).toBe(
+        inProgress.updatedAt,
+      )
+
+      vi.setSystemTime(new Date('2026-10-02T11:00:00.000Z'))
+      const completed = setStatus(diagram, inProgress, first.id, 'completed')
+      expect(completed.statusTimestamps?.[first.id]).toEqual({
+        inProgressAt: inProgress.updatedAt,
+        completedAt: completed.updatedAt,
+      })
+
+      vi.setSystemTime(new Date('2026-10-02T12:00:00.000Z'))
+      const completedDirectly = setStatus(
+        diagram,
+        instance,
+        second.id,
+        'completed',
+      )
+      expect(completedDirectly.statusTimestamps?.[second.id]).toEqual({
+        inProgressAt: completedDirectly.updatedAt,
+        completedAt: completedDirectly.updatedAt,
+      })
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+  it('preserves historical timestamps when a node is unlocked again', () => {
+    const { diagram, instance, first } = fixture()
+    const timestamps = { inProgressAt: '2026-10-02T10:00:00.000Z' }
+    const normalized = ensureStatusTimestamps(diagram, {
+      ...instance,
+      statusTimestamps: { [first.id]: timestamps },
+    })
+    expect(normalized.statusTimestamps?.[first.id]).toEqual(timestamps)
+  })
   it('uses in-progress and completed inputs by default for ALL and ANY', () => {
     const { diagram, instance, first, second, final } = fixture()
     const partial = setStatus(diagram, instance, first.id, 'in-progress')
@@ -449,6 +491,32 @@ describe('portable data', () => {
       'category-orange',
     )
     expect(result.library.instances[0].showAllSkills).toBe(true)
+  })
+  it('backfills timestamps when importing a legacy instance export', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-10-02T10:00:00.000Z'))
+    try {
+      const { diagram, instance, first, second } = fixture()
+      instance.statuses[first.id] = 'in-progress'
+      instance.statuses[second.id] = 'completed'
+      const legacyExport = JSON.parse(exportData(diagram, instance))
+      delete legacyExport.instance.statusTimestamps
+
+      const imported = importData(
+        { version: 1, diagrams: [], instances: [] },
+        JSON.stringify(legacyExport),
+      ).library.instances[0]
+      const timestamp = '2026-10-02T10:00:00.000Z'
+      expect(imported.statusTimestamps?.[first.id]).toEqual({
+        inProgressAt: timestamp,
+      })
+      expect(imported.statusTimestamps?.[second.id]).toEqual({
+        inProgressAt: timestamp,
+        completedAt: timestamp,
+      })
+    } finally {
+      vi.useRealTimers()
+    }
   })
   it('transfers an instance to an empty browser including its diagram', () => {
     const { diagram, instance, first } = fixture()

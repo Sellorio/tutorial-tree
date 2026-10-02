@@ -14,9 +14,31 @@ export function setStatus(
   const node = diagram.nodes.find((entry) => entry.id === nodeId)
   if (!node || node.kind === 'start' || statuses[nodeId] === 'locked')
     return { ...instance, statuses }
+  const timestamp = now()
+  let statusTimestamps = instance.statusTimestamps
+  if (status === 'in-progress') {
+    statusTimestamps = {
+      ...statusTimestamps,
+      [nodeId]: {
+        ...statusTimestamps?.[nodeId],
+        inProgressAt: timestamp,
+      },
+    }
+  } else if (status === 'completed') {
+    const previous = statusTimestamps?.[nodeId]
+    statusTimestamps = {
+      ...statusTimestamps,
+      [nodeId]: {
+        ...previous,
+        inProgressAt: previous?.inProgressAt ?? timestamp,
+        completedAt: timestamp,
+      },
+    }
+  }
   return {
     ...instance,
     statuses: reconcileStatuses(diagram, { ...statuses, [nodeId]: status }),
-    updatedAt: now(),
+    ...(statusTimestamps ? { statusTimestamps } : {}),
+    updatedAt: timestamp,
   }
 }

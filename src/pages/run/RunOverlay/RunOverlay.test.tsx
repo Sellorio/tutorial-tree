@@ -24,6 +24,12 @@ it('expands and collapses tips, embeds video, and selects every status', () => {
   const node = diagram.nodes.find((entry) => entry.id === 'color')!
   const instance = createInstance(diagram, 'Journey')
   instance.statuses.color = 'unlocked'
+  instance.statusTimestamps = {
+    color: {
+      inProgressAt: '2026-10-02T10:00:00.000Z',
+      completedAt: '2026-10-02T11:00:00.000Z',
+    },
+  }
   const onStatus = vi.fn()
   const onClose = vi.fn()
   render(
@@ -35,6 +41,14 @@ it('expands and collapses tips, embeds video, and selects every status', () => {
     />,
   )
   const tip = screen.getByRole('button', { name: 'Keep it small' })
+  expect(screen.getByLabelText('In progress date and time')).toHaveAttribute(
+    'datetime',
+    '2026-10-02T10:00:00.000Z',
+  )
+  expect(screen.getByLabelText('Completed date and time')).toHaveAttribute(
+    'datetime',
+    '2026-10-02T11:00:00.000Z',
+  )
   fireEvent.click(tip)
   expect(tip).toHaveAttribute('aria-expanded', 'true')
   expect(tip).toHaveTextContent(node.tips[0].long)

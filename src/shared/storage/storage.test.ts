@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { STORAGE_KEY } from '../model/constants/STORAGE_KEY'
 import { createInstance } from '../model/createInstance'
 import { loadLibrary } from './loadLibrary'
@@ -39,6 +39,34 @@ describe('browser persistence', () => {
       .library.instances[0]
     expect(loaded.statuses.start).toBe('completed')
     expect(loaded.statuses.stale).toBeUndefined()
+  })
+  it('backfills timestamps for legacy in-progress and completed nodes', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-10-02T10:00:00.000Z'))
+    try {
+      const library = starterLibrary()
+      const diagram = library.diagrams[0]
+      const instance = createInstance(diagram, 'Session')
+      const inProgressNode = diagram.nodes[1]
+      const completedNode = diagram.nodes[2]
+      instance.statuses[inProgressNode.id] = 'in-progress'
+      instance.statuses[completedNode.id] = 'completed'
+      library.instances.push(instance)
+
+      const loaded = loadLibrary({ getItem: () => JSON.stringify(library) })
+        .library.instances[0]
+      const timestamp = '2026-10-02T10:00:00.000Z'
+      expect(loaded.statusTimestamps?.[inProgressNode.id]).toEqual({
+        inProgressAt: timestamp,
+      })
+      expect(loaded.statusTimestamps?.[completedNode.id]).toEqual({
+        inProgressAt: timestamp,
+        completedAt: timestamp,
+      })
+      expect(loaded.statusTimestamps?.[diagram.nodes[0].id]).toBeUndefined()
+    } finally {
+      vi.useRealTimers()
+    }
   })
   it('defaults older instances to showing all skills', () => {
     const library = starterLibrary()

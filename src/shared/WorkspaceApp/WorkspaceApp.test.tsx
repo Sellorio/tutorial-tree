@@ -9,6 +9,7 @@ import { createInstance } from '../model/createInstance'
 import { exportData } from '../model/exportData'
 import { starterLibrary } from '../storage/starterLibrary'
 import { saved } from './testing/saved'
+import { readInitial } from './readInitial'
 
 vi.mock('../Canvas/Canvas', () => ({
   Canvas: (props: ComponentProps<typeof Canvas>) => (
@@ -65,6 +66,42 @@ function openEditor(library = starterLibrary()) {
 }
 
 describe('workspace orchestration', () => {
+  it('persists legacy timestamp migrations during startup', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-10-02T10:00:00.000Z'))
+    try {
+      const library = starterLibrary()
+      const instance = createInstance(library.diagrams[0], 'Legacy journey')
+      instance.statuses.seeing = 'in-progress'
+      library.instances.push(instance)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(library))
+
+      const initial = readInitial()
+      const migrated = initial.library.instances.find(
+        (entry) => entry.name === 'Legacy journey',
+      )!
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
+      const timestamp = migrated.statusTimestamps?.seeing?.inProgressAt
+      expect(initial.error).toBe('')
+      expect(initial.migrated).toBe(true)
+      expect(
+        stored.instances.find(
+          (entry: { name: string }) => entry.name === 'Legacy journey',
+        ).statusTimestamps.seeing.inProgressAt,
+      ).toBe(timestamp)
+
+      vi.setSystemTime(new Date('2026-10-02T11:00:00.000Z'))
+      const reloaded = readInitial()
+      expect(reloaded.migrated).toBe(false)
+      expect(
+        reloaded.library.instances.find(
+          (entry) => entry.name === 'Legacy journey',
+        )?.statusTimestamps?.seeing?.inProgressAt,
+      ).toBe(timestamp)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
   it('undoes and redoes edits with buttons and shortcuts inside settings', () => {
     openEditor()
     expect(screen.getByRole('button', { name: 'Undo' })).toBeDisabled()

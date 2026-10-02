@@ -15,6 +15,7 @@ export function RunOverlay({
   const [expanded, setExpanded] = useState<string[]>([])
   const viewport = useRunOverlayViewport(node)
   const status = instance.statuses[node.id]
+  const statusTimestamps = instance.statusTimestamps?.[node.id]
   const embed = youtubeEmbed(node.youtube)
   return (
     <div className={styles.overlay} {...viewport}>
@@ -30,6 +31,7 @@ export function RunOverlay({
         <NodeStatus
           node={node}
           status={status}
+          statusTimestamps={statusTimestamps}
           onClose={onClose}
           onStatus={onStatus}
         />

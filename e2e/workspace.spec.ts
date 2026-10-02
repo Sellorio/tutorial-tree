@@ -875,6 +875,12 @@ test('run mode persists states, closes overlays, warns on reversal, and locks de
     'data-status',
     'in-progress',
   )
+  await openNode(page, 'seeing')
+  await expect(page.getByLabel('In progress date and time')).toHaveAttribute(
+    'datetime',
+    /^\d{4}-\d{2}-\d{2}T.*Z$/,
+  )
+  await page.getByRole('button', { name: 'Close node details' }).click()
   const controls = page.locator('[data-run-controls]')
   const controlsWhenClosed = await controls.boundingBox()
   await page.getByRole('button', { name: 'Show In Progress sidebar' }).click()

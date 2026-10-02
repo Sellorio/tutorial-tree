@@ -3,6 +3,7 @@ import { now } from './now'
 import { reconcileStatuses } from './reconcileStatuses'
 import { saveDiagram } from './saveDiagram'
 import { transferSchema } from './schemas/transferSchema'
+import { ensureStatusTimestamps } from './ensureStatusTimestamps'
 
 export function importData(
   library: Library,
@@ -29,14 +30,18 @@ export function importData(
   const diagram =
     library.diagrams.find((entry) => entry.id === data.diagram.id) ??
     data.diagram
-  const merged = {
+  const merged = ensureStatusTimestamps(diagram, {
     ...data.instance,
+    statusTimestamps: {
+      ...existing?.statusTimestamps,
+      ...data.instance.statusTimestamps,
+    },
     statuses: reconcileStatuses(diagram, {
       ...existing?.statuses,
       ...data.instance.statuses,
     }),
     updatedAt: now(),
-  }
+  })
   return {
     library: {
       ...library,

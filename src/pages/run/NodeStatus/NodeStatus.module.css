@@ -64,3 +64,21 @@
 .statusButtons button:hover {
   border-color: var(--accent);
 }
+.timestamps {
+  display: grid;
+  gap: 3px;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  opacity: 0.7;
+}
+.timestamps div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 8px;
+}
+.timestamps dt,
+.timestamps dd {
+  margin: 0;
+}
