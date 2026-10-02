@@ -26,6 +26,18 @@ export function DiagramInspector({
               : current,
           )
         }
+        onNodes={(nodes) =>
+          setDraft((current) => {
+            if (!current) return current
+            const updates = new Map(nodes.map((node) => [node.id, node]))
+            return {
+              ...current,
+              nodes: current.nodes.map(
+                (entry) => updates.get(entry.id) ?? entry,
+              ),
+            }
+          })
+        }
         onConnection={(connection) =>
           setDraft((current) =>
             current

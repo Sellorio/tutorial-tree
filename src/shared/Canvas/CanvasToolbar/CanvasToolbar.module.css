@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  background: var(--surface);
+  background: var(--lighten);
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 5px;

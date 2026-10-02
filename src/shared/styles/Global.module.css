@@ -7,13 +7,22 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  --surface: #fff;
+  --lighten: #fff;
+  --darken: #1e2422;
   --canvas: #f7f9f8;
   --text: #293d36;
   --muted: #7c8983;
   --accent: #19877d;
   --accent-hover: #126e65;
   --accent-soft: #eaf5f2;
+  --talent-accent-green: #0c9400;
+  --talent-accent-teal: #0093ad;
+  --talent-accent-purple: #5100ff;
+  --talent-accent-pink: #db0079;
+  --talent-accent-red: #d10000;
+  --talent-accent-brown: #9e6700;
+  --talent-accent-orange: #ff7300;
+  --talent-accent-gray: #6d6d6d;
   --border: #e6ebe8;
   --border-strong: #cbd5cf;
   --hover: #f0f4f2;
@@ -25,7 +34,8 @@
 }
 
 :global(:root[data-theme='dark']) {
-  --surface: #1e2422;
+  --lighten: #1e2422;
+  --darken: #fff;
   --canvas: #191e1c;
   --text: #e1e9e5;
   --muted: #9baaa2;
@@ -40,7 +50,7 @@
   --danger: #f18f89;
   --shadow: 0 8px 30px #0004;
   color-scheme: dark;
-  background: var(--surface);
+  background: var(--lighten);
 }
 
 :global(*) {

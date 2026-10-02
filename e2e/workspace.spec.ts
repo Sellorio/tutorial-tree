@@ -113,6 +113,53 @@ test('run rendering stays stable after panning and switching tabs', async ({
     .toBe(true)
 })
 
+test('Show All Skills hides deeper locked skills and persists per journey', async ({
+  page,
+}) => {
+  await startJourney(page)
+  const nodes = page.locator('.react-flow__node')
+  const showAllSkills = page.getByRole('checkbox', {
+    name: 'Show All Skills',
+  })
+  const lockedNode = page.locator('[data-node-id="color"]')
+
+  await expect(nodes).toHaveCount(8)
+  await expect(page.getByTestId('talent-start')).toHaveCSS(
+    'border-top-color',
+    'rgb(20, 83, 45)',
+  )
+  await expect(page.getByTestId('talent-seeing')).toHaveCSS(
+    'border-top-color',
+    'rgb(153, 153, 153)',
+  )
+  await expect(lockedNode).toHaveCSS('border-top-color', 'rgb(68, 68, 68)')
+  await showAllSkills.uncheck()
+  await expect(nodes).toHaveCount(4)
+  await expect(page.locator('.react-flow__edge')).toHaveCount(3)
+  await expect(page.getByTestId('talent-composition')).toHaveCount(0)
+  await expect(page.getByTestId('talent-color')).toBeVisible()
+  expect((await stored(page)).instances[0].showAllSkills).toBe(false)
+
+  await page.reload()
+  await expect(
+    page.getByRole('checkbox', { name: 'Show All Skills' }),
+  ).not.toBeChecked()
+  await expect(nodes).toHaveCount(4)
+  await page.getByRole('checkbox', { name: 'Show All Skills' }).check()
+  await expect(nodes).toHaveCount(8)
+  await page.getByTestId('talent-seeing').click()
+  await page.getByRole('button', { name: 'In progress', exact: true }).click()
+  await expect(page.getByTestId('talent-seeing')).toHaveCSS(
+    'animation-name',
+    /progressPulse/,
+  )
+  await page.getByRole('button', { name: 'Edit tree' }).click()
+  await expect(page.getByTestId('talent-seeing')).toHaveCSS(
+    'border-top-color',
+    'rgb(75, 75, 75)',
+  )
+})
+
 test('edit history supports title-bar buttons and all undo redo shortcuts', async ({
   page,
 }) => {
@@ -234,6 +281,34 @@ test('shift click adds and removes nodes from the selection', async ({
   await expect(page.locator('.react-flow__node[data-id="seeing"]')).toHaveClass(
     /selected/,
   )
+})
+
+test('multi-selection edits shared accents, size, and visuals', async ({
+  page,
+}) => {
+  await page.getByRole('button', { name: 'Edit Creative foundations' }).click()
+  await page.getByTestId('talent-seeing').click()
+  await page.getByTestId('talent-color').click({ modifiers: ['Shift'] })
+  await expect(page.locator('.react-flow__node.selected')).toHaveCount(2)
+
+  await page.getByRole('button', { name: 'Accent Red' }).click()
+  await page.getByRole('button', { name: 'Large', exact: true }).click()
+  await page.getByRole('button', { name: 'Icon', exact: true }).click()
+  await page.getByRole('button', { name: 'camera icon' }).click()
+  await page.getByRole('button', { name: 'Image', exact: true }).click()
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+
+  const nodes = (await stored(page)).diagrams[0].nodes.filter((node) =>
+    ['seeing', 'color'].includes(node.id),
+  )
+  expect(nodes).toHaveLength(2)
+  for (const node of nodes)
+    expect(node).toMatchObject({
+      accent: 'red',
+      size: 'large',
+      icon: 'camera',
+      media: 'image',
+    })
 })
 
 test('undo settings keeps the selected item and works from focused controls', async ({
@@ -370,7 +445,7 @@ test('creates, edits metadata, connects from an edge, saves, reloads, and export
   await page
     .getByRole('textbox', { name: 'Description', exact: true })
     .fill('Practice for twenty minutes.')
-  await page.getByRole('button', { name: 'Accent 5', exact: true }).click()
+  await page.getByRole('button', { name: 'Accent Red', exact: true }).click()
   await page.getByRole('button', { name: 'Any input', exact: true }).click()
   await page.getByLabel('YouTube tutorial').fill('https://youtu.be/dQw4w9WgXcQ')
   await page.getByRole('button', { name: 'Add tip', exact: true }).click()
@@ -437,11 +512,11 @@ test('creates, edits metadata, connects from an edge, saves, reloads, and export
     (diagram) => diagram.name === 'Browser test tree',
   )!
   expect(saved.nodes[0]).toMatchObject({ kind: 'start', size: 'small' })
-  expect(saved.connections[0].clockwise).toBe(false)
+  expect(saved.connections[0].clockwise).toBe(true)
   expect(saved.nodes[1]).toMatchObject({
     title: 'Practice',
     requirement: 'any',
-    accent: '#cf5e46',
+    accent: 'red',
     description: 'Practice for twenty minutes.',
   })
   expect(saved.nodes[1].image).toContain('data:image/jpeg;base64,')
@@ -1263,7 +1338,7 @@ test('sizes, icons, cover images and split run panels persist across save and re
     page.getByRole('banner').getByRole('button', { name: /Import|Export/ }),
   ).toHaveCount(0)
   await expect(
-    page.getByRole('button', { name: 'Accent 1', exact: true }),
+    page.getByRole('button', { name: 'Accent Green', exact: true }),
   ).toHaveCount(0)
   await page
     .getByLabel('Upload diagram image')

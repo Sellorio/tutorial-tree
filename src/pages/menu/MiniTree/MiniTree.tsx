@@ -28,13 +28,13 @@ export function MiniTree({ diagram }: MiniTreeProps) {
               cx={position.x}
               cy={position.y}
               r={13}
-              style={{ stroke: node.accent }}
+              style={{ stroke: `var(--talent-accent-${node.accent})` }}
             />
             <circle
               cx={position.x}
               cy={position.y}
               r={4}
-              style={{ fill: node.accent }}
+              style={{ fill: `var(--talent-accent-${node.accent})` }}
             />
           </g>
         )

@@ -7,6 +7,7 @@ export type InspectorProps = {
   diagram: Diagram
   selection: Selection
   onNode: (node: TalentNode) => void
+  onNodes?: (nodes: TalentNode[]) => void
   onConnection: (connection: Connection) => void
   onDelete: () => void
   onError: (message: string) => void

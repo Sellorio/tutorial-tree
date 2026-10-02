@@ -8,7 +8,7 @@
   font: inherit;
   font-size: 11px;
   color: var(--text);
-  background: var(--surface);
+  background: var(--lighten);
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 6px 3px;

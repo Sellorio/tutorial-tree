@@ -37,7 +37,7 @@
 }
 .mode input:checked + span {
   color: var(--accent);
-  background: var(--surface);
+  background: var(--lighten);
   box-shadow: 0 1px 4px #00000012;
 }
 .mode input:focus-visible + span {

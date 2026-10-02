@@ -2,7 +2,7 @@
   height: 100%;
   width: 100%;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--node-accent) 9%, var(--surface));
+  background: color-mix(in srgb, var(--lighten) 70%, var(--node-accent));
   background-size: cover;
   background-position: center;
   display: flex;
@@ -37,7 +37,7 @@
 .nodeFaceTitle {
   position: absolute;
   padding: 1px;
-  text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 0 3px color-mix(in srgb, transparent 50%, var(--lighten));
 }
 
 .nodeFaceIcon:not(:only-child) {

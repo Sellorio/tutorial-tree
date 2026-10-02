@@ -8,20 +8,23 @@ export function AccentField({ node, patch }: AccentFieldProps) {
     <fieldset>
       <legend>Accent color</legend>
       <div className={styles.swatches}>
-        {ACCENTS.map((color, index) => (
-          <button
-            type="button"
-            className={styles.swatch}
-            key={color}
-            style={{ backgroundColor: color }}
-            aria-label={`Accent ${index + 1}`}
-            title={color}
-            aria-pressed={node.accent === color}
-            onClick={() => patch({ accent: color })}
-          >
-            {node.accent === color && <Check size={15} />}
-          </button>
-        ))}
+        {ACCENTS.map((accent) => {
+          const label = `${accent[0].toUpperCase()}${accent.slice(1)}`
+          return (
+            <button
+              type="button"
+              className={styles.swatch}
+              key={accent}
+              style={{ backgroundColor: `var(--talent-accent-${accent})` }}
+              aria-label={`Accent ${label}`}
+              title={label}
+              aria-pressed={node.accent === accent}
+              onClick={() => patch({ accent })}
+            >
+              {node.accent === accent && <Check size={15} />}
+            </button>
+          )
+        })}
       </div>
     </fieldset>
   )

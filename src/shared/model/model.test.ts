@@ -7,6 +7,7 @@ import { createInstance } from './createInstance'
 import { createNode } from './createNode'
 import { deleteDiagram } from './deleteDiagram'
 import { diagramSchema } from './schemas/diagramSchema'
+import { nodeSchema } from './schemas/nodeSchema'
 import { exportData } from './exportData'
 import { importData } from './importData'
 import { librarySchema } from './schemas/librarySchema'
@@ -297,9 +298,9 @@ describe('editing and validation', () => {
       y: 2000,
     })
   })
-  it('creates unique nodes with ten valid accents and an immutable Start', () => {
+  it('creates unique nodes with eight named accents and an immutable Start', () => {
     const { diagram, start, first } = fixture()
-    expect(ACCENTS).toHaveLength(10)
+    expect(ACCENTS).toHaveLength(8)
     expect(start.size).toBe('small')
     expect(first.size).toBe('medium')
     expect(createNode({ x: 0, y: 0 }).id).not.toBe(first.id)
@@ -310,6 +311,33 @@ describe('editing and validation', () => {
         (edge) => edge.source === first.id || edge.target === first.id,
       ),
     ).toBe(false)
+  })
+  it('normalizes legacy accent colors to named accents', () => {
+    const node = createNode({ x: 0, y: 0 })
+    const legacyAccents = [
+      ['#19877d', 'teal'],
+      ['#3478c6', 'teal'],
+      ['#7758b8', 'purple'],
+      ['#be5684', 'pink'],
+      ['#cf5e46', 'orange'],
+      ['#bc8623', 'brown'],
+      ['#789640', 'green'],
+      ['#429ca8', 'teal'],
+      ['#8d7765', 'brown'],
+      ['#6e7c8d', 'gray'],
+      ['#0c9400', 'green'],
+      ['#0093ad', 'teal'],
+      ['#5100ff', 'purple'],
+      ['#db0079', 'pink'],
+      ['#d10000', 'red'],
+      ['#9e6700', 'brown'],
+      ['#ff7300', 'orange'],
+      ['rgb(109, 109, 109)', 'gray'],
+    ] as const
+    for (const [legacyAccent, namedAccent] of legacyAccents)
+      expect(nodeSchema.parse({ ...node, accent: legacyAccent }).accent).toBe(
+        namedAccent,
+      )
   })
   it('rejects missing nodes, self links, incoming Start links, duplicates and cycles', () => {
     const { diagram, start, first, final } = fixture()
@@ -380,6 +408,25 @@ describe('portable data', () => {
     )
     expect(result.library.diagrams[0].nodes).toEqual(diagram.nodes)
     expect(result.route).toContain(diagram.id)
+  })
+  it('imports old accent colors and instances without the Show All Skills field', () => {
+    const { diagram, instance, first, second } = fixture()
+    const legacyExport = JSON.parse(exportData(diagram, instance))
+    delete legacyExport.instance.showAllSkills
+    legacyExport.diagram.nodes.find(
+      (node: { id: string }) => node.id === first.id,
+    ).accent = '#19877d'
+    legacyExport.diagram.nodes.find(
+      (node: { id: string }) => node.id === second.id,
+    ).accent = '#cf5e46'
+
+    const result = importData(
+      { version: 1, diagrams: [], instances: [] },
+      JSON.stringify(legacyExport),
+    )
+    expect(result.library.diagrams[0].nodes[1].accent).toBe('teal')
+    expect(result.library.diagrams[0].nodes[2].accent).toBe('orange')
+    expect(result.library.instances[0].showAllSkills).toBe(true)
   })
   it('transfers an instance to an empty browser including its diagram', () => {
     const { diagram, instance, first } = fixture()

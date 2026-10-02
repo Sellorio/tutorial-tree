@@ -32,7 +32,7 @@
 .overlaySection {
   flex-shrink: 0;
   padding: 12px;
-  background: var(--surface);
+  background: var(--lighten);
   border: 1px solid var(--border);
   border-radius: 5px;
   box-shadow: var(--shadow);

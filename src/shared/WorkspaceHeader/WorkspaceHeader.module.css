@@ -6,7 +6,7 @@
   padding: 0 18px;
   gap: 18px;
   border-bottom: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--lighten);
 }
 .brand {
   display: inline-flex;

@@ -7,5 +7,6 @@ export const instanceSchema = z.object({
   diagramId: idSchema,
   name: z.string().trim().min(1).max(100),
   statuses: z.record(z.string(), statusSchema),
+  showAllSkills: z.boolean().default(true),
   updatedAt: z.string(),
 })

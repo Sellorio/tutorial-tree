@@ -30,7 +30,7 @@
   background: var(--canvas);
 }
 .option[data-checked='true'] {
-  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  background: color-mix(in srgb, var(--accent) 10%, var(--lighten));
 }
 .option:hover:not([data-disabled='true']) {
   background: var(--hover);

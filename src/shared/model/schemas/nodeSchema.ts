@@ -1,4 +1,4 @@
-import { ACCENTS } from '../constants/ACCENTS'
+import { ACCENTS, LEGACY_ACCENT_NAMES } from '../constants/ACCENTS'
 import { NODE_ICONS } from '../constants/NODE_ICONS'
 import { safeImage } from '../safeImage'
 import { youtubeEmbed } from '../youtubeEmbed'
@@ -13,7 +13,13 @@ export const nodeSchema = z
     title: z.string().max(80),
     description: z.string().max(10000),
     position: z.object({ x: z.number().finite(), y: z.number().finite() }),
-    accent: z.enum(ACCENTS),
+    accent: z.preprocess(
+      (value) =>
+        typeof value === 'string'
+          ? (LEGACY_ACCENT_NAMES[value] ?? value)
+          : value,
+      z.enum(ACCENTS),
+    ),
     size: z.enum(['small', 'medium', 'large']).default('medium'),
     media: z.enum(['image', 'icon']).optional(),
     icon: z.enum(NODE_ICONS).default('sparkles'),

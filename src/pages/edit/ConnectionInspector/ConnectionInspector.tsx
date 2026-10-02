@@ -26,20 +26,20 @@ export function ConnectionInspector({
         <legend>Curve direction</legend>
         <div className={styles.segmented}>
           <button
-            aria-label="Clockwise curve"
+            aria-label="Counterclockwise curve"
             aria-pressed={connection.clockwise}
             onClick={() => onConnection({ ...connection, clockwise: true })}
           >
-            <RotateCw size={16} />
-            Clockwise
+            <RotateCcw size={16} />
+            Counter
           </button>
           <button
-            aria-label="Counterclockwise curve"
+            aria-label="Clockwise curve"
             aria-pressed={!connection.clockwise}
             onClick={() => onConnection({ ...connection, clockwise: false })}
           >
-            <RotateCcw size={16} />
-            Counter
+            <RotateCw size={16} />
+            Clockwise
           </button>
         </div>
       </fieldset>

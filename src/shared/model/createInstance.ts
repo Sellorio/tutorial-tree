@@ -9,6 +9,7 @@ export function createInstance(diagram: Diagram, name: string): Instance {
     diagramId: diagram.id,
     name: name.trim() || `${diagram.name} journey`,
     statuses: reconcileStatuses(diagram),
+    showAllSkills: true,
     updatedAt: now(),
   }
 }

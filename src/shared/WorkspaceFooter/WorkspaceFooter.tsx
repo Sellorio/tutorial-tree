@@ -2,7 +2,11 @@ import type { WorkspaceFooterProps } from './WorkspaceFooterProps'
 import { ArrowDownToLine, GitBranch } from 'lucide-react'
 import styles from './WorkspaceFooter.module.css'
 
-export function WorkspaceFooter({ editing }: WorkspaceFooterProps) {
+export function WorkspaceFooter({
+  editing,
+  showAllSkills,
+  setShowAllSkills,
+}: WorkspaceFooterProps) {
   return (
     <footer className={styles.workspaceFooter}>
       <span>
@@ -26,6 +30,16 @@ export function WorkspaceFooter({ editing }: WorkspaceFooterProps) {
           </>
         )}
       </div>
+      {!editing && (
+        <label className={styles.showAllSkills}>
+          <input
+            type="checkbox"
+            checked={showAllSkills}
+            onChange={(event) => setShowAllSkills(event.target.checked)}
+          />
+          Show All Skills
+        </label>
+      )}
       <span>
         <ArrowDownToLine size={12} />
         Local workspace

@@ -7,7 +7,7 @@
   align-items: center;
   gap: 8px;
   background: var(--text);
-  color: var(--surface);
+  color: var(--lighten);
   border-radius: 5px;
   padding: 12px 18px;
   font-size: 12px;

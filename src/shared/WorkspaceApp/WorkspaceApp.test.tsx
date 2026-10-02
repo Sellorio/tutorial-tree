@@ -199,7 +199,7 @@ describe('workspace orchestration', () => {
     expect(
       diagram.nodes.find((node) => node.id === 'seeing')!.position,
     ).toEqual({ x: 300, y: 300 })
-    expect(diagram.connections.at(-1)!.clockwise).toBe(false)
+    expect(diagram.connections.at(-1)!.clockwise).toBe(true)
   })
   it('surfaces invalid connections and invalid fields without replacing saved data', () => {
     openEditor()
@@ -290,6 +290,21 @@ describe('workspace orchestration', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Unlocked' }))
     expect(saved().instances[0].statuses.color).toBe('locked')
     expect(screen.queryByLabelText('Node details')).not.toBeInTheDocument()
+  })
+  it('persists the Show All Skills preference on the active journey', () => {
+    const library = starterLibrary()
+    const instance = createInstance(library.diagrams[0], 'Existing journey')
+    library.instances.push(instance)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(library))
+    history.replaceState(null, '', `/#/run/${instance.id}`)
+    render(<App />)
+
+    const showAllSkills = screen.getByRole('checkbox', {
+      name: 'Show All Skills',
+    })
+    expect(showAllSkills).toBeChecked()
+    fireEvent.click(showAllSkills)
+    expect(saved().instances[0].showAllSkills).toBe(false)
   })
   it('imports portable data and handles bad/oversized files', async () => {
     render(<App />)

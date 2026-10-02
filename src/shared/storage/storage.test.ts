@@ -40,6 +40,22 @@ describe('browser persistence', () => {
     expect(loaded.statuses.start).toBe('completed')
     expect(loaded.statuses.stale).toBeUndefined()
   })
+  it('defaults older instances to showing all skills', () => {
+    const library = starterLibrary()
+    const instance = createInstance(library.diagrams[0], 'Session')
+    library.instances.push(instance)
+    const legacyLibrary = JSON.parse(JSON.stringify(library))
+    delete legacyLibrary.instances[0].showAllSkills
+    legacyLibrary.diagrams[0].nodes[1].accent = '#19877d'
+    legacyLibrary.diagrams[0].nodes[2].accent = '#3478c6'
+
+    const loaded = loadLibrary({ getItem: () => JSON.stringify(legacyLibrary) })
+    expect(loaded.error).toBe('')
+    expect(loaded.library.instances[0].showAllSkills).toBe(true)
+    expect(
+      loaded.library.diagrams[0].nodes.slice(1, 3).map((node) => node.accent),
+    ).toEqual(['teal', 'teal'])
+  })
   it('reports corrupt, unavailable, or orphaned data without silently replacing it', () => {
     const library = starterLibrary()
     library.instances.push({
@@ -47,6 +63,7 @@ describe('browser persistence', () => {
       diagramId: 'missing',
       name: 'Orphan',
       statuses: {},
+      showAllSkills: true,
       updatedAt: '',
     })
     for (const getItem of [

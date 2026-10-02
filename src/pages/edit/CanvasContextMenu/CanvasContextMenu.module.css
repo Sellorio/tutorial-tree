@@ -2,7 +2,7 @@
   position: absolute;
   z-index: 15;
   width: 154px;
-  background: var(--surface);
+  background: var(--lighten);
   border: 1px solid var(--border);
   border-radius: 5px;
   padding: 5px;

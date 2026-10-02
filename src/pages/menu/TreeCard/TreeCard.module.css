@@ -3,7 +3,7 @@
   border-radius: 7px;
   overflow: hidden;
   animation: reveal 250ms ease-out;
-  background: var(--surface);
+  background: var(--lighten);
 }
 .treePreview {
   position: relative;

@@ -83,7 +83,7 @@
   cursor: pointer;
 }
 .segmented button[aria-pressed='true'] {
-  background: var(--surface);
+  background: var(--lighten);
   color: var(--accent);
   box-shadow: 0 1px 4px #00000012;
 }
@@ -99,7 +99,7 @@
   padding: 10px 13px;
   cursor: pointer;
   border: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--lighten);
   color: var(--text);
 }
 .dangerButton {

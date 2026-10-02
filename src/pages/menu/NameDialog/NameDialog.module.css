@@ -60,7 +60,7 @@
   padding: 10px 13px;
   cursor: pointer;
   border: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--lighten);
   color: var(--text);
 }
 .primaryButton {
@@ -75,7 +75,7 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   color: var(--text);
-  background: var(--surface);
+  background: var(--lighten);
   padding: 20px;
   width: min(440px, calc(100vw - 32px));
   box-shadow: var(--shadow);

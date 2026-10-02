@@ -27,6 +27,7 @@ export function DiagramCanvas({
         diagram={diagram}
         editing={editing}
         statuses={statuses}
+        showAllSkills={instance?.showAllSkills ?? true}
         selection={selection}
         onSelect={setSelection}
         onAdd={addNode}

@@ -12,6 +12,7 @@ import { addDraftNode } from '../../pages/edit/actions/addDraftNode'
 import { connectDraftNodes } from '../../pages/edit/actions/connectDraftNodes'
 import { removeDraftSelection } from '../../pages/edit/actions/removeDraftSelection'
 import { changeJourneyStatus } from '../../pages/run/actions/changeJourneyStatus'
+import { setJourneyShowAllSkills } from '../../pages/run/actions/setJourneyShowAllSkills'
 import { downloadExport } from './actions/downloadExport'
 import { importWorkspaceFile } from './actions/importWorkspaceFile'
 import { submitWorkspaceName } from './actions/submitWorkspaceName'
@@ -36,6 +37,8 @@ export function useWorkspace() {
       removeDraftSelection(context, target),
     changeStatus: (status: Exclude<Status, 'locked'>) =>
       changeJourneyStatus(context, status),
+    setShowAllSkills: (showAllSkills: boolean) =>
+      setJourneyShowAllSkills(context, showAllSkills),
     download: (target: Diagram, targetInstance = state.instance) =>
       downloadExport(target, targetInstance),
     importFile: (file?: File) => importWorkspaceFile(context, file),

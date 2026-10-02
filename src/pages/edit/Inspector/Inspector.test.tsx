@@ -4,6 +4,7 @@ import { expect, it, vi } from 'vitest'
 import { Inspector } from './Inspector'
 
 import { starterLibrary } from '../../../shared/storage/starterLibrary'
+import type { TalentNode } from '../../../shared/model/types/TalentNode'
 it('offers three sizes and an exclusive icon/image mode with selectable icons', () => {
   const { onNode } = renderInspector('color')
   expect(screen.getByRole('button', { name: 'Medium' })).toHaveAttribute(
@@ -17,6 +18,7 @@ it('offers three sizes and an exclusive icon/image mode with selectable icons', 
     )
   }
   expect(screen.queryByLabelText('Image URL')).not.toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', { name: 'Icon' }))
   fireEvent.click(screen.getByRole('button', { name: 'camera icon' }))
   expect(onNode).toHaveBeenLastCalledWith(
     expect.objectContaining({ icon: 'camera', media: 'icon' }),
@@ -42,7 +44,7 @@ it('edits a diagram cover instead of showing an unselected color palette', () =>
   )
   expect(screen.queryByText('COLOR PALETTE')).not.toBeInTheDocument()
   expect(
-    screen.queryByRole('button', { name: 'Accent 1' }),
+    screen.queryByRole('button', { name: 'Accent Green' }),
   ).not.toBeInTheDocument()
   fireEvent.change(screen.getByLabelText('Diagram image URL'), {
     target: { value: 'https://example.com/cover.jpg' },
@@ -68,9 +70,9 @@ it('edits text, description, accent, requirement, image, and tutorial', () => {
       expect.objectContaining({ [key]: value }),
     )
   }
-  fireEvent.click(screen.getByRole('button', { name: 'Accent 2' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Accent Teal' }))
   expect(onNode).toHaveBeenLastCalledWith(
-    expect.objectContaining({ accent: '#3478c6' }),
+    expect.objectContaining({ accent: 'teal' }),
   )
   fireEvent.click(screen.getByRole('button', { name: 'Any input' }))
   expect(onNode).toHaveBeenLastCalledWith(
@@ -80,6 +82,48 @@ it('edits text, description, accent, requirement, image, and tutorial', () => {
   expect(onNode).toHaveBeenLastCalledWith(
     expect.objectContaining({ image: '' }),
   )
+})
+it('applies accent, size, and visual changes to every selected node', () => {
+  const diagram = starterLibrary().diagrams[0]
+  diagram.nodes.find((node) => node.id === 'seeing')!.media = 'icon'
+  const selected = diagram.nodes.filter((node) =>
+    ['seeing', 'color'].includes(node.id),
+  )
+  const onNodes = vi.fn<(nodes: TalentNode[]) => void>()
+  render(
+    <Inspector
+      diagram={diagram}
+      selection={{ kind: 'node', id: 'seeing', ids: ['seeing', 'color'] }}
+      onNode={vi.fn()}
+      onNodes={onNodes}
+      onConnection={vi.fn()}
+      onDelete={vi.fn()}
+      onError={vi.fn()}
+    />,
+  )
+
+  expect(screen.getByText('2 NODES SELECTED')).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', { name: 'Accent Red' }))
+  expect(onNodes.mock.lastCall![0].map((node) => node.accent)).toEqual([
+    'red',
+    'red',
+  ])
+  fireEvent.click(screen.getByRole('button', { name: 'Large' }))
+  expect(onNodes.mock.lastCall![0].map((node) => node.size)).toEqual([
+    'large',
+    'large',
+  ])
+  fireEvent.click(screen.getByRole('button', { name: 'camera icon' }))
+  expect(onNodes.mock.lastCall![0].map((node) => node.icon)).toEqual([
+    'camera',
+    'camera',
+  ])
+  fireEvent.click(screen.getByRole('button', { name: 'Image' }))
+  expect(onNodes.mock.lastCall![0].map((node) => node.media)).toEqual([
+    'image',
+    'image',
+  ])
+  expect(selected).toHaveLength(2)
 })
 it('adds, edits, and deletes tips', () => {
   const { onNode } = renderInspector()
@@ -158,12 +202,12 @@ it('edits curve direction and deletes connections', () => {
   )
   expect(onConnection).toHaveBeenLastCalledWith({
     ...connection,
-    clockwise: false,
+    clockwise: true,
   })
   fireEvent.click(screen.getByRole('button', { name: 'Clockwise curve' }))
   expect(onConnection).toHaveBeenLastCalledWith({
     ...connection,
-    clockwise: true,
+    clockwise: false,
   })
   fireEvent.click(screen.getByRole('button', { name: 'Delete connection' }))
   expect(onDelete).toHaveBeenCalledOnce()

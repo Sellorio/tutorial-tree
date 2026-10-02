@@ -1,7 +1,7 @@
 .inspector {
   width: 310px;
   flex: 0 0 310px;
-  background: var(--surface);
+  background: var(--lighten);
   border-left: 1px solid var(--border);
   z-index: 20;
   display: flex;

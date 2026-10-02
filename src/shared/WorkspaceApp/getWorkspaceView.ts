@@ -44,6 +44,7 @@ export function getWorkspaceView({
     ).length ?? 0
   return {
     instance,
+    showAllSkills: instance?.showAllSkills ?? true,
     savedDiagram,
     diagram,
     editing,

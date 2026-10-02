@@ -27,6 +27,6 @@
   padding: 9px 25px;
   font-size: 12px;
   color: var(--danger);
-  background: var(--surface);
+  background: var(--lighten);
   border-bottom: 1px solid var(--danger);
 }

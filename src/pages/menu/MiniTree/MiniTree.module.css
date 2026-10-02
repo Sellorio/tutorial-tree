@@ -8,7 +8,7 @@
   stroke-width: 1.3;
 }
 .miniTree circle {
-  fill: var(--surface);
+  fill: var(--lighten);
   stroke-width: 1.7;
 }
 .miniTree circle:last-child {

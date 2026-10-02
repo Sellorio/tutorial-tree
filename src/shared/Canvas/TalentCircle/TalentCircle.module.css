@@ -4,14 +4,15 @@
 }
 .node {
   --node-accent: var(--talent-accent);
+  --node-status-color: #4b4b4b;
   width: var(--node-size);
   height: var(--node-size);
-  border: 2px solid var(--node-accent);
+  border: 2px solid var(--node-status-color);
   border-radius: 50%;
   padding: 0;
   position: relative;
   background: var(--canvas);
-  color: var(--node-accent);
+  color: color-mix(in srgb, var(--darken) 40%, var(--node-accent));
   transition: box-shadow 0.05s linear;
 }
 .selected {
@@ -22,24 +23,46 @@
   background: color-mix(in srgb, var(--node-accent) 24%, var(--canvas));
   box-shadow: 0 0 0 5px color-mix(in srgb, var(--node-accent) 55%, transparent);
 }
-.statusBadge {
-  position: absolute;
-  right: -2px;
-  bottom: 1px;
-  display: flex;
-  padding: 3px;
-  border-radius: 50%;
-  background: var(--surface);
-  color: var(--node-accent);
+.node[data-status='completed'] {
+  --node-status-color: #14532d;
+}
+.node[data-status='unlocked'] {
+  --node-status-color: #999;
+}
+.node[data-status='in-progress'] {
+  --node-status-color: #13a;
+  animation: progressPulse 1.4s ease-in-out infinite;
+}
+.node[data-status='locked'] {
+  --node-status-color: #444;
+  color: color-mix(in srgb, transparent 70%, var(--darken));
+}
+.node[data-editing='true'] {
+  --node-status-color: #4b4b4b;
+  animation: none;
+}
+.node[data-status='locked']:not([data-editing='true']) {
+  cursor: not-allowed;
 }
 .locked {
   --node-accent: color-mix(in srgb, var(--talent-accent) 15%, var(--muted));
-  cursor: not-allowed;
-}
-.in-progress {
-  border-style: dashed;
 }
 .in-progress.selected {
   box-shadow: 0 0 18px 4px
     color-mix(in srgb, var(--node-accent) 38%, transparent);
+}
+@keyframes progressPulse {
+  0%,
+  100% {
+    border-color: var(--node-status-color);
+  }
+  50% {
+    border-color: color-mix(in srgb, var(--node-status-color) 60%, white);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .node[data-status='in-progress'] {
+    animation: none;
+    border-color: var(--node-status-color);
+  }
 }

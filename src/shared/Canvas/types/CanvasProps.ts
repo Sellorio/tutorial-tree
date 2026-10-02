@@ -8,6 +8,7 @@ export type CanvasProps = {
   diagram: Diagram
   editing: boolean
   statuses: Record<string, Status>
+  showAllSkills?: boolean
   selection: Selection
   onSelect: (selection: Selection) => void
   onMove: (positions: { id: string; position: Point }[]) => void
