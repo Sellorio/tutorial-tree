@@ -28,9 +28,50 @@
   background: var(--hover);
 }
 .tipEditor {
+  position: relative;
   border-top: 1px solid var(--border);
   padding-top: 10px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+.tipEditor[data-drop-position='before']::before,
+.tipEditor[data-drop-position='after']::after {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+  content: '';
+  pointer-events: none;
+}
+.tipEditor[data-drop-position='before']::before {
+  top: -5px;
+}
+.tipEditor[data-drop-position='after']::after {
+  bottom: -5px;
+}
+.dragging {
+  opacity: 0.45;
+}
+.label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.dragHandle {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: grab;
+}
+.dragHandle:active {
+  cursor: grabbing;
 }

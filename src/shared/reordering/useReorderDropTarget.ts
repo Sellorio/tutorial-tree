@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import type { DragEvent } from 'react'
 
-export function useCategoryDropTarget(
-  categoryId: string,
+export function useReorderDropTarget(
+  targetId: string,
   draggingId: string | null,
   onReorder: (
     sourceId: string,
@@ -14,7 +14,7 @@ export function useCategoryDropTarget(
     null,
   )
   const onDragOver = (event: DragEvent<HTMLDivElement>) => {
-    if (!draggingId || draggingId === categoryId) return
+    if (!draggingId || draggingId === targetId) return
     event.preventDefault()
     event.dataTransfer.dropEffect = 'move'
     const bounds = event.currentTarget.getBoundingClientRect()
@@ -33,11 +33,11 @@ export function useCategoryDropTarget(
   const onDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault()
     const sourceId = event.dataTransfer.getData('text/plain')
-    if (sourceId && sourceId !== categoryId) {
+    if (sourceId && sourceId !== targetId) {
       const bounds = event.currentTarget.getBoundingClientRect()
       const position =
         event.clientY < bounds.top + bounds.height / 2 ? 'before' : 'after'
-      onReorder(sourceId, categoryId, position)
+      onReorder(sourceId, targetId, position)
     }
     setDropPosition(null)
   }

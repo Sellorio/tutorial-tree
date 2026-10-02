@@ -145,6 +145,53 @@ it('adds, edits, and deletes tips', () => {
   fireEvent.click(screen.getByRole('button', { name: 'Delete tip 1' }))
   expect(onNode.mock.lastCall![0].tips).toHaveLength(0)
 })
+it('reorders tips by dropping before another tip', () => {
+  const diagram = starterLibrary().diagrams[0]
+  const node = diagram.nodes.find((entry) => entry.id === 'seeing')!
+  const first = { id: 'tip-first', short: 'First', long: '' }
+  const second = { id: 'tip-second', short: 'Second', long: '' }
+  node.tips = [first, second]
+  const onNode = vi.fn()
+  render(
+    <Inspector
+      diagram={diagram}
+      selection={{ kind: 'node', id: node.id }}
+      onNode={onNode}
+      onConnection={vi.fn()}
+      onDelete={vi.fn()}
+      onError={vi.fn()}
+    />,
+  )
+  const dataTransfer = {
+    effectAllowed: 'none',
+    dropEffect: 'none',
+    getData: vi.fn(() => second.id),
+    setData: vi.fn(),
+    setDragImage: vi.fn(),
+  } as unknown as DataTransfer
+  fireEvent.dragStart(screen.getByRole('button', { name: 'Reorder tip 2' }), {
+    dataTransfer,
+    clientX: 1,
+    clientY: 1,
+  })
+  const targetRow = screen
+    .getByRole('button', { name: 'Reorder tip 1' })
+    .closest<HTMLElement>('[data-tip-row]')!
+  vi.spyOn(targetRow, 'getBoundingClientRect').mockReturnValue(
+    new DOMRect(0, 10, 100, 20),
+  )
+  const drop = new MouseEvent('drop', {
+    bubbles: true,
+    cancelable: true,
+    clientY: 11,
+  })
+  Object.defineProperty(drop, 'dataTransfer', { value: dataTransfer })
+  fireEvent(targetRow, drop)
+
+  expect(onNode).toHaveBeenLastCalledWith(
+    expect.objectContaining({ tips: [second, first] }),
+  )
+})
 it('prevents Start deletion, text changes and requirement changes', () => {
   renderInspector('start')
   expect(screen.getByLabelText('Node text')).toHaveAttribute('readonly')

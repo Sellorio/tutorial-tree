@@ -1,9 +1,11 @@
 import { TipEditor } from '../TipEditor/TipEditor'
 import type { NodeTipsEditorProps } from './NodeTipsEditorProps'
-import { Plus } from 'lucide-react'
+import { reorderItems } from '../../../shared/reordering/reorderItems'
+import { useState } from 'react'
 import styles from './NodeTipsEditor.module.css'
 
 export function NodeTipsEditor({ node, patch }: NodeTipsEditorProps) {
+  const [draggingId, setDraggingId] = useState<string | null>(null)
   return (
     <>
       <div className={styles.row}>
@@ -16,6 +18,15 @@ export function NodeTipsEditor({ node, patch }: NodeTipsEditorProps) {
           index={index}
           patch={patch}
           node={node}
+          dragging={draggingId === tip.id}
+          draggingId={draggingId}
+          onDragStart={setDraggingId}
+          onDragEnd={() => setDraggingId(null)}
+          onReorder={(sourceId, targetId, position) =>
+            patch({
+              tips: reorderItems(node.tips, sourceId, targetId, position),
+            })
+          }
         />
       ))}
       <button

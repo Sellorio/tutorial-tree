@@ -1,4 +1,4 @@
-import { GripVertical } from 'lucide-react'
+import { ReorderHandle } from '../../../../../shared/ReorderHandle/ReorderHandle'
 import type { CategoryDragHandleProps } from './CategoryDragHandleProps'
 
 export function CategoryDragHandle({
@@ -9,31 +9,12 @@ export function CategoryDragHandle({
   onEnd,
 }: CategoryDragHandleProps) {
   return (
-    <button
+    <ReorderHandle
       className={className}
-      type="button"
-      draggable
-      aria-label={`Reorder ${categoryName}`}
-      title={`Drag to reorder ${categoryName}`}
-      onDragStart={(event) => {
-        event.dataTransfer.effectAllowed = 'move'
-        event.dataTransfer.setData('text/plain', categoryId)
-        const row = event.currentTarget.closest(
-          '[data-category-row]',
-        ) as HTMLElement | null
-        if (row) {
-          const bounds = row.getBoundingClientRect()
-          event.dataTransfer.setDragImage(
-            row,
-            event.clientX - bounds.left,
-            event.clientY - bounds.top,
-          )
-        }
-        onStart(categoryId)
-      }}
-      onDragEnd={onEnd}
-    >
-      <GripVertical size={15} />
-    </button>
+      itemId={categoryId}
+      itemLabel={categoryName}
+      onStart={onStart}
+      onEnd={onEnd}
+    />
   )
 }

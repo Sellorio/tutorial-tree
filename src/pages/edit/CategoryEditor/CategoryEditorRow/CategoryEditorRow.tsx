@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { CategoryDeletePrompt } from '../CategoryDeletePrompt/CategoryDeletePrompt'
 import { CategoryDragHandle } from './CategoryDragHandle/CategoryDragHandle'
-import { useCategoryDropTarget } from './useCategoryDropTarget'
+import { useReorderDropTarget } from '../../../../shared/reordering/useReorderDropTarget'
 import type { CategoryEditorRowProps } from './CategoryEditorRowProps'
 import styles from './CategoryEditorRow.module.css'
 
@@ -24,12 +24,13 @@ export function CategoryEditorRow({
   const [name, setName] = useState(category.name)
   const [color, setColor] = useState(category.color)
   const { dropPosition, onDragOver, onDragLeave, onDrop } =
-    useCategoryDropTarget(category.id, draggingId, onReorder)
+    useReorderDropTarget(category.id, draggingId, onReorder)
   return (
     <div
       className={`${styles.row} ${dragging ? styles.dragging : ''}`}
       data-category-id={category.id}
       data-category-row=""
+      data-reorder-row=""
       data-dragging={dragging}
       data-drop-position={dropPosition ?? ''}
       onDragOver={onDragOver}

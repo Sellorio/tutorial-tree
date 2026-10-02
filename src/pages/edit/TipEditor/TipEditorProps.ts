@@ -5,4 +5,13 @@ export type TipEditorProps = {
   index: number
   patch: (value: Partial<TalentNode>) => void
   node: TalentNode
+  dragging: boolean
+  draggingId: string | null
+  onDragStart: (tipId: string) => void
+  onDragEnd: () => void
+  onReorder: (
+    sourceId: string,
+    targetId: string,
+    position: 'before' | 'after',
+  ) => void
 }
