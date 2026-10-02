@@ -15,7 +15,7 @@
     "format": "prettier --write src e2e *.ts *.json *.html README.md",
     "format:check": "prettier --check src e2e *.ts *.json *.html README.md",
     "preview": "vite preview",
-    "verify": "npm run format:check && npm run lint && npm run test:coverage && npm run build && npm run test:e2e"
+    "verify": "npm run format:check && npm run lint && npm run test:coverage && npm run build && playwright install chromium && npm run test:e2e"
   },
   "dependencies": {
     "@tanstack/react-router": "^1.170.40",

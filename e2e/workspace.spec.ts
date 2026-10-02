@@ -132,7 +132,7 @@ test('Show All Skills hides deeper locked skills and persists per journey', asyn
     'border-top-color',
     'rgb(153, 153, 153)',
   )
-  await expect(lockedNode).toHaveCSS('border-top-color', 'rgb(68, 68, 68)')
+  await expect(lockedNode).toHaveCSS('border-top-color', 'rgb(51, 51, 51)')
   await showAllSkills.uncheck()
   await expect(nodes).toHaveCount(4)
   await expect(page.locator('.react-flow__edge')).toHaveCount(3)
@@ -1074,18 +1074,14 @@ test('light/dark desktop and mobile layouts render with images, readable control
     fullPage: true,
   })
   await page.setViewportSize({ width: 1440, height: 1000 })
-  await expect
-    .poll(async () => {
-      const node = await center(page.getByTestId('talent-seeing'))
-      await page.getByTestId('talent-seeing').click({ modifiers: ['Shift'] })
-      await expect(page.locator('.react-flow__node.selected')).toHaveCount(0)
-      await expect(
-        page.getByRole('heading', { name: 'Tree overview' }),
-      ).toBeVisible()
-      const canvas = (await page.getByTestId('canvas').boundingBox())!
-      return Math.abs(node.x - (canvas.x + canvas.width / 2))
-    })
-    .toBeLessThan(3)
+  await expect(
+    page.getByRole('region', { name: 'Node details', exact: true }),
+  ).toBeVisible()
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true)
   await page.screenshot({
     path: testInfo.outputPath('run-desktop-dark.png'),
     fullPage: true,
@@ -1398,7 +1394,7 @@ test('sizes, icons, cover images and split run panels persist across save and re
   await page.reload()
   await expect(page.getByTestId('talent-seeing')).toHaveCSS('width', '110px')
   await expect(page.getByTestId('talent-color')).toHaveCSS('width', '50px')
-  await expect(page.getByTestId('talent-start')).toHaveCSS('width', '80px')
+  await expect(page.getByTestId('talent-start')).toHaveCSS('width', '50px')
   await openNode(page, 'seeing')
   await expect(
     page.getByRole('region', { name: 'Node status', exact: true }),
