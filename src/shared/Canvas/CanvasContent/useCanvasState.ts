@@ -11,11 +11,10 @@ import { activateNode } from './activateNode'
 import type { CanvasContextEvent } from '../types/CanvasContextEvent'
 import { openCanvasContext } from './openCanvasContext'
 import { useEffect, useRef, useState } from 'react'
-import { useReactFlow, useViewport } from '@xyflow/react'
+import { useReactFlow } from '@xyflow/react'
 
 export function useCanvasState(props: CanvasProps) {
   const flow = useReactFlow<FlowNode, FlowEdge>()
-  const viewport = useViewport()
   const canvasRef = useRef<HTMLDivElement>(null)
   const selecting = useRef(false)
   const selectionRef = useRef(props.selection)
@@ -39,7 +38,6 @@ export function useCanvasState(props: CanvasProps) {
     ...props,
     onSelect,
     flow,
-    viewport,
     canvasRef,
     selecting,
     selectionRef,

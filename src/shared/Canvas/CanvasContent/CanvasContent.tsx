@@ -20,7 +20,6 @@ export function CanvasContent(props: CanvasProps) {
     setContext,
     editing,
     flow,
-    viewport,
     onAdd,
     context,
     diagram,
@@ -73,12 +72,7 @@ export function CanvasContent(props: CanvasProps) {
         <span className={styles.liveDot} />
         {editing ? 'DESIGN CANVAS' : 'YOUR JOURNEY'}
       </div>
-      <CanvasToolbar
-        flow={flow}
-        viewport={viewport}
-        editing={editing}
-        onAdd={onAdd}
-      />
+      <CanvasToolbar flow={flow} editing={editing} onAdd={onAdd} />
       {context && (
         <CanvasContextMenu
           context={context}

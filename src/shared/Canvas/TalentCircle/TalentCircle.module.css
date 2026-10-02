@@ -34,7 +34,7 @@
   animation: progressPulse 1.4s ease-in-out infinite;
 }
 .node[data-status='locked'] {
-  --node-status-color: #444;
+  --node-status-color: #333;
   color: color-mix(in srgb, transparent 70%, var(--darken));
 }
 .node[data-editing='true'] {
@@ -45,7 +45,7 @@
   cursor: not-allowed;
 }
 .locked {
-  --node-accent: color-mix(in srgb, var(--talent-accent) 15%, var(--muted));
+  --node-accent: color-mix(in srgb, var(--lighten) 70%, var(--muted));
 }
 .in-progress.selected {
   box-shadow: 0 0 18px 4px

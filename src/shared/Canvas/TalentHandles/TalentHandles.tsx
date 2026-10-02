@@ -1,10 +1,10 @@
 import type { TalentHandlesProps } from './TalentHandlesProps'
 import { NodeSizeConstants } from '../../model/constants/NodeSizeConstants'
-import { Handle, Position, useViewport } from '@xyflow/react'
+import { Handle, Position, useStore } from '@xyflow/react'
 import styles from './TalentHandles.module.css'
 
 export function TalentHandles({ editing, talent }: TalentHandlesProps) {
-  const { zoom } = useViewport()
+  const zoom = useStore((state) => state.transform[2])
   const thickness = 12 / zoom
   const size = NodeSizeConstants[talent.size].nodeSize + thickness * 2
   return (

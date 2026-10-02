@@ -37,6 +37,7 @@ vi.mock('@xyflow/react', () => ({
   },
   useReactFlow: () => harness.flow,
   useViewport: () => ({ zoom: 1, x: 0, y: 0 }),
+  useStore: () => 1,
   Background: () => null,
   Handle: ({ position, type }: { position: string; type: string }) => (
     <span data-testid={`${type}-handle-${position}`} />

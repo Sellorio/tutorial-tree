@@ -1,13 +1,10 @@
 import type { CanvasToolbarProps } from './CanvasToolbarProps'
 import { Circle, Focus, Minus, Plus } from 'lucide-react'
+import { useViewport } from '@xyflow/react'
 import styles from './CanvasToolbar.module.css'
 
-export function CanvasToolbar({
-  flow,
-  viewport,
-  editing,
-  onAdd,
-}: CanvasToolbarProps) {
+export function CanvasToolbar({ flow, editing, onAdd }: CanvasToolbarProps) {
+  const { zoom } = useViewport()
   return (
     <div className={styles.tools}>
       <button
@@ -23,7 +20,7 @@ export function CanvasToolbar({
         title="Reset zoom to 100%"
         onClick={() => void flow.zoomTo(1, { duration: 160 })}
       >
-        {Math.round(viewport.zoom * 100)}%
+        {Math.round(zoom * 100)}%
       </button>
       <button
         aria-label="Zoom in"
