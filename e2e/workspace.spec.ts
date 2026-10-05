@@ -161,6 +161,51 @@ test('Show All Skills hides deeper locked skills and persists per journey', asyn
   await expect(lockedNode).toHaveAttribute('data-status', 'unlocked')
 })
 
+test('Ctrl+F searches visible nodes and centers and selects a result', async ({
+  page,
+}) => {
+  await startJourney(page)
+  const zoomIndicator = page.getByRole('button', {
+    name: 'Reset zoom to 100%',
+  })
+  const currentZoom = Number((await zoomIndicator.innerText()).replace('%', ''))
+  const zoomBeforeSelection = `${Math.round(currentZoom / 1.2)}%`
+  await page.getByRole('button', { name: 'Zoom out' }).click()
+  await expect(zoomIndicator).toHaveText(zoomBeforeSelection)
+  await page.getByRole('checkbox', { name: 'Show All Skills' }).uncheck()
+  await page.keyboard.press('Control+f')
+
+  const search = page.getByRole('searchbox', { name: 'Search visible nodes' })
+  await expect(search).toBeFocused()
+  await search.fill('Composition')
+  await expect(page.getByRole('button', { name: /Composition/ })).toHaveCount(0)
+  await search.fill('See differently')
+
+  const result = page.getByRole('button', { name: /See differently/ })
+  await expect(result).toBeVisible()
+  await result.click()
+  await expect(
+    page.getByRole('dialog', { name: 'Search visible nodes' }),
+  ).not.toBeVisible()
+
+  const canvas = page.getByTestId('canvas')
+  const node = page.getByTestId('talent-seeing')
+  await expect(node).toHaveClass(/selected/)
+  await expect
+    .poll(async () => {
+      const canvasBounds = await canvas.boundingBox()
+      const nodeBounds = await node.boundingBox()
+      if (!canvasBounds || !nodeBounds) return Infinity
+      return Math.abs(
+        nodeBounds.x +
+          nodeBounds.width / 2 -
+          (canvasBounds.x + canvasBounds.width / 2),
+      )
+    })
+    .toBeLessThan(3)
+  await expect(zoomIndicator).toHaveText(zoomBeforeSelection)
+})
+
 test('edit history supports title-bar buttons and all undo redo shortcuts', async ({
   page,
 }) => {

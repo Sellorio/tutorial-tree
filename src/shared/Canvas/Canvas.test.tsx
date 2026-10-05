@@ -4,6 +4,7 @@ import type { EdgeProps, NodeProps, ReactFlowProps } from '@xyflow/react'
 import { Position } from '@xyflow/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Canvas } from './Canvas'
+import { nodeCenter } from './geometry/nodeCenter'
 import type { Selection } from './types/Selection'
 import { reconcileStatuses } from '../model/reconcileStatuses'
 import { starterLibrary } from '../storage/starterLibrary'
@@ -13,6 +14,7 @@ const harness = vi.hoisted(() => ({
   observer: null as (() => void) | null,
   flow: {
     setCenter: vi.fn(),
+    getZoom: vi.fn(() => 0.83),
     zoomIn: vi.fn(),
     zoomOut: vi.fn(),
     zoomTo: vi.fn(),
@@ -332,6 +334,63 @@ describe('canvas adapter', () => {
     expect(onSelect).toHaveBeenLastCalledWith(null)
     fireEvent.keyDown(screen.getByTestId('canvas'), { key: 'Escape' })
     expect(onSelect).toHaveBeenLastCalledWith(null)
+  })
+  it('searches visible nodes and centers and selects a result', () => {
+    const { diagram, rerender, onSelect, ...props } = canvas(false)
+    const [start, visible, hidden] = diagram.nodes
+    const visibleNode = { ...visible, title: 'Visible needle', description: '' }
+    diagram.nodes = [start, visibleNode, { ...hidden, title: 'Hidden needle' }]
+    diagram.connections = [
+      {
+        id: 'visible-connection',
+        source: start.id,
+        target: visibleNode.id,
+        clockwise: true,
+      },
+      {
+        id: 'hidden-connection',
+        source: visibleNode.id,
+        target: hidden.id,
+        clockwise: true,
+      },
+    ]
+    const statuses = Object.fromEntries(
+      diagram.nodes.map((node) => [node.id, 'locked']),
+    )
+    statuses[start.id] = 'completed'
+    rerender(
+      <Canvas
+        {...props}
+        onSelect={onSelect}
+        diagram={diagram}
+        statuses={statuses as typeof props.statuses}
+        showAllSkills={false}
+      />,
+    )
+
+    fireEvent.keyDown(window, { key: 'f', ctrlKey: true })
+    const search = screen.getByRole('searchbox', {
+      name: 'Search visible nodes',
+    })
+    fireEvent.change(search, { target: { value: 'needle' } })
+    expect(
+      screen.getByRole('button', { name: 'Visible needle' }),
+    ).toBeInTheDocument()
+    expect(screen.queryByText('Hidden needle')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Visible needle' }))
+
+    expect(onSelect).toHaveBeenLastCalledWith({
+      kind: 'node',
+      id: visibleNode.id,
+    })
+    const center = nodeCenter(visibleNode)
+    expect(harness.flow.setCenter).toHaveBeenCalledWith(center.x, center.y, {
+      zoom: 0.83,
+      duration: 250,
+    })
+    expect(
+      screen.queryByRole('dialog', { name: 'Search visible nodes' }),
+    ).not.toBeInTheDocument()
   })
   it.each([true, false])('resets zoom to 100%% with editing=%s', (editing) => {
     canvas(editing)

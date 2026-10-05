@@ -2,6 +2,7 @@ import type { FlowNode } from '../types/FlowNode'
 import type { FlowEdge } from '../types/FlowEdge'
 import type { CanvasProps } from '../types/CanvasProps'
 import { CanvasToolbar } from '../CanvasToolbar/CanvasToolbar'
+import { CanvasSearch } from '../CanvasSearch/CanvasSearch'
 import { CanvasContextMenu } from '../../../pages/edit/CanvasContextMenu/CanvasContextMenu'
 import { useCanvasState } from './useCanvasState'
 import { createFlowProps } from './createFlowProps'
@@ -18,6 +19,7 @@ export function CanvasContent(props: CanvasProps) {
   const {
     canvasRef,
     onSelect,
+    selectSearchResult,
     setContext,
     editing,
     flow,
@@ -78,6 +80,7 @@ export function CanvasContent(props: CanvasProps) {
         />
       </ReactFlow>
       <CanvasToolbar flow={flow} editing={editing} onAdd={onAdd} />
+      <CanvasSearch nodes={nodes} onSelectNode={selectSearchResult} />
       {context && (
         <CanvasContextMenu
           context={context}
