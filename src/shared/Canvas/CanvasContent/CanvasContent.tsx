@@ -5,7 +5,8 @@ import { CanvasToolbar } from '../CanvasToolbar/CanvasToolbar'
 import { CanvasSearch } from '../CanvasSearch/CanvasSearch'
 import { CanvasContextMenu } from '../../../pages/edit/CanvasContextMenu/CanvasContextMenu'
 import { useCanvasState } from './useCanvasState'
-import { createFlowProps } from './createFlowProps'
+import { createCanvasFlowProps } from './createCanvasFlowProps'
+import { useCanvasNodeState } from './useCanvasNodeState'
 import { useConnectionDrag } from './useConnectionDrag'
 import { useShiftSelection } from './useShiftSelection'
 import { Background, BackgroundVariant, ReactFlow } from '@xyflow/react'
@@ -29,17 +30,14 @@ export function CanvasContent(props: CanvasProps) {
     onDelete,
     children,
   } = state
-  const nodes = useMemo(
-    () =>
-      state.nodes.map((node) => ({
-        ...node,
-        data: {
-          ...node.data,
-          connectionTarget: node.id === connection.target,
-        },
-      })),
-    [state.nodes, connection.target],
+  const nodeState = useCanvasNodeState(
+    state.nodes,
+    state.diagram,
+    state.onMove,
+    state.onMoveEnd,
+    connection.target,
   )
+  const flowProps = createCanvasFlowProps(state, nodeState)
   const edges = useMemo(
     () =>
       connection.preview
@@ -68,9 +66,9 @@ export function CanvasContent(props: CanvasProps) {
       }}
     >
       <ReactFlow<FlowNode, FlowEdge>
-        {...createFlowProps(state)}
+        {...flowProps}
         edges={edges}
-        nodes={nodes}
+        nodes={nodeState.nodes}
       >
         <Background
           variant={BackgroundVariant.Dots}
@@ -80,7 +78,7 @@ export function CanvasContent(props: CanvasProps) {
         />
       </ReactFlow>
       <CanvasToolbar flow={flow} editing={editing} onAdd={onAdd} />
-      <CanvasSearch nodes={nodes} onSelectNode={selectSearchResult} />
+      <CanvasSearch nodes={nodeState.nodes} onSelectNode={selectSearchResult} />
       {context && (
         <CanvasContextMenu
           context={context}

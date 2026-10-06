@@ -4,6 +4,7 @@ import { reconcileStatuses } from './reconcileStatuses'
 import { saveDiagram } from './saveDiagram'
 import { transferSchema } from './schemas/transferSchema'
 import { ensureStatusTimestamps } from './ensureStatusTimestamps'
+import { persistedStatuses } from './persistedStatuses'
 
 export function importData(
   library: Library,
@@ -36,10 +37,13 @@ export function importData(
       ...existing?.statusTimestamps,
       ...data.instance.statusTimestamps,
     },
-    statuses: reconcileStatuses(diagram, {
-      ...existing?.statuses,
-      ...data.instance.statuses,
-    }),
+    statuses: persistedStatuses(
+      diagram,
+      reconcileStatuses(diagram, {
+        ...existing?.statuses,
+        ...data.instance.statuses,
+      }),
+    ),
     updatedAt: now(),
   })
   return {

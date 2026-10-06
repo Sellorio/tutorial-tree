@@ -16,7 +16,8 @@ export function reconcileStatuses(
     if (statuses[id]) return statuses[id]
     const node = nodes.get(id)
     if (!node) return 'locked'
-    if (node.kind === 'start' || previous[id] === 'completed') {
+    const isDot = node.kind === 'dot'
+    if (node.kind === 'start' || (!isDot && previous[id] === 'completed')) {
       statuses[id] = 'completed'
       return 'completed'
     }
@@ -30,9 +31,11 @@ export function reconcileStatuses(
         ? parents.every(active)
         : parents.some(active))
     statuses[id] = unlocked
-      ? previous[id] === 'in-progress'
-        ? 'in-progress'
-        : 'unlocked'
+      ? isDot
+        ? 'completed'
+        : previous[id] === 'in-progress'
+          ? 'in-progress'
+          : 'unlocked'
       : 'locked'
     return statuses[id]
   }

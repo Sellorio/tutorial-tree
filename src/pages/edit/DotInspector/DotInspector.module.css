@@ -1,0 +1,43 @@
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.eyebrow {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.idLabel {
+  color: var(--muted);
+  font-size: 9px;
+  overflow-wrap: anywhere;
+}
+
+.idLabel code {
+  display: block;
+  margin-top: 5px;
+  font-size: 9px;
+}
+
+.dangerButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  padding: 10px 13px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--danger);
+}
+
+.dangerButton:hover {
+  background: var(--hover);
+}

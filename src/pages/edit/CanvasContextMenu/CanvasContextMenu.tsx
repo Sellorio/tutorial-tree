@@ -1,5 +1,5 @@
 import type { CanvasContextMenuProps } from './CanvasContextMenuProps'
-import { Plus, Trash2 } from 'lucide-react'
+import { CircleDot, Plus, Trash2 } from 'lucide-react'
 import styles from './CanvasContextMenu.module.css'
 
 export function CanvasContextMenu({
@@ -31,6 +31,18 @@ export function CanvasContextMenu({
         {context.selection ? <Trash2 size={16} /> : <Plus size={16} />}
         {context.selection ? `Delete ${context.selection.kind}` : 'Add Node'}
       </button>
+      {!context.selection && (
+        <button
+          role="menuitem"
+          onClick={() => {
+            onAdd(context.flow, undefined, 'dot')
+            setContext(null)
+          }}
+        >
+          <CircleDot size={16} />
+          Add Dot Node
+        </button>
+      )}
     </div>
   )
 }

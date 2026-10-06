@@ -1,34 +1,33 @@
 import type { TalentHandlesProps } from './TalentHandlesProps'
-import { NodeSizeConstants } from '../../model/constants/NodeSizeConstants'
 import { Handle, Position, useStore } from '@xyflow/react'
 import styles from './TalentHandles.module.css'
 
-export function TalentHandles({ editing, talent }: TalentHandlesProps) {
+export function TalentHandles({ editing, size }: TalentHandlesProps) {
   const zoom = useStore((state) => state.transform[2])
   const thickness = 12 / zoom
-  const size = NodeSizeConstants[talent.size].nodeSize + thickness * 2
+  const handleSize = size + thickness * 2
   return (
     <>
       {editing && (
         <svg
           className={styles.connectionRing}
-          width={size}
-          height={size}
+          width={handleSize}
+          height={handleSize}
           aria-hidden="true"
         >
           <circle
             data-connection-handle
             className={`${styles.hitArea} nodrag nopan`}
-            cx={size / 2}
-            cy={size / 2}
-            r={(size - thickness) / 2}
+            cx={handleSize / 2}
+            cy={handleSize / 2}
+            r={(handleSize - thickness) / 2}
             strokeWidth={thickness}
           />
           <circle
             className={styles.hoverBorder}
-            cx={size / 2}
-            cy={size / 2}
-            r={(size - thickness) / 2}
+            cx={handleSize / 2}
+            cy={handleSize / 2}
+            r={(handleSize - thickness) / 2}
           />
         </svg>
       )}

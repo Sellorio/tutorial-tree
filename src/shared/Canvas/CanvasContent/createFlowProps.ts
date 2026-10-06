@@ -95,7 +95,8 @@ export function createFlowProps({
         onSelect({ kind: 'connection', id: selected.id })
     },
     onNodeClick: (event, node) => {
-      if (!editing || !event.shiftKey) activate(node.data.talent)
+      if (!editing || !event.shiftKey)
+        activate(node.type === 'dot' ? node.data.dot : node.data.talent)
     },
     onNodeContextMenu: (event, node) =>
       openContext(event, { kind: 'node', id: node.id }),

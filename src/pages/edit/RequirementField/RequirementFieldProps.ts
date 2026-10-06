@@ -1,6 +1,7 @@
-import type { TalentNode } from '../../../shared/model/types/TalentNode'
+import type { DiagramNode } from '../../../shared/model/types/DiagramNode'
+import type { NodePatch } from '../../../shared/model/types/NodePatch'
 
 export type RequirementFieldProps = {
-  node: TalentNode
-  patch: (value: Partial<TalentNode>) => void
+  node: DiagramNode
+  patch: (value: NodePatch) => void
 }

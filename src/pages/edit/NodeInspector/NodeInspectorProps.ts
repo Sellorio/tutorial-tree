@@ -1,10 +1,11 @@
-import type { TalentNode } from '../../../shared/model/types/TalentNode'
+import type { DiagramNode } from '../../../shared/model/types/DiagramNode'
+import type { NodePatch } from '../../../shared/model/types/NodePatch'
 import type { Category } from '../../../shared/model/types/Category'
 
 export type NodeInspectorProps = {
-  node: TalentNode
+  node: DiagramNode
   categories: Category[]
-  patch: (value: Partial<TalentNode>) => void
+  patch: (value: NodePatch) => void
   onError: (message: string) => void
   onDelete: () => void
 }

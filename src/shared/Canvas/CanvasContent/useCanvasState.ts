@@ -1,7 +1,8 @@
-import type { TalentNode } from '../../model/types/TalentNode'
+import type { DiagramNode } from '../../model/types/DiagramNode'
 import type { Selection } from '../types/Selection'
 import type { FlowNode } from '../types/FlowNode'
 import type { FlowEdge } from '../types/FlowEdge'
+import type { TalentFlowNode } from '../types/TalentFlowNode'
 import type { CanvasProps } from '../types/CanvasProps'
 import type { CanvasMenuState } from '../types/CanvasMenuState'
 import { createFlowNodes } from './createFlowNodes'
@@ -26,7 +27,7 @@ export function useCanvasState(props: CanvasProps) {
     selectionRef.current = selection
     props.onSelect(selection)
   }
-  const selectSearchResult = (node: FlowNode) => {
+  const selectSearchResult = (node: TalentFlowNode) => {
     const center = nodeCenter(node.data.talent)
     void flow.setCenter(center.x, center.y, {
       zoom: flow.getZoom(),
@@ -38,7 +39,7 @@ export function useCanvasState(props: CanvasProps) {
   useCanvasSelection({ ...props, flow, canvasRef })
 
   const activate = useCallback(
-    (node: TalentNode) => activateNode(props, setContext, node),
+    (node: DiagramNode) => activateNode(props, setContext, node),
     [props],
   )
   const openContext = (

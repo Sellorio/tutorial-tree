@@ -3,6 +3,7 @@ import { diagramSchema } from './schemas/diagramSchema'
 import type { Library } from './types/Library'
 import { now } from './now'
 import { reconcileStatuses } from './reconcileStatuses'
+import { persistedStatuses } from './persistedStatuses'
 
 export function saveDiagram(library: Library, diagram: Diagram): Library {
   const saved = diagramSchema.parse({ ...diagram, updatedAt: now() })
@@ -16,7 +17,10 @@ export function saveDiagram(library: Library, diagram: Diagram): Library {
       instance.diagramId === saved.id
         ? {
             ...instance,
-            statuses: reconcileStatuses(saved, instance.statuses),
+            statuses: persistedStatuses(
+              saved,
+              reconcileStatuses(saved, instance.statuses),
+            ),
             updatedAt: now(),
           }
         : instance,

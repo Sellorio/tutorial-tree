@@ -1,13 +1,13 @@
 import { NodeSizeConstants } from '../../model/constants/NodeSizeConstants'
 import { talentIcons } from '../../model/constants/talentIcons'
-import type { FlowNode } from '../types/FlowNode'
+import type { TalentFlowNode } from '../types/TalentFlowNode'
 import { TalentFace } from '../TalentFace/TalentFace'
 import { TalentHandles } from '../TalentHandles/TalentHandles'
 import type { CSSProperties } from 'react'
 import type { NodeProps } from '@xyflow/react'
 import styles from './TalentCircle.module.css'
 
-export function TalentCircle({ data, selected }: NodeProps<FlowNode>) {
+export function TalentCircle({ data, selected }: NodeProps<TalentFlowNode>) {
   const { talent, status, editing } = data
   const Icon = talentIcons[talent.icon]
   const image = talent.media === 'image' ? talent.image : ''
@@ -35,7 +35,10 @@ export function TalentCircle({ data, selected }: NodeProps<FlowNode>) {
       }}
     >
       <TalentFace image={image} talent={talent} Icon={Icon} />
-      <TalentHandles editing={editing} talent={talent} />
+      <TalentHandles
+        editing={editing}
+        size={NodeSizeConstants[talent.size].nodeSize}
+      />
     </div>
   )
 }

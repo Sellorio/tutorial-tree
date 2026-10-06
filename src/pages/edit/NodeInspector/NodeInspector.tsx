@@ -1,5 +1,6 @@
 import { youtubeEmbed } from '../../../shared/model/youtubeEmbed'
 import type { NodeInspectorProps } from './NodeInspectorProps'
+import { DotInspector } from '../DotInspector/DotInspector'
 import { NodeSizeField } from '../NodeSizeField/NodeSizeField'
 import { AccentField } from '../AccentField/AccentField'
 import { NodeVisualField } from '../NodeVisualField/NodeVisualField'
@@ -16,6 +17,9 @@ export function NodeInspector({
   onError,
   onDelete,
 }: NodeInspectorProps) {
+  if (node.kind === 'dot')
+    return <DotInspector node={node} patch={patch} onDelete={onDelete} />
+
   return (
     <div className={styles.fields}>
       <div className={styles.eyebrow}>

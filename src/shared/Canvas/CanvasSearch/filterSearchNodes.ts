@@ -1,13 +1,17 @@
 import type { FlowNode } from '../types/FlowNode'
+import type { TalentFlowNode } from '../types/TalentFlowNode'
 
 export function filterSearchNodes(
   nodes: FlowNode[],
   query: string,
-): FlowNode[] {
+): TalentFlowNode[] {
   const normalizedQuery = query.trim().toLowerCase()
   if (!normalizedQuery) return []
 
-  return nodes.filter(({ data }) => {
+  const talentNodes = nodes.filter(
+    (node): node is TalentFlowNode => node.type === 'talent',
+  )
+  return talentNodes.filter(({ data }) => {
     const talent = data.talent
     return [
       talent.name,

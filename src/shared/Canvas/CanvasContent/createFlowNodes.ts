@@ -1,4 +1,4 @@
-import { NodeSizeConstants } from '../../model/constants/NodeSizeConstants'
+import { nodeSize } from '../../model/nodeSize'
 import type { FlowNode } from '../types/FlowNode'
 import type { FlowNodesProps } from '../types/FlowNodesProps'
 import { getVisibleNodeIds } from './getVisibleNodeIds'
@@ -17,29 +17,49 @@ export function createFlowNodes({
   )
   return diagram.nodes
     .filter((talent) => editing || visibleNodeIds.has(talent.id))
-    .map((talent) => ({
-      id: talent.id,
-      type: 'talent',
-      position: talent.position,
-      data: {
-        talent,
-        categoryColor: categoryColors.get(talent.categoryId) ?? '#0c9400',
-        status: editing ? 'unlocked' : (statuses[talent.id] ?? 'unlocked'),
-        editing,
-        activate: () => activate(talent),
-      },
-      selected:
+    .map((talent): FlowNode => {
+      const size = nodeSize(talent)
+      const selected =
         selection?.kind === 'node' &&
-        (selection.ids ?? [selection.id]).includes(talent.id),
-      draggable: editing,
-      selectable: editing || statuses[talent.id] !== 'locked',
-      focusable: editing || statuses[talent.id] !== 'locked',
-      ariaLabel: `${talent.title}, ${editing ? 'skill' : statuses[talent.id]}`,
-      width: NodeSizeConstants[talent.size].nodeSize,
-      height: NodeSizeConstants[talent.size].nodeSize,
-      measured: {
-        width: NodeSizeConstants[talent.size].nodeSize,
-        height: NodeSizeConstants[talent.size].nodeSize,
-      },
-    }))
+        (selection.ids ?? [selection.id]).includes(talent.id)
+      if (talent.kind === 'dot')
+        return {
+          id: talent.id,
+          type: 'dot',
+          position: talent.position,
+          data: {
+            dot: talent,
+            editing,
+            activate: () => activate(talent),
+          },
+          selected,
+          draggable: editing,
+          selectable: editing,
+          focusable: editing,
+          ariaLabel: 'Routing dot',
+          width: size,
+          height: size,
+          measured: { width: size, height: size },
+        }
+      return {
+        id: talent.id,
+        type: 'talent',
+        position: talent.position,
+        data: {
+          talent,
+          categoryColor: categoryColors.get(talent.categoryId) ?? '#0c9400',
+          status: editing ? 'unlocked' : (statuses[talent.id] ?? 'unlocked'),
+          editing,
+          activate: () => activate(talent),
+        },
+        selected,
+        draggable: editing,
+        selectable: editing || statuses[talent.id] !== 'locked',
+        focusable: editing || statuses[talent.id] !== 'locked',
+        ariaLabel: `${talent.title}, ${editing ? 'skill' : statuses[talent.id]}`,
+        width: size,
+        height: size,
+        measured: { width: size, height: size },
+      }
+    })
 }

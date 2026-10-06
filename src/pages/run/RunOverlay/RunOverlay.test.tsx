@@ -4,6 +4,7 @@ import { beforeEach, expect, it, vi } from 'vitest'
 import { RunOverlay } from './RunOverlay'
 import { createInstance } from '../../../shared/model/createInstance'
 import { starterLibrary } from '../../../shared/storage/starterLibrary'
+import type { TalentNode } from '../../../shared/model/types/TalentNode'
 
 vi.mock('@xyflow/react', () => ({
   useReactFlow: () => ({ setViewport: vi.fn() }),
@@ -21,7 +22,10 @@ beforeEach(() => {
 
 it('expands and collapses tips, embeds video, and selects every status', () => {
   const diagram = starterLibrary().diagrams[0]
-  const node = diagram.nodes.find((entry) => entry.id === 'color')!
+  const node = diagram.nodes.find(
+    (entry): entry is TalentNode =>
+      entry.kind !== 'dot' && entry.id === 'color',
+  )!
   const instance = createInstance(diagram, 'Journey')
   instance.statuses.color = 'unlocked'
   instance.statusTimestamps = {
@@ -75,7 +79,9 @@ it('never exposes status controls for Start', () => {
   const diagram = starterLibrary().diagrams[0]
   render(
     <RunOverlay
-      node={diagram.nodes[0]}
+      node={diagram.nodes.find(
+        (entry): entry is TalentNode => entry.kind === 'start',
+      )!}
       instance={createInstance(diagram, 'Journey')}
       onNodePatch={vi.fn()}
       onStatus={vi.fn()}
@@ -89,7 +95,10 @@ it('never exposes status controls for Start', () => {
 
 it('debounces user-tip saves and keeps them below standard tips', async () => {
   const diagram = starterLibrary().diagrams[0]
-  const node = diagram.nodes.find((entry) => entry.id === 'color')!
+  const node = diagram.nodes.find(
+    (entry): entry is TalentNode =>
+      entry.kind !== 'dot' && entry.id === 'color',
+  )!
   const instance = createInstance(diagram, 'Journey')
   instance.statuses.color = 'unlocked'
   const onNodePatch = vi.fn()

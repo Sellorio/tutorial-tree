@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import type { MouseEvent, PointerEvent } from 'react'
 import { connectionError } from '../../model/connectionError'
 import { NodeSizeConstants } from '../../model/constants/NodeSizeConstants'
+import { nodeSize } from '../../model/nodeSize'
 import type { Point } from '../../model/types/Point'
 import { nodeCenter } from '../geometry/nodeCenter'
 import type { CanvasState } from '../types/CanvasState'
@@ -26,8 +27,7 @@ export function useConnectionDrag({
     diagram.nodes.find((node) => {
       const center = nodeCenter(node)
       return (
-        Math.hypot(point.x - center.x, point.y - center.y) <=
-        NodeSizeConstants[node.size].nodeSize / 2
+        Math.hypot(point.x - center.x, point.y - center.y) <= nodeSize(node) / 2
       )
     })
   const findTarget = (point: Point, source: string) => {
@@ -105,10 +105,8 @@ export function useConnectionDrag({
             clockwise: true,
             source: nodeCenter(source),
             target: target ? nodeCenter(target) : drag.point,
-            sourceRadius: NodeSizeConstants[source.size].nodeSize / 2,
-            targetRadius: target
-              ? NodeSizeConstants[target.size].nodeSize / 2
-              : 0,
+            sourceRadius: nodeSize(source) / 2,
+            targetRadius: target ? nodeSize(target) / 2 : 0,
           },
         }
       : null

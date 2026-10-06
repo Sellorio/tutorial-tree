@@ -9,7 +9,7 @@ export function ensureStatusTimestamps(
   const timestamp = now()
   const statusTimestamps: NonNullable<Instance['statusTimestamps']> = {}
   for (const node of diagram.nodes) {
-    if (node.kind === 'start') continue
+    if (node.kind === 'start' || node.kind === 'dot') continue
     const previous = instance.statusTimestamps?.[node.id]
     const status = instance.statuses[node.id]
     if (status === 'in-progress') {

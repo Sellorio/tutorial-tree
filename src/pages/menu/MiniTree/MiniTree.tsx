@@ -25,6 +25,20 @@ export function MiniTree({ diagram }: MiniTreeProps) {
       })}
       {diagram.nodes.map((node) => {
         const position = getPreviewPoint(diagram, node.id, bounds)
+        const color =
+          node.kind === 'dot'
+            ? 'color-mix(in srgb, var(--edge) 24%, var(--canvas))'
+            : (categoryColors.get(node.categoryId) ?? '#0c9400')
+        if (node.kind === 'dot')
+          return (
+            <circle
+              key={node.id}
+              cx={position.x}
+              cy={position.y}
+              r={4}
+              fill={color}
+            />
+          )
         return (
           <g key={node.id}>
             <circle
@@ -32,7 +46,7 @@ export function MiniTree({ diagram }: MiniTreeProps) {
               cy={position.y}
               r={13}
               style={{
-                stroke: categoryColors.get(node.categoryId) ?? '#0c9400',
+                stroke: color,
               }}
             />
             <circle
@@ -40,7 +54,7 @@ export function MiniTree({ diagram }: MiniTreeProps) {
               cy={position.y}
               r={4}
               style={{
-                fill: categoryColors.get(node.categoryId) ?? '#0c9400',
+                fill: color,
               }}
             />
           </g>

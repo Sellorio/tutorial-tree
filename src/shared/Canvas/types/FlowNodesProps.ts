@@ -1,6 +1,6 @@
-import type { TalentNode } from '../../model/types/TalentNode'
+import type { DiagramNode } from '../../model/types/DiagramNode'
 import type { CanvasProps } from './CanvasProps'
 
 export type FlowNodesProps = CanvasProps & {
-  activate: (node: TalentNode) => void
+  activate: (node: DiagramNode) => void
 }

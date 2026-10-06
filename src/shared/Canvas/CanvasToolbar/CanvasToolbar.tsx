@@ -1,5 +1,5 @@
 import type { CanvasToolbarProps } from './CanvasToolbarProps'
-import { Circle, Focus, Minus, Plus } from 'lucide-react'
+import { Circle, CircleDot, Focus, Minus, Plus } from 'lucide-react'
 import { useViewport } from '@xyflow/react'
 import styles from './CanvasToolbar.module.css'
 
@@ -59,6 +59,25 @@ export function CanvasToolbar({ flow, editing, onAdd }: CanvasToolbarProps) {
           >
             <Circle size={18} />
             <Plus size={10} />
+          </button>
+          <button
+            aria-label="Add dot node"
+            title="Add dot node"
+            onClick={() => {
+              const bounds = document
+                .querySelector('[data-testid="canvas"]')!
+                .getBoundingClientRect()
+              onAdd(
+                flow.screenToFlowPosition({
+                  x: bounds.left + bounds.width / 2,
+                  y: bounds.top + bounds.height / 2,
+                }),
+                undefined,
+                'dot',
+              )
+            }}
+          >
+            <CircleDot size={18} />
           </button>
         </>
       )}

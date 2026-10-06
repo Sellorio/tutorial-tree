@@ -19,10 +19,14 @@ export function JourneyList({
         const source = library.diagrams.find(
           (tree) => tree.id === entry.diagramId,
         )!
-        const total = source.nodes.length - 1
+        const total = source.nodes.filter(
+          (node) => node.kind !== 'start' && node.kind !== 'dot',
+        ).length
         const completed = source.nodes.filter(
           (node) =>
-            node.kind !== 'start' && entry.statuses[node.id] === 'completed',
+            node.kind !== 'start' &&
+            node.kind !== 'dot' &&
+            entry.statuses[node.id] === 'completed',
         ).length
         return (
           <JourneyRow

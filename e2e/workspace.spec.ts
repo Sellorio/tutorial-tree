@@ -606,10 +606,19 @@ test('creates, edits metadata, connects from an edge, saves, reloads, and export
   await page.mouse.up()
   await expect(preview).toHaveCount(0)
   await expect(page.locator('.react-flow__edge')).toHaveCount(1)
-  await expect(page.locator('.react-flow__edge-path')).toHaveAttribute(
-    'd',
-    previewPath!,
-  )
+  const edgePath = await page
+    .locator('.react-flow__edge-path')
+    .getAttribute('d')
+  const pathCoordinates = (path: string) =>
+    path.match(/-?\d+(?:\.\d+)?/g)!.map(Number)
+  const previewCoordinates = pathCoordinates(previewPath!)
+  const edgeCoordinates = pathCoordinates(edgePath!)
+  expect(edgeCoordinates).toHaveLength(previewCoordinates.length)
+  edgeCoordinates.forEach((coordinate, index) => {
+    expect(
+      Math.abs(coordinate - previewCoordinates[index]!),
+    ).toBeLessThanOrEqual(1)
+  })
   await page.getByRole('button', { name: 'Counterclockwise curve' }).click()
   await page.getByRole('button', { name: 'Save', exact: true }).click()
   const saved = (await stored(page)).diagrams.find(
@@ -639,6 +648,70 @@ test('creates, edits metadata, connects from an edge, saves, reloads, and export
   const data = JSON.parse(await readFile((await download.path())!, 'utf8'))
   expect(data.diagram.id).toBe(saved.id)
   expect(data.diagram.nodes).toEqual(saved.nodes)
+})
+
+test('creates and persists a routing dot with only its input rule', async ({
+  page,
+}) => {
+  await page.getByRole('button', { name: 'New tree', exact: true }).click()
+  await page
+    .getByRole('dialog')
+    .getByLabel('Name', { exact: true })
+    .fill('Dot routing tree')
+  await page.getByRole('button', { name: 'Create tree', exact: true }).click()
+  await page
+    .locator('.react-flow__pane')
+    .click({ button: 'right', position: { x: 180, y: 120 } })
+  await page.getByRole('menuitem', { name: 'Add Dot Node' }).click()
+  const dot = page.locator('[data-testid^="dot-"]')
+  await expect(dot).toBeVisible()
+  await expect(page.getByText('DOT NODE')).toBeVisible()
+  await page.getByRole('button', { name: 'Any input', exact: true }).click()
+
+  await page.getByRole('button', { name: 'Add node', exact: true }).click()
+  await page.getByLabel('Node text', { exact: true }).fill('Practice')
+  const start = page.locator('.react-flow__node').filter({ hasText: 'Start' })
+  const task = page.locator('.react-flow__node').filter({ hasText: 'Practice' })
+  const connect = async (source: Locator, target: Locator) => {
+    const sourceBounds = (await source.boundingBox())!
+    await drag(
+      page,
+      {
+        x: sourceBounds.x + sourceBounds.width + 5,
+        y: sourceBounds.y + sourceBounds.height / 2,
+      },
+      await center(target),
+    )
+  }
+  await connect(start, dot)
+  await connect(dot, task)
+  await expect(page.locator('.react-flow__edge')).toHaveCount(2)
+
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  const saved = (await stored(page)).diagrams.find(
+    (diagram) => diagram.name === 'Dot routing tree',
+  )!
+  const savedDot = saved.nodes.find((node) => node.kind === 'dot')!
+  expect(savedDot.requirement).toBe('any')
+  expect(Object.keys(savedDot).sort()).toEqual([
+    'id',
+    'kind',
+    'position',
+    'requirement',
+  ])
+  expect(saved.connections).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        source: saved.nodes[0].id,
+        target: savedDot.id,
+      }),
+      expect.objectContaining({ source: savedDot.id }),
+    ]),
+  )
+
+  await page.reload()
+  await expect(page.getByTestId(`dot-${savedDot.id}`)).toBeVisible()
+  await expect(page.getByTestId(`dot-${savedDot.id}`)).toHaveText('')
 })
 
 test('node names persist and replace the Run status eyebrow', async ({

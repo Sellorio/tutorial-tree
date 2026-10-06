@@ -4,6 +4,7 @@ import { expect, it, vi } from 'vitest'
 import { Inspector } from './Inspector'
 
 import { starterLibrary } from '../../../shared/storage/starterLibrary'
+import { createDotNode } from '../../../shared/model/createDotNode'
 import type { TalentNode } from '../../../shared/model/types/TalentNode'
 it('offers three sizes and an exclusive icon/image mode with selectable icons', () => {
   const { onNode } = renderInspector('color')
@@ -84,7 +85,9 @@ it('edits text, description, accent, requirement, image, and tutorial', () => {
 })
 it('applies accent, size, and visual changes to every selected node', () => {
   const diagram = starterLibrary().diagrams[0]
-  diagram.nodes.find((node) => node.id === 'seeing')!.media = 'icon'
+  diagram.nodes.find(
+    (node): node is TalentNode => node.kind !== 'dot' && node.id === 'seeing',
+  )!.media = 'icon'
   const selected = diagram.nodes.filter((node) =>
     ['seeing', 'color'].includes(node.id),
   )
@@ -147,7 +150,10 @@ it('adds, edits, and deletes tips', () => {
 })
 it('reorders tips by dropping before another tip', () => {
   const diagram = starterLibrary().diagrams[0]
-  const node = diagram.nodes.find((entry) => entry.id === 'seeing')!
+  const node = diagram.nodes.find(
+    (entry): entry is TalentNode =>
+      entry.kind !== 'dot' && entry.id === 'seeing',
+  )!
   const first = { id: 'tip-first', short: 'First', long: '' }
   const second = { id: 'tip-second', short: 'Second', long: '' }
   node.tips = [first, second]
@@ -201,6 +207,32 @@ it('prevents Start deletion, text changes and requirement changes', () => {
   expect(
     screen.queryByRole('button', { name: 'Any input' }),
   ).not.toBeInTheDocument()
+})
+it('shows only the input rule for a dot node', () => {
+  const diagram = starterLibrary().diagrams[0]
+  const dot = createDotNode({ x: 300, y: 200 })
+  diagram.nodes.push(dot)
+  const onNode = vi.fn()
+  render(
+    <Inspector
+      diagram={diagram}
+      selection={{ kind: 'node', id: dot.id }}
+      onNode={onNode}
+      onConnection={vi.fn()}
+      onDelete={vi.fn()}
+      onError={vi.fn()}
+    />,
+  )
+
+  expect(screen.getByText('DOT NODE')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'All inputs' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
+  expect(screen.queryByLabelText('Node text')).not.toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: 'Category Red' })).toBeNull()
+  fireEvent.click(screen.getByRole('button', { name: 'Any input' }))
+  expect(onNode).toHaveBeenLastCalledWith({ ...dot, requirement: 'any' })
 })
 it('uploads supported images and rejects oversized or non-image files', async () => {
   const { onNode, onError } = renderInspector()
@@ -267,8 +299,14 @@ it('edits curve direction and deletes connections', () => {
 it('shows size-weighted automatic angles and preserves the angle when switching to manual', () => {
   const diagram = starterLibrary().diagrams[0]
   const connection = diagram.connections[0]
-  const source = diagram.nodes.find((node) => node.id === connection.source)!
-  const target = diagram.nodes.find((node) => node.id === connection.target)!
+  const source = diagram.nodes.find(
+    (node): node is TalentNode =>
+      node.kind !== 'dot' && node.id === connection.source,
+  )!
+  const target = diagram.nodes.find(
+    (node): node is TalentNode =>
+      node.kind !== 'dot' && node.id === connection.target,
+  )!
   source.size = 'small'
   source.position = { x: 0, y: 0 }
   const onConnection = vi.fn()
@@ -301,8 +339,12 @@ it('shows size-weighted automatic angles and preserves the angle when switching 
 })
 it('shows validation feedback and diagram overview', () => {
   const { diagram, rerender } = renderInspector()
-  diagram.nodes[1].image = 'javascript:bad'
-  diagram.nodes[1].youtube = 'not-youtube'
+  const node = diagram.nodes.find(
+    (entry): entry is TalentNode =>
+      entry.kind !== 'dot' && entry.id === 'seeing',
+  )!
+  node.image = 'javascript:bad'
+  node.youtube = 'not-youtube'
   const props = {
     diagram,
     onNode: vi.fn(),

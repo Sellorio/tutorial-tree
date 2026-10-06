@@ -1,6 +1,5 @@
-import { NodeSizeConstants } from '../../model/constants/NodeSizeConstants'
+import { nodeSize } from '../../model/nodeSize'
 import { isConnectionActive } from '../../model/isConnectionActive'
-import { nodeCenter } from '../geometry/nodeCenter'
 import type { FlowEdge } from '../types/FlowEdge'
 import type { CanvasProps } from '../types/CanvasProps'
 import { getVisibleNodeIds } from './getVisibleNodeIds'
@@ -34,16 +33,16 @@ export function createFlowEdges({
         data: {
           clockwise: connection.clockwise,
           curveAngle: connection.curveAngle,
-          source: nodeCenter(sourceNode),
-          target: nodeCenter(targetNode),
-          sourceRadius: NodeSizeConstants[sourceNode.size].nodeSize / 2,
-          targetRadius: NodeSizeConstants[targetNode.size].nodeSize / 2,
+          sourceRadius: nodeSize(sourceNode) / 2,
+          targetRadius: nodeSize(targetNode) / 2,
         },
         selected:
           selection?.kind === 'connection' && selection.id === connection.id,
         selectable: editing,
         focusable: editing,
-        ariaLabel: `Connection from ${sourceNode.title} to ${targetNode.title}`,
+        ariaLabel: `Connection from ${
+          sourceNode.kind === 'dot' ? 'dot' : sourceNode.title
+        } to ${targetNode.kind === 'dot' ? 'dot' : targetNode.title}`,
         style: {
           color:
             editing ||

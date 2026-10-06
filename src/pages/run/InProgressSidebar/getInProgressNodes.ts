@@ -27,7 +27,11 @@ export function getInProgressNodes(
       visited.add(targetId)
       queue.push(targetId)
       const target = nodesById.get(targetId)
-      if (target && statuses[target.id] === 'in-progress')
+      if (
+        target &&
+        target.kind !== 'dot' &&
+        statuses[target.id] === 'in-progress'
+      )
         inProgress.push(target)
     }
   }

@@ -10,6 +10,7 @@ import { exportData } from '../model/exportData'
 import { starterLibrary } from '../storage/starterLibrary'
 import { saved } from './testing/saved'
 import { readInitial } from './readInitial'
+import type { TalentNode } from '../model/types/TalentNode'
 
 vi.mock('../Canvas/Canvas', () => ({
   Canvas: (props: ComponentProps<typeof Canvas>) => (
@@ -21,7 +22,7 @@ vi.mock('../Canvas/Canvas', () => ({
             data-testid={`mock-${node.id}`}
             onClick={() => props.onSelect({ kind: 'node', id: node.id })}
           >
-            {node.title}
+            {node.kind === 'dot' ? 'Routing dot' : node.title}
           </button>
         ))}
         <button onClick={() => props.onSelect(null)}>Clear selection</button>
@@ -130,14 +131,18 @@ describe('workspace orchestration', () => {
       (category) => category.id !== 'category-green',
     )
     diagram.nodes.forEach((node) => {
-      if (node.categoryId === 'category-green')
+      if (node.kind !== 'dot' && node.categoryId === 'category-green')
         node.categoryId = 'category-teal'
     })
     openEditor(library)
 
     fireEvent.click(screen.getByRole('button', { name: 'Canvas add' }))
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
-    expect(saved().diagrams[0].nodes.at(-1)?.categoryId).toBe('category-teal')
+    expect(
+      saved()
+        .diagrams[0].nodes.filter((node) => node.kind !== 'dot')
+        .at(-1)?.categoryId,
+    ).toBe('category-teal')
   })
   it('saves diagram defaults and connection overrides with a manual curve', () => {
     openEditor()
@@ -264,7 +269,11 @@ describe('workspace orchestration', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
     expect(screen.getByRole('alert')).toHaveTextContent('invalid fields')
-    expect(saved().diagrams[0].nodes[1].youtube).toBe('')
+    expect(
+      saved().diagrams[0].nodes.find(
+        (node): node is TalentNode => node.kind === 'task',
+      )?.youtube,
+    ).toBe('')
   })
   it('leaves the edited draft open on quota failure', () => {
     openEditor()

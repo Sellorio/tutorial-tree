@@ -1,4 +1,5 @@
 import type { FlowNode } from '../types/FlowNode'
+import type { TalentFlowNode } from '../types/TalentFlowNode'
 import { filterSearchNodes } from './filterSearchNodes'
 import { useEffect, useState } from 'react'
 import styles from './CanvasSearch.module.css'
@@ -8,7 +9,7 @@ export function CanvasSearch({
   onSelectNode,
 }: {
   nodes: FlowNode[]
-  onSelectNode: (node: FlowNode) => void
+  onSelectNode: (node: TalentFlowNode) => void
 }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')

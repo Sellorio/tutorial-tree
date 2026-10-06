@@ -15,7 +15,13 @@ export function TreeOverview({
       <dl>
         <div>
           <dt>Skills</dt>
-          <dd>{diagram.nodes.length - 1}</dd>
+          <dd>
+            {
+              diagram.nodes.filter(
+                (node) => node.kind !== 'start' && node.kind !== 'dot',
+              ).length
+            }
+          </dd>
         </div>
         <div>
           <dt>Connections</dt>
@@ -28,8 +34,9 @@ export function TreeOverview({
         categoryNodeCounts={Object.fromEntries(
           diagram.categories.map((category) => [
             category.id,
-            diagram.nodes.filter((node) => node.categoryId === category.id)
-              .length,
+            diagram.nodes.filter(
+              (node) => node.kind !== 'dot' && node.categoryId === category.id,
+            ).length,
           ]),
         )}
         onChange={(categories) => onDiagram?.({ ...diagram, categories })}
@@ -41,7 +48,7 @@ export function TreeOverview({
             ...diagram,
             categories,
             nodes: diagram.nodes.map((node) =>
-              node.categoryId === categoryId
+              node.kind !== 'dot' && node.categoryId === categoryId
                 ? { ...node, categoryId: targetCategoryId }
                 : node,
             ),

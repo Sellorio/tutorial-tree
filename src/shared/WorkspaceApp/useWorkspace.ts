@@ -31,8 +31,8 @@ export function useWorkspace() {
   return {
     ...context,
     save: () => saveDraft(context),
-    addNode: (position: Point, source?: string) =>
-      addDraftNode(context, position, source),
+    addNode: (position: Point, source?: string, kind?: 'task' | 'dot') =>
+      addDraftNode(context, position, source, kind),
     connect: (source: string, target: string) =>
       connectDraftNodes(context, source, target),
     removeSelected: (target?: Selection) =>

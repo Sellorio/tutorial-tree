@@ -5,8 +5,8 @@ export type FlowEdge = Edge<
   {
     clockwise: boolean
     curveAngle?: number
-    source: Point
-    target: Point
+    source?: Point
+    target?: Point
     sourceRadius: number
     targetRadius: number
   },

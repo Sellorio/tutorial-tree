@@ -19,7 +19,9 @@ export function patchRunNode(
     ...currentDiagram,
     updatedAt: now(),
     nodes: currentDiagram.nodes.map((node) =>
-      node.id === selectedNode.id ? { ...node, ...patch } : node,
+      node.id === selectedNode.id && node.kind !== 'dot'
+        ? { ...node, ...patch }
+        : node,
     ),
   }
   commit({

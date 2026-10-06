@@ -1,4 +1,5 @@
 import { reconcileStatuses } from '../model/reconcileStatuses'
+import type { TalentNode } from '../model/types/TalentNode'
 import type { WorkspaceStore } from './WorkspaceStore'
 
 export function getWorkspaceView({
@@ -24,7 +25,10 @@ export function getWorkspaceView({
   const statuses = diagram ? reconcileStatuses(diagram, instance?.statuses) : {}
   const selectedNode =
     selection?.kind === 'node'
-      ? diagram?.nodes.find((node) => node.id === selection.id)
+      ? diagram?.nodes.find(
+          (node): node is TalentNode =>
+            node.kind !== 'dot' && node.id === selection.id,
+        )
       : undefined
   const visibleDiagrams = library.diagrams
     .filter((entry) => entry.name.toLowerCase().includes(query.toLowerCase()))
@@ -37,10 +41,15 @@ export function getWorkspaceView({
       second.updatedAt.localeCompare(first.updatedAt),
     )
   const skillCount =
-    diagram?.nodes.filter((node) => node.kind !== 'start').length ?? 0
+    diagram?.nodes.filter(
+      (node) => node.kind !== 'start' && node.kind !== 'dot',
+    ).length ?? 0
   const completedCount =
     diagram?.nodes.filter(
-      (node) => node.kind !== 'start' && statuses[node.id] === 'completed',
+      (node) =>
+        node.kind !== 'start' &&
+        node.kind !== 'dot' &&
+        statuses[node.id] === 'completed',
     ).length ?? 0
   return {
     instance,

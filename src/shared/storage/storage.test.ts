@@ -85,6 +85,7 @@ describe('browser persistence', () => {
     expect(
       loaded.library.diagrams[0].nodes
         .slice(1, 3)
+        .filter((node) => node.kind !== 'dot')
         .map((node) => node.categoryId),
     ).toEqual(['category-teal', 'category-teal'])
   })

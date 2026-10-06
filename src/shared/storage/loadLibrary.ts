@@ -4,6 +4,7 @@ import type { Library } from '../model/types/Library'
 import { reconcileStatuses } from '../model/reconcileStatuses'
 import { ensureStatusTimestamps } from '../model/ensureStatusTimestamps'
 import { starterLibrary } from './starterLibrary'
+import { persistedStatuses } from '../model/persistedStatuses'
 
 export function loadLibrary(storage: Pick<Storage, 'getItem'>): {
   library: Library
@@ -24,11 +25,16 @@ export function loadLibrary(storage: Pick<Storage, 'getItem'>): {
           )!
           const normalized = ensureStatusTimestamps(diagram, {
             ...instance,
-            statuses: reconcileStatuses(diagram, instance.statuses),
+            statuses: persistedStatuses(
+              diagram,
+              reconcileStatuses(diagram, instance.statuses),
+            ),
           })
           if (
+            JSON.stringify(instance.statuses) !==
+              JSON.stringify(normalized.statuses) ||
             JSON.stringify(instance.statusTimestamps ?? {}) !==
-            JSON.stringify(normalized.statusTimestamps ?? {})
+              JSON.stringify(normalized.statusTimestamps ?? {})
           )
             migrated = true
           return normalized

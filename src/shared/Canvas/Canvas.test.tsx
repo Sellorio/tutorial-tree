@@ -8,6 +8,8 @@ import { nodeCenter } from './geometry/nodeCenter'
 import type { Selection } from './types/Selection'
 import { reconcileStatuses } from '../model/reconcileStatuses'
 import { starterLibrary } from '../storage/starterLibrary'
+import { createDotNode } from '../model/createDotNode'
+import type { TalentNode } from '../model/types/TalentNode'
 
 const harness = vi.hoisted(() => ({
   props: {} as ReactFlowProps,
@@ -40,6 +42,27 @@ vi.mock('@xyflow/react', () => ({
   useReactFlow: () => harness.flow,
   useViewport: () => ({ zoom: 1, x: 0, y: 0 }),
   useStore: () => 1,
+  applyNodeChanges: (
+    changes: {
+      id: string
+      type: string
+      position?: { x: number; y: number }
+      selected?: boolean
+    }[],
+    nodes: {
+      id: string
+      position: { x: number; y: number }
+      selected?: boolean
+    }[],
+  ) =>
+    nodes.map((node) => {
+      const change = changes.find((entry) => entry.id === node.id)
+      if (change?.type === 'position' && change.position)
+        return { ...node, position: change.position }
+      if (change?.type === 'select')
+        return { ...node, selected: change.selected }
+      return node
+    }),
   Background: () => null,
   Handle: ({ position, type }: { position: string; type: string }) => (
     <span data-testid={`${type}-handle-${position}`} />
@@ -118,8 +141,11 @@ describe('canvas adapter', () => {
   })
   it('uses current centers and radii when positions or sizes change, without endpoint markers', () => {
     const { diagram, rerender, ...props } = canvas()
+    const first = diagram.nodes.find(
+      (node): node is TalentNode => node.kind === 'start',
+    )!
     diagram.nodes[0] = {
-      ...diagram.nodes[0],
+      ...first,
       position: { x: 110, y: 120 },
       size: 'large',
     }
@@ -130,7 +156,6 @@ describe('canvas adapter', () => {
       measured: { width: 110, height: 110 },
     })
     expect(harness.props.edges![0].data).toMatchObject({
-      source: { x: 165, y: 175 },
       sourceRadius: 55,
     })
     expect(harness.props.edges![0].markerEnd).toBeUndefined()
@@ -168,6 +193,17 @@ describe('canvas adapter', () => {
       harness.props.onNodesChange!([
         { type: 'position', id: 'seeing', position: { x: 10, y: 20 } },
       ]),
+    )
+    expect(onMove).not.toHaveBeenCalled()
+    expect(
+      harness.props.nodes!.find((node) => node.id === 'seeing')?.position,
+    ).toEqual({ x: 10, y: 20 })
+    act(() =>
+      harness.props.onNodeDragStop!(
+        new MouseEvent('mouseup'),
+        harness.props.nodes![1],
+        harness.props.nodes!,
+      ),
     )
     expect(onMove).toHaveBeenCalledWith([
       { id: 'seeing', position: { x: 10, y: 20 } },
@@ -322,8 +358,16 @@ describe('canvas adapter', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: 'Add Node' }))
     expect(onAdd).toHaveBeenLastCalledWith({ x: 150, y: 180 })
     expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+    fireEvent.contextMenu(screen.getByTestId('flow'), {
+      clientX: 175,
+      clientY: 205,
+    })
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Add Dot Node' }))
+    expect(onAdd).toHaveBeenLastCalledWith({ x: 175, y: 205 }, undefined, 'dot')
     fireEvent.click(screen.getByRole('button', { name: 'Add node' }))
-    expect(onAdd).toHaveBeenCalledTimes(2)
+    expect(onAdd).toHaveBeenCalledTimes(3)
+    fireEvent.click(screen.getByRole('button', { name: 'Add dot node' }))
+    expect(onAdd).toHaveBeenLastCalledWith(expect.any(Object), undefined, 'dot')
     fireEvent.click(screen.getByRole('button', { name: 'Zoom in' }))
     fireEvent.click(screen.getByRole('button', { name: 'Zoom out' }))
     fireEvent.click(screen.getByRole('button', { name: 'Fit tree' }))
@@ -337,7 +381,13 @@ describe('canvas adapter', () => {
   })
   it('searches visible nodes and centers and selects a result', () => {
     const { diagram, rerender, onSelect, ...props } = canvas(false)
-    const [start, visible, hidden] = diagram.nodes
+    const start = diagram.nodes.find(
+      (node): node is TalentNode => node.kind === 'start',
+    )!
+    const [visible, hidden] = diagram.nodes.filter(
+      (node): node is TalentNode =>
+        node.kind !== 'start' && node.kind !== 'dot',
+    )
     const visibleNode = { ...visible, title: 'Visible needle', description: '' }
     diagram.nodes = [start, visibleNode, { ...hidden, title: 'Hidden needle' }]
     diagram.connections = [
@@ -391,6 +441,31 @@ describe('canvas adapter', () => {
     expect(
       screen.queryByRole('dialog', { name: 'Search visible nodes' }),
     ).not.toBeInTheDocument()
+  })
+  it('renders dots as small routing points and routes edges to their centers', () => {
+    const { diagram, rerender, ...props } = canvas()
+    const dot = createDotNode({ x: 300, y: 200 })
+    diagram.nodes.push(dot)
+    diagram.connections.push({
+      id: 'dot-connection',
+      source: 'seeing',
+      target: dot.id,
+      clockwise: true,
+    })
+    rerender(<Canvas {...props} diagram={diagram} />)
+
+    expect(
+      harness.props.nodes!.find((node) => node.id === dot.id),
+    ).toMatchObject({
+      type: 'dot',
+      width: 12,
+      height: 12,
+      selectable: true,
+      ariaLabel: 'Routing dot',
+    })
+    expect(harness.props.edges!.at(-1)?.data).toMatchObject({
+      targetRadius: 6,
+    })
   })
   it.each([true, false])('resets zoom to 100%% with editing=%s', (editing) => {
     canvas(editing)

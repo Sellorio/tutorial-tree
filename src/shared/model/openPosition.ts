@@ -1,6 +1,7 @@
 import type { Point } from './types/Point'
-import { NodeSizeConstants } from './constants/NodeSizeConstants'
 import type { Diagram } from './types/Diagram'
+import { NodeSizeConstants } from './constants/NodeSizeConstants'
+import { nodeSize } from './nodeSize'
 
 export function openPosition(diagram: Diagram, desired: Point): Point {
   const position = { ...desired }
@@ -8,10 +9,7 @@ export function openPosition(diagram: Diagram, desired: Point): Point {
     diagram.nodes.some(
       (node) =>
         Math.hypot(node.position.x - position.x, node.position.y - position.y) <
-        (NodeSizeConstants[node.size].nodeSize +
-          NodeSizeConstants.medium.nodeSize) /
-          2 +
-          48,
+        (nodeSize(node) + NodeSizeConstants.medium.nodeSize) / 2 + 48,
     )
   )
     position.x += 180

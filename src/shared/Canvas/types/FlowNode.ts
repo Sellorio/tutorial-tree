@@ -1,4 +1,4 @@
-import type { TalentData } from './TalentData'
-import type { Node } from '@xyflow/react'
+import type { DotFlowNode } from './DotFlowNode'
+import type { TalentFlowNode } from './TalentFlowNode'
 
-export type FlowNode = Node<TalentData, 'talent'>
+export type FlowNode = TalentFlowNode | DotFlowNode

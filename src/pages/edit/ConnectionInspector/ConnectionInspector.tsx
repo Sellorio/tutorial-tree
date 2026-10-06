@@ -10,17 +10,15 @@ export function ConnectionInspector({
   onConnection,
   onDelete,
 }: ConnectionInspectorProps) {
+  const source = diagram.nodes.find((entry) => entry.id === connection.source)
+  const target = diagram.nodes.find((entry) => entry.id === connection.target)
   return (
     <div className={styles.fields}>
       <div className={styles.eyebrow}>CONNECTION</div>
       <div className={styles.direction}>
-        <span>
-          {diagram.nodes.find((entry) => entry.id === connection.source)?.title}
-        </span>
+        <span>{source?.kind === 'dot' ? 'Routing dot' : source?.title}</span>
         <ArrowRight size={18} />
-        <span>
-          {diagram.nodes.find((entry) => entry.id === connection.target)?.title}
-        </span>
+        <span>{target?.kind === 'dot' ? 'Routing dot' : target?.title}</span>
       </div>
       <fieldset>
         <legend>Curve direction</legend>

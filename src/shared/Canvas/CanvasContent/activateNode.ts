@@ -1,12 +1,12 @@
 import type { Dispatch, SetStateAction } from 'react'
-import type { TalentNode } from '../../model/types/TalentNode'
+import type { DiagramNode } from '../../model/types/DiagramNode'
 import type { CanvasProps } from '../types/CanvasProps'
 import type { CanvasMenuState } from '../types/CanvasMenuState'
 
 export function activateNode(
   props: CanvasProps,
   setContext: Dispatch<SetStateAction<CanvasMenuState>>,
-  node: TalentNode,
+  node: DiagramNode,
 ) {
   const { editing, statuses, onSelect, selection } = props
   if (!editing && statuses[node.id] === 'locked') return

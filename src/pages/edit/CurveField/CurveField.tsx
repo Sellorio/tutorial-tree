@@ -1,7 +1,7 @@
 import type { CurveFieldProps } from './CurveFieldProps'
 import { useId } from 'react'
 import { connectionCurve } from '../../../shared/model/connectionCurve'
-import { NodeSizeConstants } from '../../../shared/model/constants/NodeSizeConstants'
+import { nodeSize } from '../../../shared/model/nodeSize'
 import { nodeCenter } from '../../../shared/Canvas/geometry/nodeCenter'
 import styles from './CurveField.module.css'
 
@@ -21,8 +21,8 @@ export function CurveField({
         nodeCenter(target),
         connection.clockwise,
         undefined,
-        NodeSizeConstants[source.size].nodeSize / 2,
-        NodeSizeConstants[target.size].nodeSize / 2,
+        nodeSize(source) / 2,
+        nodeSize(target) / 2,
       ).angle,
   )
   const updateAngle = (value: number) => {

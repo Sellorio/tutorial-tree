@@ -17,7 +17,11 @@ export const diagramSchema = diagramBase.superRefine((diagram, context) => {
   )
     report('Category IDs must be unique.')
   const categoryIds = new Set(diagram.categories.map((category) => category.id))
-  if (diagram.nodes.some((node) => !categoryIds.has(node.categoryId)))
+  if (
+    diagram.nodes.some(
+      (node) => node.kind !== 'dot' && !categoryIds.has(node.categoryId),
+    )
+  )
     report('Every node must reference an existing category.')
   if (
     new Set(diagram.connections.map((edge) => edge.id)).size !==

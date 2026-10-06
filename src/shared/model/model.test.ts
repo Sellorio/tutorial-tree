@@ -22,10 +22,13 @@ import { setStatus } from './setStatus'
 import { youtubeEmbed } from './youtubeEmbed'
 import type { Diagram } from './types/Diagram'
 import type { Library } from './types/Library'
+import type { TalentNode } from './types/TalentNode'
 
 function fixture() {
   const diagram = createDiagram('Test tree')
-  const start = diagram.nodes[0]
+  const start = diagram.nodes.find(
+    (node): node is TalentNode => node.kind === 'start',
+  )!
   const first = createNode({ x: 200, y: 100 })
   const second = createNode({ x: 200, y: 300 })
   const final = createNode({ x: 400, y: 200 })
@@ -83,6 +86,46 @@ describe('progress rules', () => {
       vi.useRealTimers()
     }
   })
+  it('keeps dot statuses and timestamps derived instead of persisting them', () => {
+    const { diagram, start, first } = fixture()
+    const dot = nodeSchema.parse({
+      id: crypto.randomUUID(),
+      kind: 'dot',
+      position: { x: 120, y: 120 },
+      requirement: 'all',
+    })
+    diagram.nodes.push(dot)
+    diagram.connections = [
+      {
+        id: crypto.randomUUID(),
+        source: start.id,
+        target: dot.id,
+        clockwise: true,
+      },
+      {
+        id: crypto.randomUUID(),
+        source: dot.id,
+        target: first.id,
+        clockwise: true,
+      },
+    ]
+
+    const instance = createInstance(diagram, 'Dot journey')
+    const timestamps = ensureStatusTimestamps(diagram, {
+      ...instance,
+      statuses: { ...instance.statuses, [dot.id]: 'completed' },
+      statusTimestamps: {
+        [dot.id]: { inProgressAt: '2026-10-02T10:00:00.000Z' },
+      },
+    })
+
+    expect(instance.statuses[dot.id]).toBeUndefined()
+    expect(reconcileStatuses(diagram)[dot.id]).toBe('completed')
+    expect(timestamps.statusTimestamps?.[dot.id]).toBeUndefined()
+    expect(
+      setStatus(diagram, instance, first.id, 'completed').statuses[dot.id],
+    ).toBeUndefined()
+  })
   it('preserves historical timestamps when a node is unlocked again', () => {
     const { diagram, instance, first } = fixture()
     const timestamps = { inProgressAt: '2026-10-02T10:00:00.000Z' }
@@ -105,6 +148,42 @@ describe('progress rules', () => {
     expect(reconcileStatuses(diagram, partial.statuses)[final.id]).toBe(
       'unlocked',
     )
+  })
+  it('recursively completes chained dots using their ALL and ANY inputs', () => {
+    const { diagram, start, first, second, final } = fixture()
+    const firstDot = nodeSchema.parse({
+      id: crypto.randomUUID(),
+      kind: 'dot',
+      position: { x: 300, y: 150 },
+      requirement: 'all',
+      title: 'Ignored text',
+    })
+    const secondDot = nodeSchema.parse({
+      id: crypto.randomUUID(),
+      kind: 'dot',
+      position: { x: 400, y: 150 },
+      requirement: 'any',
+    })
+    diagram.nodes = [start, first, second, final, firstDot, secondDot].reverse()
+    diagram.connections = [
+      [start, firstDot],
+      [first, firstDot],
+      [firstDot, secondDot],
+      [second, secondDot],
+      [secondDot, final],
+    ].map(([source, target]) => ({
+      id: crypto.randomUUID(),
+      source: source.id,
+      target: target.id,
+      clockwise: true,
+    }))
+
+    const statuses = reconcileStatuses(diagram, { [first.id]: 'completed' })
+
+    expect(firstDot).not.toHaveProperty('title')
+    expect(statuses[firstDot.id]).toBe('completed')
+    expect(statuses[secondDot.id]).toBe('completed')
+    expect(statuses[final.id]).toBe('unlocked')
   })
   it('resolves unlocked chains regardless of node order and relocks active descendants', () => {
     const { diagram, first, second, final } = fixture()
@@ -279,7 +358,7 @@ describe('editing and validation', () => {
       media: 'image',
       icon: 'sparkles',
     })
-    expect(migrated.nodes[0].media).toBe('icon')
+    expect((migrated.nodes[0] as TalentNode).media).toBe('icon')
     expect(NodeSizeConstants).toMatchObject({
       small: { nodeSize: 50, iconSize: 24, fontSize: '0.6rem' },
       medium: { nodeSize: 80, iconSize: 36, fontSize: '1.0rem' },
@@ -378,11 +457,13 @@ describe('editing and validation', () => {
     ] as const
     for (const [legacyAccent] of legacyAccents)
       expect(
-        nodeSchema.parse({
-          ...node,
-          categoryId: undefined,
-          accent: legacyAccent,
-        }).categoryId,
+        (
+          nodeSchema.parse({
+            ...node,
+            categoryId: undefined,
+            accent: legacyAccent,
+          }) as TalentNode
+        ).categoryId,
       ).toBe(LEGACY_CATEGORY_IDS[legacyAccent])
   })
   it('rejects missing nodes, self links, incoming Start links, duplicates and cycles', () => {
@@ -480,9 +561,9 @@ describe('portable data', () => {
       JSON.stringify(legacyExport),
     )
     expect(
-      result.library.diagrams[0].nodes.every(
-        (node) => node.userTips.length === 0,
-      ),
+      result.library.diagrams[0].nodes
+        .filter((node): node is TalentNode => node.kind !== 'dot')
+        .every((node) => node.userTips.length === 0),
     ).toBe(true)
   })
   it('imports old accent colors and instances without the Show All Skills field', () => {
@@ -504,10 +585,14 @@ describe('portable data', () => {
       { version: 1, diagrams: [], instances: [] },
       JSON.stringify(legacyExport),
     )
-    expect(result.library.diagrams[0].nodes[1].categoryId).toBe('category-teal')
-    expect(result.library.diagrams[0].nodes[2].categoryId).toBe(
-      'category-orange',
-    )
+    const importedFirst = result.library.diagrams[0].nodes.find(
+      (node) => node.id === first.id,
+    ) as TalentNode
+    const importedSecond = result.library.diagrams[0].nodes.find(
+      (node) => node.id === second.id,
+    ) as TalentNode
+    expect(importedFirst.categoryId).toBe('category-teal')
+    expect(importedSecond.categoryId).toBe('category-orange')
     expect(result.library.instances[0].showAllSkills).toBe(true)
   })
   it('backfills timestamps when importing a legacy instance export', () => {

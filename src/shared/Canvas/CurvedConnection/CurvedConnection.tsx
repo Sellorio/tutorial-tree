@@ -16,10 +16,10 @@ export function CurvedConnection({
   ...props
 }: EdgeProps<FlowEdge>) {
   const maskId = `edge-${useId().replace(/:/g, '')}`
-  const source = data?.source ?? { x: sourceX, y: sourceY }
-  const target = data?.target ?? { x: targetX, y: targetY }
   const sourceRadius = data?.sourceRadius ?? 56
   const targetRadius = data?.targetRadius ?? 56
+  const source = data?.source ?? { x: sourceX - sourceRadius, y: sourceY }
+  const target = data?.target ?? { x: targetX + targetRadius, y: targetY }
   const curve = connectionGeometry(
     source,
     target,
