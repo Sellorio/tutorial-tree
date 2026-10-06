@@ -1,10 +1,11 @@
 import type { FlowNode } from '../types/FlowNode'
 import type { TalentFlowNode } from '../types/TalentFlowNode'
 import { filterSearchNodes } from './filterSearchNodes'
+import { memo } from 'react'
 import { useEffect, useState } from 'react'
 import styles from './CanvasSearch.module.css'
 
-export function CanvasSearch({
+export const CanvasSearch = memo(function CanvasSearch({
   nodes,
   onSelectNode,
 }: {
@@ -96,4 +97,4 @@ export function CanvasSearch({
       ) : null}
     </div>
   )
-}
+})

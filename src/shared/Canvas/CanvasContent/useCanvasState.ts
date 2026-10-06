@@ -20,21 +20,28 @@ export function useCanvasState(props: CanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null)
   const selecting = useRef(false)
   const selectionRef = useRef(props.selection)
+  const onSelectProp = props.onSelect
   useEffect(() => {
     selectionRef.current = props.selection
   }, [props.selection])
-  const onSelect = (selection: Selection) => {
-    selectionRef.current = selection
-    props.onSelect(selection)
-  }
-  const selectSearchResult = (node: TalentFlowNode) => {
-    const center = nodeCenter(node.data.talent)
-    void flow.setCenter(center.x, center.y, {
-      zoom: flow.getZoom(),
-      duration: 250,
-    })
-    onSelect({ kind: 'node', id: node.id })
-  }
+  const onSelect = useCallback(
+    (selection: Selection) => {
+      selectionRef.current = selection
+      onSelectProp(selection)
+    },
+    [onSelectProp],
+  )
+  const selectSearchResult = useCallback(
+    (node: TalentFlowNode) => {
+      const center = nodeCenter(node.data.talent)
+      void flow.setCenter(center.x, center.y, {
+        zoom: flow.getZoom(),
+        duration: 250,
+      })
+      onSelect({ kind: 'node', id: node.id })
+    },
+    [flow, onSelect],
+  )
   const [context, setContext] = useState<CanvasMenuState>(null)
   useCanvasSelection({ ...props, flow, canvasRef })
 

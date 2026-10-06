@@ -10,6 +10,7 @@ export function useCanvasNodeState(
   flowNodes: FlowNode[],
   diagram: Diagram,
   onMove: CanvasProps['onMove'],
+  onMoveStart: CanvasProps['onMoveStart'],
   onMoveEnd: CanvasProps['onMoveEnd'],
   connectionTarget: string | null | undefined,
 ) {
@@ -30,6 +31,7 @@ export function useCanvasNodeState(
     [flowNodes, connectionTarget],
   )
   const [nodes, setNodes] = useState(initialNodes)
+  const [isMoving, setIsMoving] = useState(false)
   const movedPositions = useRef(new Map<string, Point>())
   const previousDiagram = useRef(diagram)
 
@@ -56,14 +58,20 @@ export function useCanvasNodeState(
       movedPositions.current.set(position.id, position.position)
   }
 
+  const beginMoves = () => {
+    setIsMoving(true)
+    onMoveStart?.()
+  }
+
   const commitMoves = () => {
     if (movedPositions.current.size)
       onMove(
         [...movedPositions.current].map(([id, position]) => ({ id, position })),
       )
     movedPositions.current.clear()
+    setIsMoving(false)
     onMoveEnd?.()
   }
 
-  return { nodes, onNodesChange, stageMoves, commitMoves }
+  return { nodes, isMoving, onNodesChange, stageMoves, beginMoves, commitMoves }
 }

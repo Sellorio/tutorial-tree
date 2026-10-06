@@ -1,9 +1,13 @@
 import type { NodeProps } from '@xyflow/react'
 import type { DotFlowNode } from '../types/DotFlowNode'
+import { memo } from 'react'
 import { TalentHandles } from '../TalentHandles/TalentHandles'
 import styles from './DotNode.module.css'
 
-export function DotNode({ data, selected }: NodeProps<DotFlowNode>) {
+export const DotNode = memo(function DotNode({
+  data,
+  selected,
+}: NodeProps<DotFlowNode>) {
   const { dot, editing, connectionTarget } = data
   return (
     <div
@@ -22,4 +26,4 @@ export function DotNode({ data, selected }: NodeProps<DotFlowNode>) {
       <TalentHandles editing={editing} size={12} />
     </div>
   )
-}
+})

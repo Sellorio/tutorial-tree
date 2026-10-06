@@ -10,6 +10,7 @@ export function createCanvasFlowProps(
     ...state,
     nodes: nodeState.nodes,
     onMove: nodeState.stageMoves,
+    onMoveStart: nodeState.beginMoves,
     onMoveEnd: nodeState.commitMoves,
   })
   const handleNodesChange = flowProps.onNodesChange

@@ -5,6 +5,8 @@ import { Position } from '@xyflow/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Canvas } from './Canvas'
 import { nodeCenter } from './geometry/nodeCenter'
+import * as geometry from './geometry/connectionGeometry'
+import * as searchFilter from './CanvasSearch/filterSearchNodes'
 import type { Selection } from './types/Selection'
 import { reconcileStatuses } from '../model/reconcileStatuses'
 import { starterLibrary } from '../storage/starterLibrary'
@@ -190,6 +192,14 @@ describe('canvas adapter', () => {
   it('forwards node movement and keyboard/mouse selection', () => {
     const { onMove, onSelect } = canvas()
     act(() =>
+      harness.props.onNodeDragStart!(
+        new MouseEvent('mousedown'),
+        harness.props.nodes![1],
+        harness.props.nodes!,
+      ),
+    )
+    expect(harness.props.edges![0].data?.isMoving).toBe(true)
+    act(() =>
       harness.props.onNodesChange!([
         { type: 'position', id: 'seeing', position: { x: 10, y: 20 } },
       ]),
@@ -208,6 +218,7 @@ describe('canvas adapter', () => {
     expect(onMove).toHaveBeenCalledWith([
       { id: 'seeing', position: { x: 10, y: 20 } },
     ])
+    expect(harness.props.edges![0].data?.isMoving).toBeUndefined()
     act(() =>
       harness.props.onNodesChange!([
         { type: 'select', id: 'seeing', selected: true },
@@ -380,6 +391,7 @@ describe('canvas adapter', () => {
     expect(onSelect).toHaveBeenLastCalledWith(null)
   })
   it('searches visible nodes and centers and selects a result', () => {
+    const filterSpy = vi.spyOn(searchFilter, 'filterSearchNodes')
     const { diagram, rerender, onSelect, ...props } = canvas(false)
     const start = diagram.nodes.find(
       (node): node is TalentNode => node.kind === 'start',
@@ -423,10 +435,22 @@ describe('canvas adapter', () => {
       name: 'Search visible nodes',
     })
     fireEvent.change(search, { target: { value: 'needle' } })
+    const filterCalls = filterSpy.mock.calls.length
     expect(
       screen.getByRole('button', { name: 'Visible needle' }),
     ).toBeInTheDocument()
     expect(screen.queryByText('Hidden needle')).not.toBeInTheDocument()
+    act(() =>
+      harness.props.onNodesChange!([
+        {
+          type: 'position',
+          id: visibleNode.id,
+          position: { x: 20, y: 30 },
+        },
+      ]),
+    )
+    expect(filterSpy).toHaveBeenCalledTimes(filterCalls)
+    filterSpy.mockRestore()
     fireEvent.click(screen.getByRole('button', { name: 'Visible needle' }))
 
     expect(onSelect).toHaveBeenLastCalledWith({
@@ -567,6 +591,7 @@ describe('canvas adapter', () => {
   })
   it('renders reversible curved paths from endpoint coordinates', () => {
     canvas()
+    const geometrySpy = vi.spyOn(geometry, 'connectionGeometry')
     const Edge = harness.props.edgeTypes!.curved
     const props = {
       id: 'edge',
@@ -590,9 +615,17 @@ describe('canvas adapter', () => {
     const first = screen.getByTestId('curve-path').getAttribute('d')
     rerender(
       <svg>
+        <Edge {...props} />
+      </svg>,
+    )
+    expect(geometrySpy).toHaveBeenCalledOnce()
+    rerender(
+      <svg>
         <Edge {...props} data={{ clockwise: false }} selected={false} />
       </svg>,
     )
     expect(screen.getByTestId('curve-path').getAttribute('d')).not.toBe(first)
+    expect(geometrySpy).toHaveBeenCalledTimes(2)
+    geometrySpy.mockRestore()
   })
 })

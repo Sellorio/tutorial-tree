@@ -1,12 +1,12 @@
 import { connectionGeometry } from '../geometry/connectionGeometry'
 import type { FlowEdge } from '../types/FlowEdge'
-import { useId } from 'react'
+import { memo, useId } from 'react'
 import { BaseEdge } from '@xyflow/react'
 import type { EdgeProps } from '@xyflow/react'
 import { ChevronRight } from 'lucide-react'
 import styles from './CurvedConnection.module.css'
 
-export function CurvedConnection({
+export const CurvedConnection = memo(function CurvedConnection({
   sourceX,
   sourceY,
   targetX,
@@ -27,6 +27,7 @@ export function CurvedConnection({
     sourceRadius,
     targetRadius,
     data?.curveAngle,
+    !data?.isMoving,
   )
   const extent = Math.max(curve.length * 2, 200)
   return (
@@ -90,4 +91,4 @@ export function CurvedConnection({
       </g>
     </g>
   )
-}
+})

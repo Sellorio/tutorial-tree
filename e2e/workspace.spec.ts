@@ -1700,6 +1700,7 @@ test('center-driven edges keep spaced arrows and synchronized geometry throughou
     await expect(edge.locator('.react-flow__edge-path')).toBeVisible()
   }
   await page.mouse.up()
+  await expect(edge.locator('[data-arrow-distance]').first()).toBeVisible()
   await node.click({ button: 'right' })
   page.once('dialog', (dialog) => dialog.dismiss())
   await page.getByRole('menuitem', { name: 'Delete node' }).click()

@@ -9,6 +9,7 @@ export type FlowEdge = Edge<
     target?: Point
     sourceRadius: number
     targetRadius: number
+    isMoving?: boolean
   },
   'curved'
 >

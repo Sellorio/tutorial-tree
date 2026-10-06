@@ -34,20 +34,25 @@ export function CanvasContent(props: CanvasProps) {
     state.nodes,
     state.diagram,
     state.onMove,
+    state.onMoveStart,
     state.onMoveEnd,
     connection.target,
   )
   const flowProps = createCanvasFlowProps(state, nodeState)
-  const edges = useMemo(
-    () =>
-      connection.preview
-        ? [
-            ...state.edges,
-            { ...connection.preview, className: styles.connectionPreview },
-          ]
-        : state.edges,
-    [state.edges, connection.preview],
-  )
+  const edges = useMemo(() => {
+    const visibleEdges = connection.preview
+      ? [
+          ...state.edges,
+          { ...connection.preview, className: styles.connectionPreview },
+        ]
+      : state.edges
+    return nodeState.isMoving
+      ? visibleEdges.map((edge): FlowEdge => ({
+          ...edge,
+          data: edge.data ? { ...edge.data, isMoving: true } : undefined,
+        }))
+      : visibleEdges
+  }, [state.edges, connection.preview, nodeState.isMoving])
   return (
     <div
       ref={canvasRef}
@@ -78,7 +83,7 @@ export function CanvasContent(props: CanvasProps) {
         />
       </ReactFlow>
       <CanvasToolbar flow={flow} editing={editing} onAdd={onAdd} />
-      <CanvasSearch nodes={nodeState.nodes} onSelectNode={selectSearchResult} />
+      <CanvasSearch nodes={state.nodes} onSelectNode={selectSearchResult} />
       {context && (
         <CanvasContextMenu
           context={context}

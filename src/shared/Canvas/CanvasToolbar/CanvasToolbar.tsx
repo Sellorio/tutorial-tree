@@ -1,9 +1,14 @@
 import type { CanvasToolbarProps } from './CanvasToolbarProps'
 import { Circle, CircleDot, Focus, Minus, Plus } from 'lucide-react'
+import { memo } from 'react'
 import { useViewport } from '@xyflow/react'
 import styles from './CanvasToolbar.module.css'
 
-export function CanvasToolbar({ flow, editing, onAdd }: CanvasToolbarProps) {
+export const CanvasToolbar = memo(function CanvasToolbar({
+  flow,
+  editing,
+  onAdd,
+}: CanvasToolbarProps) {
   const { zoom } = useViewport()
   return (
     <div className={styles.tools}>
@@ -83,4 +88,4 @@ export function CanvasToolbar({ flow, editing, onAdd }: CanvasToolbarProps) {
       )}
     </div>
   )
-}
+})
