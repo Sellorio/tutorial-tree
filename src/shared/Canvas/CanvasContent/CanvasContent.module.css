@@ -6,6 +6,11 @@
   background: var(--canvas);
   overflow: hidden;
 }
+
+.canvas :global(.react-flow__viewport) {
+  will-change: transform;
+}
+
 .canvas :global(.react-flow__node) {
   border: 0;
   background: none;

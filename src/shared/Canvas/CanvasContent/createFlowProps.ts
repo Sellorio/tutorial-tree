@@ -130,6 +130,6 @@ export function createFlowProps({
     maxZoom: 2,
     fitView: true,
     fitViewOptions: { padding: 0.2, maxZoom: 1 },
-    onlyRenderVisibleElements: false,
+    onlyRenderVisibleElements: true,
   }
 }

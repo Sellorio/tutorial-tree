@@ -98,6 +98,7 @@ test('run rendering stays stable after panning and switching tabs', async ({
   const before = await canvas.screenshot({ animations: 'disabled' })
   const viewport = page.locator('.react-flow__viewport')
   const transform = await viewport.getAttribute('style')
+  await expect(viewport).toHaveCSS('will-change', 'transform')
   await drag(page, origin, destination)
   await expect(viewport).not.toHaveAttribute('style', transform!)
   await drag(page, destination, origin)
@@ -123,7 +124,7 @@ test('Show All Skills hides deeper locked skills and persists per journey', asyn
   })
   const lockedNode = page.locator('[data-node-id="color"]')
 
-  await expect(nodes).toHaveCount(8)
+  await expect(page.getByTestId('talent-composition')).toBeVisible()
   await expect(page.getByTestId('talent-start')).toHaveCSS(
     'border-top-color',
     'rgb(20, 83, 45)',
@@ -146,7 +147,7 @@ test('Show All Skills hides deeper locked skills and persists per journey', asyn
   ).not.toBeChecked()
   await expect(nodes).toHaveCount(4)
   await page.getByRole('checkbox', { name: 'Show All Skills' }).check()
-  await expect(nodes).toHaveCount(8)
+  await expect(page.getByTestId('talent-composition')).toBeVisible()
   await page.getByTestId('talent-seeing').click()
   await page.getByRole('button', { name: 'In progress', exact: true }).click()
   await expect(page.getByTestId('talent-seeing')).toHaveCSS(

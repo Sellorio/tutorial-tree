@@ -43,7 +43,9 @@ vi.mock('@xyflow/react', () => ({
   },
   useReactFlow: () => harness.flow,
   useViewport: () => ({ zoom: 1, x: 0, y: 0 }),
-  useStore: () => 1,
+  useStore: (
+    selector: (state: { transform: [number, number, number] }) => unknown,
+  ) => selector({ transform: [0, 0, 1] }),
   applyNodeChanges: (
     changes: {
       id: string
@@ -172,6 +174,7 @@ describe('canvas adapter', () => {
       height: 50,
       draggable: true,
     })
+    expect(harness.props.onlyRenderVisibleElements).toBe(true)
     const connection = {
       source: 'start',
       target: 'series',
