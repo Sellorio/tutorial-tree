@@ -5,6 +5,7 @@ import { CanvasToolbar } from '../CanvasToolbar/CanvasToolbar'
 import { CanvasSearch } from '../CanvasSearch/CanvasSearch'
 import { CanvasContextMenu } from '../../../pages/edit/CanvasContextMenu/CanvasContextMenu'
 import { useCanvasState } from './useCanvasState'
+import { syncEdgeCenters } from './syncEdgeCenters'
 import { createCanvasFlowProps } from './createCanvasFlowProps'
 import { useCanvasNodeState } from './useCanvasNodeState'
 import { useConnectionDrag } from './useConnectionDrag'
@@ -41,19 +42,20 @@ export function CanvasContent(props: CanvasProps) {
   )
   const flowProps = createCanvasFlowProps(state, nodeState)
   const edges = useMemo(() => {
+    const currentEdges = syncEdgeCenters(state.edges, nodeState.nodes)
     const visibleEdges = connection.preview
       ? [
-          ...state.edges,
+          ...currentEdges,
           { ...connection.preview, className: styles.connectionPreview },
         ]
-      : state.edges
+      : currentEdges
     return nodeState.isMoving
       ? visibleEdges.map((edge): FlowEdge => ({
           ...edge,
           data: edge.data ? { ...edge.data, isMoving: true } : undefined,
         }))
       : visibleEdges
-  }, [state.edges, connection.preview, nodeState.isMoving])
+  }, [state.edges, connection.preview, nodeState.isMoving, nodeState.nodes])
   return (
     <div
       ref={canvasRef}

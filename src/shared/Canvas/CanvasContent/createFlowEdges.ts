@@ -1,5 +1,6 @@
 import { nodeSize } from '../../model/nodeSize'
 import { isConnectionActive } from '../../model/isConnectionActive'
+import { nodeCenter } from '../geometry/nodeCenter'
 import type { FlowEdge } from '../types/FlowEdge'
 import type { CanvasProps } from '../types/CanvasProps'
 import { getVisibleNodeIds } from './getVisibleNodeIds'
@@ -33,6 +34,8 @@ export function createFlowEdges({
         data: {
           clockwise: connection.clockwise,
           curveAngle: connection.curveAngle,
+          source: nodeCenter(sourceNode),
+          target: nodeCenter(targetNode),
           sourceRadius: nodeSize(sourceNode) / 2,
           targetRadius: nodeSize(targetNode) / 2,
         },

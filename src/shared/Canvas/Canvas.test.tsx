@@ -514,7 +514,10 @@ describe('canvas adapter', () => {
       selectable: true,
       ariaLabel: 'Routing dot',
     })
+    const source = diagram.nodes.find((node) => node.id === 'seeing')!
     expect(harness.props.edges!.at(-1)?.data).toMatchObject({
+      source: nodeCenter(source),
+      target: nodeCenter(dot),
       targetRadius: 6,
     })
   })
