@@ -16,6 +16,7 @@ import type { TalentNode } from '../model/types/TalentNode'
 const harness = vi.hoisted(() => ({
   props: {} as ReactFlowProps,
   observer: null as (() => void) | null,
+  edgeProps: {} as Record<string, unknown>,
   flow: {
     setCenter: vi.fn(),
     getZoom: vi.fn(() => 0.83),
@@ -41,6 +42,7 @@ vi.mock('@xyflow/react', () => ({
       </div>
     )
   },
+  ViewportPortal: ({ children }: { children: ReactNode }) => children,
   useReactFlow: () => harness.flow,
   useViewport: () => ({ zoom: 1, x: 0, y: 0 }),
   useStore: (
@@ -71,11 +73,14 @@ vi.mock('@xyflow/react', () => ({
   Handle: ({ position, type }: { position: string; type: string }) => (
     <span data-testid={`${type}-handle-${position}`} />
   ),
-  BaseEdge: ({ path }: { path: string }) => (
-    <svg>
-      <path data-testid="curve-path" d={path} />
-    </svg>
-  ),
+  BaseEdge: (props: { path: string } & Record<string, unknown>) => {
+    harness.edgeProps = props
+    return (
+      <svg>
+        <path data-testid="curve-path" d={props.path} />
+      </svg>
+    )
+  },
   Position: { Left: 'left', Right: 'right', Top: 'top', Bottom: 'bottom' },
   ConnectionMode: { Loose: 'loose' },
   SelectionMode: { Partial: 'partial' },
@@ -118,6 +123,25 @@ function canvas(editing = true, selection: Selection = null) {
 const event = {} as ReactMouseEvent
 
 describe('canvas adapter', () => {
+  it('renders the diagram background centered on the flow origin', () => {
+    const { diagram, rerender, ...props } = canvas()
+    diagram.background = {
+      image: '/studio.jpg',
+      width: 1600,
+      height: 900,
+      lockAspectRatio: false,
+    }
+    rerender(<Canvas {...props} diagram={diagram} />)
+    expect(screen.getByTestId('diagram-background')).toHaveStyle({
+      width: '1600px',
+      height: '900px',
+      left: '-800px',
+      top: '-450px',
+    })
+    expect(
+      screen.getByTestId('diagram-background').querySelector('img'),
+    ).toHaveAttribute('src', '/studio.jpg')
+  })
   it('offers node/connection context deletion but protects Start', () => {
     const { onDelete } = canvas()
     const contextEvent = {
@@ -607,6 +631,11 @@ describe('canvas adapter', () => {
       sourceY: 0,
       targetX: 100,
       targetY: 0,
+      selectable: true,
+      deletable: true,
+      sourceHandleId: 'source-handle',
+      targetHandleId: 'target-handle',
+      pathOptions: { offset: 24 },
       data: { clockwise: true },
       selected: true,
     } satisfies EdgeProps
@@ -615,6 +644,13 @@ describe('canvas adapter', () => {
         <Edge {...props} />
       </svg>,
     )
+    expect(harness.edgeProps).not.toHaveProperty('selectable')
+    expect(harness.edgeProps).not.toHaveProperty('deletable')
+    expect(harness.edgeProps).not.toHaveProperty('sourcePosition')
+    expect(harness.edgeProps).not.toHaveProperty('targetPosition')
+    expect(harness.edgeProps).not.toHaveProperty('sourceHandleId')
+    expect(harness.edgeProps).not.toHaveProperty('targetHandleId')
+    expect(harness.edgeProps).not.toHaveProperty('pathOptions')
     const first = screen.getByTestId('curve-path').getAttribute('d')
     rerender(
       <svg>

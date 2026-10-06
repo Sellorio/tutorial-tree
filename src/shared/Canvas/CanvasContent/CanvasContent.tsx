@@ -9,7 +9,8 @@ import { createCanvasFlowProps } from './createCanvasFlowProps'
 import { useCanvasNodeState } from './useCanvasNodeState'
 import { useConnectionDrag } from './useConnectionDrag'
 import { useShiftSelection } from './useShiftSelection'
-import { Background, BackgroundVariant, ReactFlow } from '@xyflow/react'
+import { ReactFlow } from '@xyflow/react'
+import { CanvasBackground } from '../CanvasBackground/CanvasBackground'
 import { useMemo } from 'react'
 import styles from './CanvasContent.module.css'
 
@@ -75,12 +76,7 @@ export function CanvasContent(props: CanvasProps) {
         edges={edges}
         nodes={nodeState.nodes}
       >
-        <Background
-          variant={BackgroundVariant.Dots}
-          gap={24}
-          size={1.1}
-          color="var(--dot)"
-        />
+        <CanvasBackground background={state.diagram.background} />
       </ReactFlow>
       <CanvasToolbar flow={flow} editing={editing} onAdd={onAdd} />
       <CanvasSearch nodes={state.nodes} onSelectNode={selectSearchResult} />

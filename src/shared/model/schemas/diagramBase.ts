@@ -15,6 +15,22 @@ export const diagramBase = z.object({
     .max(3000000)
     .refine(safeImage, 'Use an image URL or an uploaded image.')
     .default(''),
+  background: z
+    .object({
+      image: z
+        .string()
+        .max(3000000)
+        .refine(safeImage, 'Use an image URL or an uploaded image.'),
+      width: z.number().int().min(1).max(Number.MAX_SAFE_INTEGER),
+      height: z.number().int().min(1).max(Number.MAX_SAFE_INTEGER),
+      lockAspectRatio: z.boolean(),
+    })
+    .default({
+      image: '',
+      width: 1200,
+      height: 800,
+      lockAspectRatio: true,
+    }),
   categories: z
     .array(categorySchema)
     .min(1)

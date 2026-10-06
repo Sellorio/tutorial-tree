@@ -7,6 +7,7 @@
 5. Update unit tests and e2e tests
 6. Verify change using `npm run verify`. If verification breaks due to changes caused by me, fix the verification issues. This includes fixing any bugs that tests may uncover.
 7. Test the change using the built-in browser (if you can).
+8. Always shut down any instances of that app that you started (including any leftover instances from playwright test runs).
 
 # Implementation Guidelines
 

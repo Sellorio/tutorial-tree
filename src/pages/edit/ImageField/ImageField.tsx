@@ -16,7 +16,11 @@ export function ImageField({
   return (
     <div className={styles.fields}>
       <label>
-        {kind === 'diagram' ? 'Diagram image URL' : 'Image URL'}
+        {kind === 'diagram'
+          ? 'Diagram image URL'
+          : kind === 'background'
+            ? 'Background image URL'
+            : 'Image URL'}
         <input
           type="url"
           placeholder="https://..."
@@ -41,12 +45,22 @@ export function ImageField({
           onClick={() => uploadRef.current?.click()}
         >
           <ImagePlus size={15} />
-          {kind === 'diagram' ? 'Upload cover' : 'Upload image'}
+          {kind === 'diagram'
+            ? 'Upload cover'
+            : kind === 'background'
+              ? 'Upload background'
+              : 'Upload image'}
         </button>
         {value && (
           <button
             className={styles.iconButton}
-            aria-label={kind === 'diagram' ? 'Remove cover' : 'Remove image'}
+            aria-label={
+              kind === 'diagram'
+                ? 'Remove cover'
+                : kind === 'background'
+                  ? 'Remove background image'
+                  : 'Remove image'
+            }
             title="Remove image"
             onClick={() => onChange('')}
           >

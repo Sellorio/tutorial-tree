@@ -352,6 +352,12 @@ describe('editing and validation', () => {
     legacy.nodes[1].image = '/studio.jpg'
     const migrated = diagramSchema.parse(legacy)
     expect(migrated.image).toBe('')
+    expect(migrated.background).toEqual({
+      image: '',
+      width: 1200,
+      height: 800,
+      lockAspectRatio: true,
+    })
     expect(migrated.nodes[1]).toMatchObject({
       name: '',
       size: 'medium',

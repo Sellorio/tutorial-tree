@@ -1,4 +1,5 @@
 import { ImageField } from '../ImageField/ImageField'
+import { DiagramBackgroundSettings } from '../DiagramBackgroundSettings/DiagramBackgroundSettings'
 import { ActivationField } from '../ActivationField/ActivationField'
 import { CategoryEditor } from '../CategoryEditor/CategoryEditor'
 import type { TreeOverviewProps } from './TreeOverviewProps'
@@ -61,6 +62,12 @@ export function TreeOverview({
         onChange={(activeStatuses) =>
           onDiagram?.({ ...diagram, activeStatuses })
         }
+      />
+      <div className={styles.sectionHeading}>CANVAS BACKGROUND</div>
+      <DiagramBackgroundSettings
+        background={diagram.background}
+        onChange={(background) => onDiagram?.({ ...diagram, background })}
+        onError={onError}
       />
       <div className={styles.sectionHeading}>DIAGRAM COVER</div>
       <ImageField

@@ -1580,6 +1580,56 @@ test('sizes, icons, cover images and split run panels persist across save and re
     page.getByRole('button', { name: 'Category Green', exact: true }),
   ).toHaveCount(0)
   await page
+    .getByLabel('Upload background image')
+    .setInputFiles('public/studio.jpg')
+  const backgroundImage = page.getByTestId('diagram-background').locator('img')
+  await expect
+    .poll(() =>
+      backgroundImage.evaluate(
+        (image) => (image as HTMLImageElement).naturalWidth,
+      ),
+    )
+    .toBeGreaterThan(0)
+  const naturalSize = await backgroundImage.evaluate((image) => {
+    const loadedImage = image as HTMLImageElement
+    return {
+      width: loadedImage.naturalWidth,
+      height: loadedImage.naturalHeight,
+    }
+  })
+  await expect(page.getByLabel('Background width (px)')).toHaveValue(
+    String(naturalSize.width),
+  )
+  await expect(page.getByLabel('Background height (px)')).toHaveValue(
+    String(naturalSize.height),
+  )
+  await page.getByLabel('Background width (px)').fill('1600')
+  await expect(page.getByLabel('Background height (px)')).toHaveValue(
+    String(Math.round((1600 * naturalSize.height) / naturalSize.width)),
+  )
+  await page.getByLabel('Lock aspect ratio').uncheck()
+  await page.getByLabel('Background height (px)').fill('900')
+  await expect(page.getByTestId('diagram-background')).toHaveCSS(
+    'z-index',
+    '-1',
+  )
+  await expect(page.getByTestId('diagram-background')).toHaveCSS(
+    'left',
+    '-800px',
+  )
+  await expect(page.getByTestId('diagram-background')).toHaveCSS(
+    'top',
+    '-450px',
+  )
+  await expect(page.getByTestId('diagram-background').locator('img')).toHaveCSS(
+    'opacity',
+    '0.5',
+  )
+  await expect(page.getByTestId('diagram-background').locator('img')).toHaveCSS(
+    'filter',
+    'saturate(0.7)',
+  )
+  await page
     .getByLabel('Upload diagram image')
     .setInputFiles('public/studio.jpg')
   await page.getByTestId('talent-seeing').click()
@@ -1603,11 +1653,22 @@ test('sizes, icons, cover images and split run panels persist across save and re
   await page.getByRole('button', { name: 'Save & return' }).click()
   const diagram = (await stored(page)).diagrams[0]
   expect(diagram.image).toContain('data:image/jpeg;base64,')
+  expect(diagram.background).toMatchObject({
+    width: 1600,
+    height: 900,
+    lockAspectRatio: false,
+  })
+  expect(diagram.background.image).toContain('data:image/jpeg;base64,')
   await expect(
     page.getByRole('img', { name: 'Creative foundations cover' }),
   ).toHaveAttribute('src', /^data:image/)
   await startJourney(page, 'Visual options')
   await page.reload()
+  await expect(page.getByTestId('diagram-background')).toBeVisible()
+  await expect(page.getByTestId('diagram-background').locator('img')).toHaveCSS(
+    'opacity',
+    '0.5',
+  )
   await expect(page.getByTestId('talent-seeing')).toHaveCSS('width', '110px')
   await expect(page.getByTestId('talent-color')).toHaveCSS('width', '50px')
   await expect(page.getByTestId('talent-start')).toHaveCSS('width', '50px')

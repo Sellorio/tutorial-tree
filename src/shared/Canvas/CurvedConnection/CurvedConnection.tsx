@@ -7,13 +7,16 @@ import { ChevronRight } from 'lucide-react'
 import styles from './CurvedConnection.module.css'
 
 export const CurvedConnection = memo(function CurvedConnection({
+  id,
   sourceX,
   sourceY,
   targetX,
   targetY,
   data,
   selected,
-  ...props
+  markerEnd,
+  markerStart,
+  style,
 }: EdgeProps<FlowEdge>) {
   const maskId = `edge-${useId().replace(/:/g, '')}`
   const sourceRadius = data?.sourceRadius ?? 56
@@ -67,12 +70,15 @@ export const CurvedConnection = memo(function CurvedConnection({
         </mask>
       </defs>
       <BaseEdge
-        {...props}
+        id={id}
         path={curve.path}
         className={`${styles.connection} ${selected ? styles.selectedConnection : ''}`}
+        markerStart={markerStart}
+        markerEnd={markerEnd}
+        style={style}
         interactionWidth={22}
       />
-      <g className={styles.pathArrows} style={props.style}>
+      <g className={styles.pathArrows} style={style}>
         {curve.arrows.map((arrow) => (
           <g
             key={arrow.distance}
