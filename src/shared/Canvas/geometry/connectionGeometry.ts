@@ -9,7 +9,6 @@ export function connectionGeometry(
   sourceRadius: number,
   targetRadius: number,
   curveAngle?: number,
-  includeArrows = true,
 ) {
   const { path } = connectionCurve(
     source,
@@ -19,13 +18,6 @@ export function connectionGeometry(
     sourceRadius,
     targetRadius,
   )
-  if (!includeArrows) {
-    return {
-      path,
-      arrows: [],
-      length: Math.hypot(target.x - source.x, target.y - source.y),
-    }
-  }
   const properties = new svgPathProperties(path)
   const length = properties.getTotalLength()
   const arrows: { x: number; y: number; angle: number; distance: number }[] = []

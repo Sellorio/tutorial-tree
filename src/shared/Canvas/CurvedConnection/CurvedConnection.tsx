@@ -30,7 +30,6 @@ export const CurvedConnection = memo(function CurvedConnection({
     sourceRadius,
     targetRadius,
     data?.curveAngle,
-    !data?.isMoving,
   )
   const extent = Math.max(curve.length * 2, 200)
   return (

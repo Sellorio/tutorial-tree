@@ -26,6 +26,7 @@ import type { TalentNode } from './types/TalentNode'
 
 function fixture() {
   const diagram = createDiagram('Test tree')
+  diagram.activeStatuses = ['in-progress', 'completed']
   const start = diagram.nodes.find(
     (node): node is TalentNode => node.kind === 'start',
   )!
@@ -298,6 +299,37 @@ describe('progress rules', () => {
     expect(merged.statuses[second.id]).toBe('locked')
     expect(merged.statuses.deleted).toBeUndefined()
     expect(reconcileStatuses(diagram, merged.statuses)).toEqual(merged.statuses)
+  })
+  it('starts new diagrams fully unlocked and recursively relocks after changing defaults', () => {
+    const diagram = createDiagram('Unlocked tree')
+    const start = diagram.nodes[0]
+    const first = createNode({ x: 200, y: 100 })
+    const second = createNode({ x: 400, y: 100 })
+    const final = createNode({ x: 600, y: 100 })
+    diagram.nodes.push(first, second, final)
+    diagram.connections = [
+      [start, first],
+      [first, second],
+      [second, final],
+    ].map(([source, target]) => ({
+      id: crypto.randomUUID(),
+      source: source.id,
+      target: target.id,
+      clockwise: true,
+    }))
+
+    const instance = createInstance(diagram, 'My journey')
+    expect(instance.statuses[first.id]).toBe('unlocked')
+    expect(instance.statuses[second.id]).toBe('unlocked')
+    expect(instance.statuses[final.id]).toBe('unlocked')
+
+    const updated = saveDiagram(
+      { version: 1, diagrams: [diagram], instances: [instance] },
+      { ...diagram, activeStatuses: ['in-progress', 'completed'] },
+    )
+    expect(updated.instances[0].statuses[first.id]).toBe('unlocked')
+    expect(updated.instances[0].statuses[second.id]).toBe('locked')
+    expect(updated.instances[0].statuses[final.id]).toBe('locked')
   })
   it('instances have independent, unique state', () => {
     const { diagram, instance, first } = fixture()

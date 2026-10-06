@@ -32,9 +32,29 @@ async function drag(
   await page.mouse.up({ button })
 }
 
-async function startJourney(page: Page, name = 'My first journey') {
+async function startJourney(
+  page: Page,
+  name = 'My first journey',
+  useLegacyDefaults = false,
+) {
   if (await page.getByRole('button', { name: 'Save & return' }).count())
     await page.getByRole('button', { name: 'Save & return' }).click()
+  if (useLegacyDefaults) {
+    const storedLibrary = await page.evaluate(
+      (key) => localStorage.getItem(key),
+      STORAGE_KEY,
+    )
+    const library = storedLibrary
+      ? (JSON.parse(storedLibrary) as Library)
+      : starterLibrary()
+    library.diagrams[0].activeStatuses = ['in-progress', 'completed']
+    await page.evaluate(
+      ({ key, value }) => localStorage.setItem(key, JSON.stringify(value)),
+      { key: STORAGE_KEY, value: library },
+    )
+    await page.reload()
+    await page.getByRole('tab', { name: /Skill trees/ }).click()
+  }
   await page.getByRole('tab', { name: /My journeys/ }).click()
   await page.getByRole('button', { name: 'New journey', exact: true }).click()
   const dialog = page.getByRole('dialog')
@@ -78,18 +98,28 @@ test('run rendering stays stable after panning and switching tabs', async ({
   context,
 }) => {
   await startJourney(page)
-  const locked = page.locator('[data-node-id][data-status="locked"]').first()
-  await expect(locked).toBeVisible()
-  await expect(locked).toHaveCSS('filter', 'none')
-  await expect(locked).toHaveCSS('opacity', '1')
+  const unlocked = page
+    .locator('[data-node-id][data-status="unlocked"]')
+    .first()
+  await expect(unlocked).toBeVisible()
+  await expect(
+    page.locator('[data-node-id][data-status="locked"]'),
+  ).toHaveCount(0)
+  await expect(unlocked).toHaveCSS('filter', 'none')
+  await expect(unlocked).toHaveCSS('opacity', '1')
   const edges = page.locator('.react-flow__edge-path')
   await expect(edges).not.toHaveCount(0)
+  await expect(page.locator('.react-flow__edge').first()).toHaveCSS(
+    'pointer-events',
+    'none',
+  )
+  await expect(edges.first()).toHaveCSS('pointer-events', 'none')
   for (const edge of await edges.all()) {
     await expect(edge).toHaveCSS('opacity', '1')
     await expect(edge).not.toHaveCSS('stroke', 'none')
   }
   await page.getByRole('button', { name: 'Fit tree' }).click()
-  await locked.hover()
+  await unlocked.hover()
   const canvas = page.getByTestId('canvas')
   const bounds = (await canvas.boundingBox())!
   const origin = { x: bounds.x + 30, y: bounds.y + 40 }
@@ -117,7 +147,7 @@ test('run rendering stays stable after panning and switching tabs', async ({
 test('Show All Skills hides deeper locked skills and persists per journey', async ({
   page,
 }) => {
-  await startJourney(page)
+  await startJourney(page, 'My first journey', true)
   const nodes = page.locator('.react-flow__node')
   const showAllSkills = page.getByRole('checkbox', {
     name: 'Show All Skills',
@@ -165,7 +195,7 @@ test('Show All Skills hides deeper locked skills and persists per journey', asyn
 test('Ctrl+F searches visible nodes and centers and selects a result', async ({
   page,
 }) => {
-  await startJourney(page)
+  await startJourney(page, 'My first journey', true)
   const zoomIndicator = page.getByRole('button', {
     name: 'Reset zoom to 100%',
   })
@@ -481,7 +511,7 @@ test('connection curve slider and activation settings render and persist', async
   await page.getByRole('button', { name: 'Edit Creative foundations' }).click()
   await expect(
     page.getByRole('checkbox', { name: 'Unlocked', exact: true }),
-  ).not.toBeChecked()
+  ).toBeChecked()
   await expect(
     page.getByRole('checkbox', { name: 'In Progress', exact: true }),
   ).toBeChecked()
@@ -960,7 +990,7 @@ test('protects Start, rejects incoming Start links, and confirms node/connection
 test('run mode persists states, closes overlays, warns on reversal, and locks dependents', async ({
   page,
 }) => {
-  await startJourney(page)
+  await startJourney(page, 'My first journey', true)
   await expect(
     page.getByRole('checkbox', { name: 'Show All Skills' }),
   ).toBeVisible()
@@ -1329,6 +1359,7 @@ test('ALL and ANY prerequisites reconcile in browser, preserving completed nodes
 }) => {
   const library = starterLibrary()
   const diagram = library.diagrams[0]
+  diagram.activeStatuses = ['in-progress', 'completed']
   const instance = createInstance(diagram, 'Prerequisites')
   Object.assign(instance.statuses, {
     seeing: 'completed',
@@ -1760,6 +1791,7 @@ test('center-driven edges keep spaced arrows and synchronized geometry throughou
     })
     expect(error).toBeLessThan(1)
     await expect(edge.locator('.react-flow__edge-path')).toBeVisible()
+    await expect(edge.locator('[data-arrow-distance]').first()).toBeVisible()
   }
   await page.mouse.up()
   await expect(edge.locator('[data-arrow-distance]').first()).toBeVisible()

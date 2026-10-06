@@ -17,7 +17,7 @@ export function createDiagram(name: string): Diagram {
     categories: DEFAULT_CATEGORIES.map((category) => ({ ...category })),
     nodes: [createNode({ x: 80, y: 260 }, 'start')],
     connections: [],
-    activeStatuses: ['in-progress', 'completed'],
+    activeStatuses: ['in-progress', 'completed', 'unlocked'],
     updatedAt: now(),
   }
 }

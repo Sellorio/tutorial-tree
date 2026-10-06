@@ -146,10 +146,9 @@ describe('workspace orchestration', () => {
   })
   it('saves diagram defaults and connection overrides with a manual curve', () => {
     openEditor()
-    expect(screen.getByRole('checkbox', { name: 'Unlocked' })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Unlocked' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'In Progress' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Completed' })).toBeChecked()
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Unlocked' }))
     fireEvent.click(screen.getByRole('button', { name: 'Canvas connect' }))
     expect(screen.getByRole('checkbox', { name: 'Completed' })).toBeDisabled()
     fireEvent.click(screen.getByRole('radio', { name: 'Manual curve' }))
@@ -350,7 +349,7 @@ describe('workspace orchestration', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Unlocked' }))
     expect(saved().instances[0].statuses.seeing).toBe('completed')
     fireEvent.click(screen.getByRole('button', { name: 'Unlocked' }))
-    expect(saved().instances[0].statuses.color).toBe('locked')
+    expect(saved().instances[0].statuses.color).toBe('in-progress')
     expect(screen.queryByLabelText('Node details')).not.toBeInTheDocument()
   })
   it('persists the Show All Skills preference on the active journey', () => {

@@ -106,6 +106,7 @@ beforeEach(() => {
 
 function canvas(editing = true, selection: Selection = null) {
   const diagram = starterLibrary().diagrams[0]
+  diagram.activeStatuses = ['in-progress', 'completed']
   const props = {
     diagram,
     editing,
@@ -225,7 +226,6 @@ describe('canvas adapter', () => {
         harness.props.nodes!,
       ),
     )
-    expect(harness.props.edges![0].data?.isMoving).toBe(true)
     act(() =>
       harness.props.onNodesChange!([
         { type: 'position', id: 'seeing', position: { x: 10, y: 20 } },
@@ -245,7 +245,6 @@ describe('canvas adapter', () => {
     expect(onMove).toHaveBeenCalledWith([
       { id: 'seeing', position: { x: 10, y: 20 } },
     ])
-    expect(harness.props.edges![0].data?.isMoving).toBeUndefined()
     act(() =>
       harness.props.onNodesChange!([
         { type: 'select', id: 'seeing', selected: true },

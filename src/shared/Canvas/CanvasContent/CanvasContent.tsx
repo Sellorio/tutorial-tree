@@ -49,13 +49,8 @@ export function CanvasContent(props: CanvasProps) {
           { ...connection.preview, className: styles.connectionPreview },
         ]
       : currentEdges
-    return nodeState.isMoving
-      ? visibleEdges.map((edge): FlowEdge => ({
-          ...edge,
-          data: edge.data ? { ...edge.data, isMoving: true } : undefined,
-        }))
-      : visibleEdges
-  }, [state.edges, connection.preview, nodeState.isMoving, nodeState.nodes])
+    return visibleEdges
+  }, [state.edges, connection.preview, nodeState.nodes])
   return (
     <div
       ref={canvasRef}

@@ -42,23 +42,15 @@ describe('center-based connection geometry', () => {
       result.path,
     )
   })
-  it('keeps the live path but skips arrow sampling during movement', () => {
+  it('keeps arrows on updated live paths during movement', () => {
     const source = { x: 0, y: 0 }
     const target = { x: 500, y: 250 }
-    const full = connectionGeometry(source, target, true, 56, 72)
-    const moving = connectionGeometry(
-      source,
-      target,
-      true,
-      56,
-      72,
-      undefined,
-      false,
-    )
+    const updated = connectionGeometry(source, { x: 480, y: 270 }, true, 56, 72)
 
-    expect(moving.path).toBe(full.path)
-    expect(moving.arrows).toEqual([])
-    expect(moving.length).toBe(Math.hypot(500, 250))
+    expect(updated.path).not.toBe(
+      connectionGeometry(source, target, true, 56, 72).path,
+    )
+    expect(updated.arrows.length).toBeGreaterThan(0)
   })
   it('handles overlapping nodes without invalid geometry or arrows inside nodes', () => {
     const result = connectionGeometry(
