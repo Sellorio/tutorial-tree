@@ -10,6 +10,35 @@
   flex: 1;
   min-height: 0;
 }
+
+.loadingOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: var(--lighten);
+  color: var(--text);
+}
+
+.loadingSpinner {
+  animation: workspaceAppLoading 0.8s linear infinite;
+}
+
+@keyframes workspaceAppLoading {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loadingSpinner {
+    animation: none;
+  }
+}
+
 @media (max-width: 700px) {
   .workspace {
     flex-direction: column;

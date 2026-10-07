@@ -12,6 +12,15 @@ import { saved } from './testing/saved'
 import { readInitial } from './readInitial'
 import type { TalentNode } from '../model/types/TalentNode'
 
+const serverFunctionsMock = vi.hoisted(() => ({
+  getLibraryFn: vi.fn(),
+}))
+
+vi.mock('../server/serverFunctions', () => ({
+  getLibraryFn: serverFunctionsMock.getLibraryFn,
+  saveLibraryFn: vi.fn(async () => ({ success: true })),
+}))
+
 vi.mock('../Canvas/Canvas', () => ({
   Canvas: (props: ComponentProps<typeof Canvas>) => (
     <ReactFlowProvider>
@@ -56,13 +65,13 @@ beforeEach(() => {
     }),
   )
   localStorage.clear()
-  history.replaceState(null, '', '/#/')
+  history.replaceState(null, '', '/')
   vi.spyOn(window, 'confirm').mockReturnValue(true)
 })
 
 function openEditor(library = starterLibrary()) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(library))
-  history.replaceState(null, '', `/#/edit/${library.diagrams[0].id}`)
+  history.replaceState(null, '', `/edit/${library.diagrams[0].id}`)
   return render(<App />)
 }
 
@@ -102,6 +111,34 @@ describe('workspace orchestration', () => {
     } finally {
       vi.useRealTimers()
     }
+  })
+  it('shows a loading state while opening a server-backed tree', async () => {
+    const library = starterLibrary()
+    let resolveLibrary!: (result: {
+      library: typeof library
+      error: string
+    }) => void
+    serverFunctionsMock.getLibraryFn.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveLibrary = resolve
+      }),
+    )
+    render(<App initialLibrary={library} />)
+
+    fireEvent.click(screen.getByRole('tab', { name: /Skill trees/ }))
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Edit Creative foundations' }),
+    )
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Loading tree from server...',
+    )
+    expect(window.location.pathname).toBe('/')
+
+    resolveLibrary({ library, error: '' })
+    await waitFor(() =>
+      expect(window.location.pathname).toBe(`/edit/${library.diagrams[0].id}`),
+    )
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
   it('undoes and redoes edits with buttons and shortcuts inside settings', () => {
     openEditor()
@@ -233,7 +270,7 @@ describe('workspace orchestration', () => {
       expect(screen.getByLabelText('Diagram name')).toHaveValue('My new tree'),
     )
     expect(saved().diagrams).toHaveLength(2)
-    expect(location.hash).toContain('/edit/')
+    expect(location.pathname).toContain('/edit/')
   })
   it('saves canvas creation, movement, connections, metadata and name changes', () => {
     openEditor()
@@ -333,7 +370,7 @@ describe('workspace orchestration', () => {
     expect(saved().diagrams[0].name).toBe('Ready tree')
     expect(saved().instances[0].statuses.seeing).toBe('unlocked')
   })
-  it('warns before revoking completion, saves progress immediately and closes the overlay', () => {
+  it('warns before revoking completion, saves progress and closes the overlay', async () => {
     const library = starterLibrary()
     const instance = createInstance(library.diagrams[0], 'Existing journey')
     Object.assign(instance.statuses, {
@@ -342,22 +379,24 @@ describe('workspace orchestration', () => {
     })
     library.instances.push(instance)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(library))
-    history.replaceState(null, '', `/#/run/${instance.id}`)
+    history.replaceState(null, '', `/run/${instance.id}`)
     render(<App />)
     fireEvent.click(screen.getByTestId('mock-seeing'))
     vi.mocked(window.confirm).mockReturnValueOnce(false)
     fireEvent.click(screen.getByRole('button', { name: 'Unlocked' }))
     expect(saved().instances[0].statuses.seeing).toBe('completed')
     fireEvent.click(screen.getByRole('button', { name: 'Unlocked' }))
-    expect(saved().instances[0].statuses.color).toBe('in-progress')
-    expect(screen.queryByLabelText('Node details')).not.toBeInTheDocument()
+    await waitFor(() => {
+      expect(saved().instances[0].statuses.color).toBe('in-progress')
+      expect(screen.queryByLabelText('Node details')).not.toBeInTheDocument()
+    })
   })
   it('persists the Show All Skills preference on the active journey', () => {
     const library = starterLibrary()
     const instance = createInstance(library.diagrams[0], 'Existing journey')
     library.instances.push(instance)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(library))
-    history.replaceState(null, '', `/#/run/${instance.id}`)
+    history.replaceState(null, '', `/run/${instance.id}`)
     render(<App />)
 
     const showAllSkills = screen.getByRole('checkbox', {
@@ -419,7 +458,7 @@ describe('workspace orchestration', () => {
     expect(saved().instances).toHaveLength(0)
   })
   it('persists theme choice and renders missing routes gracefully', () => {
-    history.replaceState(null, '', '/#/edit/missing')
+    history.replaceState(null, '', '/edit/missing')
     render(<App />)
     expect(screen.getByText("That tree isn't here.")).toBeInTheDocument()
     fireEvent.change(screen.getByLabelText('Theme'), {

@@ -5,15 +5,29 @@ import type { Selection } from '../Canvas/types/Selection'
 import type { Dialog } from '../../pages/menu/WorkspaceDialog/Dialog'
 import { readInitial } from './readInitial'
 import type { MenuTab } from '../../pages/menu/MenuToolbar/MenuTab'
+import type { Library } from '../model/types/Library'
+import type { PublicUser } from '../server/PublicUser'
 import { useRef, useState } from 'react'
 
-export function useWorkspaceStore() {
-  const [initial] = useState(readInitial)
+export function useWorkspaceStore(
+  initialLibrary?: Library,
+  initialError?: string,
+  user?: PublicUser,
+  initialPath?: string,
+) {
+  const [initial] = useState(() =>
+    initialLibrary === undefined
+      ? readInitial()
+      : { library: initialLibrary, error: initialError ?? '', migrated: false },
+  )
   const [library, setLibrary] = useState(initial.library)
   const libraryRef = useRef(initial.library)
-  const [route, setRoute] = useState(() => parseRoute(window.location.hash))
+  const routePath =
+    initialPath ??
+    (typeof window === 'undefined' ? '/' : window.location.pathname)
+  const [route, setRoute] = useState(() => parseRoute(routePath))
   const history = useDiagramHistory(() => {
-    const target = parseRoute(window.location.hash)
+    const target = parseRoute(routePath)
     return target?.mode === 'edit'
       ? (initial.library.diagrams.find((diagram) => diagram.id === target.id) ??
           null)
@@ -30,6 +44,8 @@ export function useWorkspaceStore() {
   const bypassGuard = useRef(false)
   return {
     initial,
+    serverBacked: initialLibrary !== undefined,
+    user,
     library,
     setLibrary,
     libraryRef,

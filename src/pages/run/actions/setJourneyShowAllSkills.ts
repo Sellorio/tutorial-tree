@@ -1,7 +1,7 @@
 import { now } from '../../../shared/model/now'
 import type { WorkspaceOperationContext } from '../../../shared/WorkspaceApp/WorkspaceOperationContext'
 
-export function setJourneyShowAllSkills(
+export async function setJourneyShowAllSkills(
   state: WorkspaceOperationContext,
   showAllSkills: boolean,
 ) {
@@ -9,7 +9,7 @@ export function setJourneyShowAllSkills(
   if (!instance || instance.showAllSkills === showAllSkills) return
 
   const updated = { ...instance, showAllSkills, updatedAt: now() }
-  commit({
+  await commit({
     ...library,
     instances: library.instances.map((entry) =>
       entry.id === updated.id ? updated : entry,

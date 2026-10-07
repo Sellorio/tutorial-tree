@@ -5,7 +5,7 @@ export function MenuFooter() {
     <footer className={styles.libraryFooter}>
       <span>
         <span className={styles.localDot} />
-        Stored on this device
+        Saved to your account
       </span>
       <span>Small steps. Bigger possibilities.</span>
     </footer>

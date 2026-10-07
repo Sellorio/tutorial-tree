@@ -14,21 +14,31 @@ export function useWorkspaceEffects({
   setNavigationGuard,
   dirty,
 }: WorkspaceState) {
-  const onHashChange = useEffectEvent(() => {
+  const onPathChange = useEffectEvent(() => {
     if (
       !bypassGuard.current &&
       dirty &&
       !window.confirm('Discard your unsaved diagram changes?')
     ) {
+      setNavigationGuard(true)
       history.replaceState(
         null,
         '',
-        `${location.pathname}${location.search}#/${route!.mode}/${encodeURIComponent(route!.id)}`,
+        route ? `/${route.mode}/${encodeURIComponent(route.id)}` : '/',
       )
+      window.dispatchEvent(new PopStateEvent('popstate'))
+      return
+    }
+    const next = parseRoute(location.pathname)
+    if (
+      bypassGuard.current &&
+      next?.mode === route?.mode &&
+      next?.id === route?.id
+    ) {
+      setNavigationGuard(false)
       return
     }
     setNavigationGuard(false)
-    const next = parseRoute(location.hash)
     setRoute(next)
     resetDraft(
       next?.mode === 'edit'
@@ -40,9 +50,9 @@ export function useWorkspaceEffects({
     setNotice('')
   })
   useEffect(() => {
-    const listener = () => onHashChange()
-    window.addEventListener('hashchange', listener)
-    return () => window.removeEventListener('hashchange', listener)
+    const listener = () => onPathChange()
+    window.addEventListener('popstate', listener)
+    return () => window.removeEventListener('popstate', listener)
   }, [])
   useEffect(() => {
     if (!dirty) return

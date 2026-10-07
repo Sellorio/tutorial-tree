@@ -1,10 +1,9 @@
-import { createHashHistory, createRouter } from '@tanstack/react-router'
+import { createRouter } from '@tanstack/react-router'
 import { routeTree } from '../../routeTree.gen'
 
 export function createWorkspaceRouter() {
   return createRouter({
     routeTree,
-    history: createHashHistory(),
     defaultPendingMinMs: 0,
   })
 }

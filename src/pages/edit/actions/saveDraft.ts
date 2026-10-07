@@ -1,13 +1,15 @@
 import { saveDiagram } from '../../../shared/model/saveDiagram'
 import type { WorkspaceOperationContext } from '../../../shared/WorkspaceApp/WorkspaceOperationContext'
 
-export function saveDraft(state: WorkspaceOperationContext): boolean {
+export async function saveDraft(
+  state: WorkspaceOperationContext,
+): Promise<boolean> {
   const { library, draft, replaceDraft, setMessage, setNotice, commit } = state
 
   if (!draft) return false
   try {
     const next = saveDiagram(library, draft)
-    if (!commit(next)) return false
+    if (!(await commit(next))) return false
     replaceDraft(next.diagrams.find((entry) => entry.id === draft.id)!)
     setNotice('Diagram saved')
     return true

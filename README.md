@@ -1,17 +1,19 @@
 # Branch
 
-A browser-local skill-tree editor and learning-progress tracker, built with React, TypeScript, Vite, and React Flow. No account or backend is required.
+A skill-tree editor and learning-progress tracker, built with React, TypeScript, TanStack Start, and React Flow. Accounts and per-user libraries are stored in SQLite on the server.
 
 ## Run
 
-Use Node.js 22.12 or later.
+Install Bun 1.4.2 or later and Docker Desktop. `bun run dev` builds and runs the development Docker container directly, mounting the source for hot reload. SQLite data is stored in the ignored `appdata/` directory.
 
 ```sh
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
-Vite prints the local URL. A starter tree, Creative foundations, is included and can be edited or deleted.
+The first startup seeds the admin account (`admin`) with the password `password`. Sign in and change it when prompted. From the administration portal, create registration tickets and share their `/register?ticket=...` links. The production container stores its SQLite database in `/data`.
+
+Build and export the production image as a Docker tar archive with `bun run publish`; this creates `tutorial-tree.tar`. Load it with `docker load --input tutorial-tree.tar` and run the image with a persistent volume mounted at `/data`.
 
 ## Workspace
 
@@ -20,7 +22,7 @@ Vite prints the local URL. A starter tree, Creative foundations, is included and
 - Deletion requires confirmation. Deleting a diagram also deletes every journey linked to it.
 - The compact title bar contains the current title and actions. On the menu, **Import** sits next to **New** and accepts the selected tab's export type. Export and delete actions live alongside each tree or journey.
 - Theme defaults to **System**, follows OS changes, and supports persistent **Light** and **Dark** overrides.
-- The hash URL identifies the open diagram or journey. Refresh restores it; unknown IDs show a recoverable empty state.
+- Clean URLs such as `/edit/{id}` and `/run/{id}` identify the open diagram or journey. Refresh restores it; unknown IDs show a recoverable empty state.
 
 ## Editor
 
@@ -38,7 +40,7 @@ Vite prints the local URL. A starter tree, Creative foundations, is included and
 - Right-click a node or connection to delete it with confirmation. Selected nodes use a glow instead of extra border rings.
 - Drag the **Properties** header to undock or move the inspector. Drop near either window edge or use its dock buttons to redock. On small screens, the docked inspector sits below the canvas.
 - Start is always completed, cannot be deleted, and cannot receive a connection. Duplicate, self-referencing, and cyclic connections are rejected.
-- **Save** writes the diagram to browser storage and reconciles existing journeys. **Save & return** saves and opens the menu. Journeys can only be started from the menu. Navigation and refresh warn about unsaved edits.
+- **Save** writes the diagram to your account and reconciles existing journeys. **Save & return** saves and opens the menu. Journeys can only be started from the menu. Navigation and refresh warn about unsaved edits.
 
 ## Run Mode
 
@@ -52,27 +54,27 @@ Vite prints the local URL. A starter tree, Creative foundations, is included and
 
 ## Portable Data
 
-Exports are versioned JSON with stable diagram, node, connection, and instance IDs.
+Exports are versioned JSON with stable diagram, node, connection, and instance IDs. Imports associate data with the signed-in account; users can only access their own diagrams and journeys.
 
 - A **diagram export** contains the diagram. Importing it replaces the diagram with the same ID and reconciles every linked instance.
-- An **instance export** includes both its diagram and progress. Importing into an empty browser restores both. When that diagram already exists locally, its current structure takes precedence; imported statuses are merged by node ID and reconciled against it.
+- An **instance export** includes both its diagram and progress. Importing into an account without that diagram restores both. When that diagram already exists in the account, its current structure takes precedence; imported statuses are merged by node ID and reconciled against it.
 - Imports require confirmation and reject malformed JSON, invalid graphs, unsupported versions, unsafe media values, and mismatched instance ownership. Maximum import size is 10 MB.
-- Data lives under `branch.library.v1` in localStorage. Theme lives under `branch.theme`. Quota or permission failures are reported without silently declaring a successful save. Export important work before clearing browser data.
-- YouTube embeds and remote images need network access. Uploaded images, the included starter photo, and saved progress remain local. Typography has a local fallback when Google Fonts is unavailable.
+- Library data is stored in the server's SQLite database. Theme preference remains in browser storage under `branch.theme`. Export important work before deleting an account or its server data.
+- YouTube embeds and remote images need network access. Uploaded images, the included starter photo, and saved progress are persisted with the account. Typography has a local fallback when Google Fonts is unavailable.
 
 ## Verification
 
 ```sh
-npm test
-npm run test:coverage
-npm run lint
-npm run format:check
-npm run build
-npx playwright install chromium
-npm run test:e2e
+bun run test
+bun run test:coverage
+bun run lint
+bun run format:check
+bun run build
+bun --bun run playwright install chromium
+bun run test:e2e
 ```
 
-`npm run format` applies the repository's Prettier configuration. Playwright starts Vite when needed, or reuses the local server. Tests use isolated browser contexts and do not alter your normal browser's progress.
+`bun run format` applies the repository's Prettier configuration. Playwright starts an isolated Bun/Vite server and SQLite database; its users and state do not alter application data.
 
 | Area                                                                    | Tests                                                                                                               |
 | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -90,20 +92,20 @@ Coverage reports are generated in `coverage/`; the shared model is gated at 100%
 
 ## Structure
 
-The first source folder identifies UI ownership: `menu`, `edit`, `run`, or `shared`. The only root source file is the React entry point. Components have their own folder, matching CSS module when needed, separate props type, and colocated tests or component-specific helpers. Tests of a composed screen also exercise its smaller child components.
+UI is organized under `src/pages`, `src/shared`, and TanStack Start's `src/routes`. Components have their own folder, matching CSS module when needed, separate props type, and colocated tests or component-specific helpers. Tests of a composed screen also exercise its smaller child components.
 
 ```text
 src/
 	main.tsx
-	menu/       MenuScreen, TreeCard, JourneyRow, NameDialog, ...
-	edit/       Inspector, NodeInspector, ImageField, MovablePanel, ...
-	run/        RunOverlay, NodeStatus, NodeTips, ...
+	routes/     file-based workspace, auth, and admin routes
+	pages/      menu, edit, run, auth
 	shared/
 		WorkspaceApp/    composition, state, routing effects, shared actions
 		Canvas/          adapter, node/edge components, geometry, flow types
 		ThemePicker/     theme control, preference hook and constants
+		server/          SQLite, authentication, and per-user data operations
 		model/           one operation per file; types, schemas and constants
-		storage/         persistence and starter data
+		storage/         library validation and starter data
 		styles/          global design tokens and resets
 		testing/         shared test setup
 		architecture/    source-structure regression guard

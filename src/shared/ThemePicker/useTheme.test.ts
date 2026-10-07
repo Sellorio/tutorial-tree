@@ -1,4 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
+import { createElement } from 'react'
+import { renderToString } from 'react-dom/server'
 import { beforeEach, expect, it, vi } from 'vitest'
 import { useTheme } from './useTheme'
 
@@ -37,4 +39,14 @@ it('loads saved overrides and keeps changes usable when storage fails', () => {
   })
   act(() => expect(result.current.changeTheme('dark')).toBe(false))
   expect(result.current.theme).toBe('dark')
+})
+
+it('renders safely without browser globals during server rendering', () => {
+  vi.stubGlobal('window', undefined)
+  try {
+    const ServerComponent = () => createElement('span', null, useTheme().theme)
+    expect(renderToString(createElement(ServerComponent))).toContain('light')
+  } finally {
+    vi.unstubAllGlobals()
+  }
 })

@@ -1,0 +1,9 @@
+.git
+.tanstack
+.output
+appdata
+coverage
+dist
+node_modules
+playwright-report
+test-results

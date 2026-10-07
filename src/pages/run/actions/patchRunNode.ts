@@ -2,7 +2,7 @@ import type { TalentNode } from '../../../shared/model/types/TalentNode'
 import { now } from '../../../shared/model/now'
 import type { WorkspaceOperationContext } from '../../../shared/WorkspaceApp/WorkspaceOperationContext'
 
-export function patchRunNode(
+export async function patchRunNode(
   state: WorkspaceOperationContext,
   patch: Partial<TalentNode>,
 ) {
@@ -24,7 +24,7 @@ export function patchRunNode(
         : node,
     ),
   }
-  commit({
+  await commit({
     ...library,
     diagrams: library.diagrams.map((entry) =>
       entry.id === diagram.id ? updatedDiagram : entry,

@@ -27,9 +27,16 @@ it('keeps production units individual and UI components small and colocated', ()
         ts.isInterfaceDeclaration(statement),
     )
     if (units.length > 1) violations.push(`${local}: multiple declarations`)
-    if (!/^src\/(pages\/(menu|edit|run)|routes|shared)\//.test(local))
+    if (
+      !/^src\/(pages\/(menu|edit|run|auth)|routes|shared)\//.test(local) &&
+      local !== 'src/router.tsx'
+    )
       violations.push(`${local}: missing UI ownership folder`)
-    if (file.endsWith('.tsx')) {
+    if (
+      file.endsWith('.tsx') &&
+      !/^src\/routes\//.test(local) &&
+      local !== 'src/router.tsx'
+    ) {
       const name = basename(file, '.tsx')
       if (basename(dirname(file)) !== name)
         violations.push(`${local}: missing component folder`)

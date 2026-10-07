@@ -3,6 +3,7 @@ import { MenuActions } from '../../pages/menu/MenuActions/MenuActions'
 import { EditActions } from '../../pages/edit/EditActions/EditActions'
 import { RunActions } from '../../pages/run/RunActions/RunActions'
 import { ThemePicker } from '../ThemePicker/ThemePicker'
+import { UserMenu } from '../UserMenu/UserMenu'
 import type { WorkspaceHeaderProps } from './WorkspaceHeaderProps'
 import { GitBranch } from 'lucide-react'
 import styles from './WorkspaceHeader.module.css'
@@ -26,6 +27,7 @@ export function WorkspaceHeader({
   changeTheme,
   setNotice,
   importFile,
+  user,
   ...history
 }: WorkspaceHeaderProps) {
   return (
@@ -80,6 +82,7 @@ export function WorkspaceHeader({
           changeTheme={changeTheme}
           setNotice={setNotice}
         />
+        {user && <UserMenu user={user} />}
       </div>
       <input
         ref={fileRef}

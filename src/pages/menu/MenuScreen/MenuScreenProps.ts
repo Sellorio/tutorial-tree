@@ -12,7 +12,7 @@ export type MenuScreenProps = {
   setQuery: (query: string) => void
   visibleDiagrams: Diagram[]
   navigate: (path: string, skipGuard?: boolean) => void
-  commit: (library: Library) => boolean
+  commit: (library: Library) => Promise<boolean>
   download: (diagram: Diagram, instance?: Instance) => void
   setDialog: (dialog: Dialog | null) => void
   visibleInstances: Instance[]

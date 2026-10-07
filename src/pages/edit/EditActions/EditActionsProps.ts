@@ -4,6 +4,6 @@ export type EditActionsProps = {
   canRedo: boolean
   undo: () => void
   redo: () => void
-  save: () => boolean
+  save: () => Promise<boolean>
   navigate: (path: string, skipGuard?: boolean) => void
 }

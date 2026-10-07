@@ -36,8 +36,8 @@ export async function importWorkspaceFile(
       )
     )
       return
-    if (commit(result.library)) {
-      const next = parseRoute(`#${result.route}`)
+    if (await commit(result.library)) {
+      const next = parseRoute(result.route)
       setRoute(next)
       setDraft(
         next?.mode === 'edit'

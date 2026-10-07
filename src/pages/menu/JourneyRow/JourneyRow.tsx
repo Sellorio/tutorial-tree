@@ -39,9 +39,9 @@ export function JourneyRow({
         className={styles.iconButton}
         title="Delete journey"
         aria-label={`Delete ${entry.name}`}
-        onClick={() => {
+        onClick={async () => {
           if (window.confirm(`Delete "${entry.name}"? This cannot be undone.`))
-            commit({
+            await commit({
               ...library,
               instances: library.instances.filter(
                 (item) => item.id !== entry.id,

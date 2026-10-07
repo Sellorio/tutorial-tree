@@ -6,6 +6,7 @@ import type { ThemePreference } from '../ThemePicker/ThemePreference'
 import type { Dialog } from '../../pages/menu/WorkspaceDialog/Dialog'
 import type { Route } from '../model/types/Route'
 import type { MenuTab } from '../../pages/menu/MenuToolbar/MenuTab'
+import type { PublicUser } from '../server/PublicUser'
 
 export type WorkspaceHeaderProps = {
   navigate: (path: string, skipGuard?: boolean) => void
@@ -25,11 +26,12 @@ export type WorkspaceHeaderProps = {
   canRedo: boolean
   undo: () => void
   redo: () => void
-  save: () => boolean
+  save: () => Promise<boolean>
   completedCount: number
   preference: ThemePreference
   theme: Exclude<ThemePreference, 'system'>
   changeTheme: (preference: ThemePreference) => boolean
   setNotice: (notice: string) => void
   importFile: (file?: File) => Promise<void>
+  user?: PublicUser
 }

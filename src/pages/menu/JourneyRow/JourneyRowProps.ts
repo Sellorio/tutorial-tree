@@ -8,7 +8,7 @@ export type JourneyRowProps = {
   completed: number
   total: number
   download: (diagram: Diagram, instance?: Instance) => void
-  commit: (library: Library) => boolean
+  commit: (library: Library) => Promise<boolean>
   library: Library
   navigate: (path: string, skipGuard?: boolean) => void
 }

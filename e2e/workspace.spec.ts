@@ -3,14 +3,29 @@ import type { Locator, Page } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 import { createInstance } from '../src/shared/model/createInstance'
 import { exportData } from '../src/shared/model/exportData'
-import { STORAGE_KEY } from '../src/shared/model/constants/STORAGE_KEY'
 import type { Library } from '../src/shared/model/types/Library'
 import { starterLibrary } from '../src/shared/storage/starterLibrary'
 
 async function stored(page: Page): Promise<Library> {
-  return page.evaluate(
-    (key) => JSON.parse(localStorage.getItem(key)!),
-    STORAGE_KEY,
+  return page.evaluate(async (modulePath) => {
+    const { getLibraryFn } = (await import(modulePath)) as {
+      getLibraryFn: () => Promise<{ library: Library }>
+    }
+    return (await getLibraryFn()).library
+  }, '/src/shared/server/serverFunctions.ts')
+}
+
+async function saveLibrary(page: Page, library: Library) {
+  await page.evaluate(
+    async ({ modulePath, value }) => {
+      const { saveLibraryFn } = (await import(modulePath)) as {
+        saveLibraryFn: (options: {
+          data: Library
+        }) => Promise<{ success: boolean }>
+      }
+      await saveLibraryFn({ data: value })
+    },
+    { modulePath: '/src/shared/server/serverFunctions.ts', value: library },
   )
 }
 
@@ -40,20 +55,14 @@ async function startJourney(
   if (await page.getByRole('button', { name: 'Save & return' }).count())
     await page.getByRole('button', { name: 'Save & return' }).click()
   if (useLegacyDefaults) {
-    const storedLibrary = await page.evaluate(
-      (key) => localStorage.getItem(key),
-      STORAGE_KEY,
-    )
-    const library = storedLibrary
-      ? (JSON.parse(storedLibrary) as Library)
-      : starterLibrary()
+    const library = await stored(page)
     library.diagrams[0].activeStatuses = ['in-progress', 'completed']
-    await page.evaluate(
-      ({ key, value }) => localStorage.setItem(key, JSON.stringify(value)),
-      { key: STORAGE_KEY, value: library },
-    )
+    await saveLibrary(page, library)
     await page.reload()
-    await page.getByRole('tab', { name: /Skill trees/ }).click()
+    await page.waitForLoadState('networkidle')
+    const skillTreesTab = page.getByRole('tab', { name: /Skill trees/ })
+    await skillTreesTab.click()
+    await expect(skillTreesTab).toHaveAttribute('aria-selected', 'true')
   }
   await page.getByRole('tab', { name: /My journeys/ }).click()
   await page.getByRole('button', { name: 'New journey', exact: true }).click()
@@ -62,7 +71,8 @@ async function startJourney(
   await dialog
     .getByRole('button', { name: 'Start journey', exact: true })
     .click()
-  await expect(page).toHaveURL(/#\/run\//)
+  await expect(page).toHaveURL(/\/run\//)
+  await page.waitForLoadState('networkidle')
   await expect(page.getByTestId('talent-seeing')).toBeVisible()
 }
 
@@ -90,7 +100,12 @@ async function selectConnection(page: Page, id: string) {
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/')
-  await page.getByRole('tab', { name: /Skill trees/ }).click()
+  await saveLibrary(page, starterLibrary())
+  await page.reload()
+  await page.waitForLoadState('networkidle')
+  const skillTreesTab = page.getByRole('tab', { name: /Skill trees/ })
+  await skillTreesTab.click()
+  await expect(skillTreesTab).toHaveAttribute('aria-selected', 'true')
 })
 
 test('run rendering stays stable after panning and switching tabs', async ({
@@ -164,7 +179,8 @@ test('Show All Skills hides deeper locked skills and persists per journey', asyn
     'rgb(153, 153, 153)',
   )
   await expect(lockedNode).toHaveCSS('border-top-color', 'rgb(51, 51, 51)')
-  await showAllSkills.uncheck()
+  await showAllSkills.click()
+  await expect(showAllSkills).not.toBeChecked()
   await expect(nodes).toHaveCount(4)
   await expect(page.locator('.react-flow__edge')).toHaveCount(3)
   await expect(page.getByTestId('talent-composition')).toHaveCount(0)
@@ -172,11 +188,14 @@ test('Show All Skills hides deeper locked skills and persists per journey', asyn
   expect((await stored(page)).instances[0].showAllSkills).toBe(false)
 
   await page.reload()
-  await expect(
-    page.getByRole('checkbox', { name: 'Show All Skills' }),
-  ).not.toBeChecked()
+  await page.waitForLoadState('networkidle')
+  const refreshedShowAllSkills = page.getByRole('checkbox', {
+    name: 'Show All Skills',
+  })
+  await expect(refreshedShowAllSkills).not.toBeChecked()
   await expect(nodes).toHaveCount(4)
-  await page.getByRole('checkbox', { name: 'Show All Skills' }).check()
+  await refreshedShowAllSkills.click()
+  await expect(refreshedShowAllSkills).toBeChecked()
   await expect(page.getByTestId('talent-composition')).toBeVisible()
   await page.getByTestId('talent-seeing').click()
   await page.getByRole('button', { name: 'In progress', exact: true }).click()
@@ -203,7 +222,9 @@ test('Ctrl+F searches visible nodes and centers and selects a result', async ({
   const zoomBeforeSelection = `${Math.round(currentZoom / 1.2)}%`
   await page.getByRole('button', { name: 'Zoom out' }).click()
   await expect(zoomIndicator).toHaveText(zoomBeforeSelection)
-  await page.getByRole('checkbox', { name: 'Show All Skills' }).uncheck()
+  const showAllSkills = page.getByRole('checkbox', { name: 'Show All Skills' })
+  await showAllSkills.click()
+  await expect(showAllSkills).not.toBeChecked()
   await page.keyboard.press('Control+f')
 
   const search = page.getByRole('searchbox', { name: 'Search visible nodes' })
@@ -302,6 +323,7 @@ test('custom categories can be colored, assigned to skills, and persisted', asyn
   ).toBe(category.id)
 
   await page.reload()
+  await page.waitForLoadState('networkidle')
   expect(
     (await stored(page)).diagrams[0].nodes.find((node) => node.id === 'seeing')
       ?.categoryId,
@@ -343,12 +365,12 @@ test('shift box selection includes partially intersecting nodes and undoes group
       diagram.nodes.some((node) => node.id === edge.target) &&
       diagram.nodes.some((node) => node.id === edge.source),
   )
-  await page.evaluate(
-    ({ key, library }) => localStorage.setItem(key, JSON.stringify(library)),
-    { key: STORAGE_KEY, library },
-  )
+  await saveLibrary(page, library)
   await page.reload()
-  await page.getByRole('tab', { name: /Skill trees/ }).click()
+  await page.waitForLoadState('networkidle')
+  const skillTreesTab = page.getByRole('tab', { name: /Skill trees/ })
+  await skillTreesTab.click()
+  await expect(skillTreesTab).toHaveAttribute('aria-selected', 'true')
   await page.getByRole('button', { name: 'Edit Creative foundations' }).click()
   await page.getByRole('button', { name: 'Fit tree' }).click()
   const first = page.getByTestId(`talent-${diagram.nodes[1].id}`)
@@ -574,7 +596,7 @@ test('creates, edits metadata, connects from an edge, saves, reloads, and export
     .getByLabel('Name', { exact: true })
     .fill('Browser test tree')
   await page.getByRole('button', { name: 'Create tree', exact: true }).click()
-  await expect(page).toHaveURL(/#\/edit\//)
+  await expect(page).toHaveURL(/\/edit\//)
   await page.getByRole('button', { name: 'Add node', exact: true }).click()
   await page.getByLabel('Node text', { exact: true }).fill('Practice')
   await page
@@ -1171,7 +1193,7 @@ test('imports diagrams and instances, merges newer local graphs, and downloads p
     mimeType: 'application/json',
     buffer: Buffer.from(original),
   })
-  await expect(page).toHaveURL(/#\/run\//)
+  await expect(page).toHaveURL(/\/run\//)
   await expect(page.getByTestId('talent-seeing')).toHaveAttribute(
     'data-status',
     'completed',
@@ -1248,10 +1270,15 @@ test('saved graph changes reconcile existing journeys and unsaved navigation can
   await openNode(page, 'seeing')
   await page.getByRole('button', { name: 'Completed', exact: true }).click()
   await page.getByRole('button', { name: 'Edit tree', exact: true }).click()
-  await page.getByLabel('Diagram name').fill('Updated tree')
+  const diagramName = page.getByLabel('Diagram name')
+  await expect(page).toHaveURL(/\/edit\//)
+  await expect(diagramName).toHaveValue('Creative foundations')
+  await diagramName.fill('Updated tree')
+  await expect(diagramName).toHaveValue('Updated tree')
+  await expect(page.getByText('Unsaved changes')).toBeVisible()
   page.once('dialog', (dialog) => dialog.dismiss())
   await page.getByRole('button', { name: 'Branch main menu' }).click()
-  await expect(page).toHaveURL(/#\/edit\//)
+  await expect(page).toHaveURL(/\/edit\//)
   await expect(page.getByLabel('Diagram name')).toHaveValue('Updated tree')
   await page.getByRole('button', { name: 'Save', exact: true }).click()
   expect((await stored(page)).instances[0].statuses.seeing).toBe('completed')
@@ -1337,21 +1364,19 @@ test('light/dark desktop and mobile layouts render with images, readable control
   expect(errors).toEqual([])
 })
 
-test('missing URL targets and storage errors have recoverable UI', async ({
-  page,
-}) => {
-  await page.goto('/#/run/missing')
+test('missing URL targets return to the workspace', async ({ page }) => {
+  await page.goto('/run/missing')
+  await page.waitForLoadState('networkidle')
   await expect(page.getByText("That tree isn't here.")).toBeVisible()
   await page.getByRole('button', { name: 'Back to workspace' }).click()
+  await expect(page).toHaveURL('/')
+  const skillTreesTab = page.getByRole('tab', { name: /Skill trees/ })
+  await skillTreesTab.click()
+  await expect(skillTreesTab).toHaveAttribute('aria-selected', 'true')
   await expect(
     page.getByRole('button', { name: 'New tree', exact: true }),
   ).toBeVisible()
-  await page.evaluate(
-    (key) => localStorage.setItem(key, '{broken'),
-    STORAGE_KEY,
-  )
-  await page.reload()
-  await expect(page.getByRole('alert')).toContainText('not been overwritten')
+  await expect(page.getByRole('heading', { name: 'Skill trees' })).toBeVisible()
 })
 
 test('ALL and ANY prerequisites reconcile in browser, preserving completed nodes after graph changes', async ({
@@ -1368,11 +1393,8 @@ test('ALL and ANY prerequisites reconcile in browser, preserving completed nodes
     composition: 'completed',
   })
   library.instances.push(instance)
-  await page.evaluate(
-    ({ key, value }) => localStorage.setItem(key, JSON.stringify(value)),
-    { key: STORAGE_KEY, value: library },
-  )
-  await page.goto(`/#/run/${instance.id}`)
+  await saveLibrary(page, library)
+  await page.goto(`/run/${instance.id}`)
   await page.reload()
   await expect(page.getByTestId('talent-study')).toHaveAttribute(
     'data-status',

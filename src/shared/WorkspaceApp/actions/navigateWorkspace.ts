@@ -8,5 +8,6 @@ export function navigateWorkspace(
   const { setNavigationGuard } = state
 
   setNavigationGuard(skipGuard)
-  window.location.assign(`#${path}`)
+  window.history.pushState(null, '', path)
+  window.dispatchEvent(new PopStateEvent('popstate'))
 }

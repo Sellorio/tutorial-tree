@@ -17,13 +17,13 @@ export function TreeCardActions({
         className={styles.iconButton}
         aria-label={`Delete ${entry.name}`}
         title="Delete tree"
-        onClick={() => {
+        onClick={async () => {
           if (
             window.confirm(
               `Delete "${entry.name}" and all its journeys? This cannot be undone.`,
             )
           )
-            commit(deleteDiagram(library, entry.id))
+            await commit(deleteDiagram(library, entry.id))
         }}
       >
         <Trash2 size={15} />

@@ -19,17 +19,53 @@ import { downloadExport } from './actions/downloadExport'
 import { importWorkspaceFile } from './actions/importWorkspaceFile'
 import { submitWorkspaceName } from './actions/submitWorkspaceName'
 import { useEditHistoryShortcuts } from '../../pages/edit/actions/useEditHistoryShortcuts'
+import type { PublicUser } from '../server/PublicUser'
+import { getLibraryFn } from '../server/serverFunctions'
+import { parseRoute } from '../model/parseRoute'
+import { useState } from 'react'
 
-export function useWorkspace() {
-  const state = useWorkspaceState()
+export function useWorkspace(
+  initialLibrary?: Library,
+  initialError?: string,
+  user?: PublicUser,
+  initialPath?: string,
+) {
+  const state = useWorkspaceState(
+    initialLibrary,
+    initialError,
+    user,
+    initialPath,
+  )
   useWorkspaceEffects(state)
   useEditHistoryShortcuts(state)
+  const [loadingRoute, setLoadingRoute] = useState<'edit' | 'run' | null>(null)
   const commit = (next: Library) => commitLibrary(state, next)
-  const navigate = (path: string, skipGuard = false) =>
-    navigateWorkspace(state, path, skipGuard)
+  const navigate = (path: string, skipGuard = false) => {
+    const target = parseRoute(path)
+    if (!state.serverBacked || !target) {
+      navigateWorkspace(state, path, skipGuard)
+      return
+    }
+
+    setLoadingRoute(target.mode)
+    void getLibraryFn()
+      .then(({ library, error }) => {
+        state.libraryRef.current = library
+        state.setLibrary(library)
+        state.setMessage(error)
+        navigateWorkspace(state, path, skipGuard)
+      })
+      .catch(() => {
+        state.setMessage(
+          'Could not load your data from the server. Check your connection and try again.',
+        )
+      })
+      .finally(() => setLoadingRoute(null))
+  }
   const context = { ...state, commit, navigate }
   return {
     ...context,
+    loadingRoute,
     save: () => saveDraft(context),
     addNode: (position: Point, source?: string, kind?: 'task' | 'dot') =>
       addDraftNode(context, position, source, kind),

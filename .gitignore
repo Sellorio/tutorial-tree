@@ -27,3 +27,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Runtime data and container artifacts
+/appdata/
+/tutorial-tree.tar
+
+# Generated build output
+/.tanstack/
+/.output/

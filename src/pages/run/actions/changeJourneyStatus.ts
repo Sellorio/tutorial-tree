@@ -2,7 +2,7 @@ import type { Status } from '../../../shared/model/types/Status'
 import { setStatus } from '../../../shared/model/setStatus'
 import type { WorkspaceOperationContext } from '../../../shared/WorkspaceApp/WorkspaceOperationContext'
 
-export function changeJourneyStatus(
+export async function changeJourneyStatus(
   state: WorkspaceOperationContext,
   status: Exclude<Status, 'locked'>,
 ) {
@@ -27,7 +27,7 @@ export function changeJourneyStatus(
     return
   const updated = setStatus(diagram, instance, selectedNode.id, status)
   if (
-    commit({
+    await commit({
       ...library,
       instances: library.instances.map((entry) =>
         entry.id === updated.id ? updated : entry,

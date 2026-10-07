@@ -752,10 +752,10 @@ describe('view helpers', () => {
     ).not.toContain('NaN')
   })
   it('parses persistent edit/run routes and safely rejects malformed URLs', () => {
-    expect(parseRoute('#/edit/a%20b')).toEqual({ mode: 'edit', id: 'a b' })
-    expect(parseRoute('#/run/abc')).toEqual({ mode: 'run', id: 'abc' })
-    expect(parseRoute('#/edit/%')).toBeNull()
-    expect(parseRoute('#/else/abc')).toBeNull()
+    expect(parseRoute('/edit/a%20b')).toEqual({ mode: 'edit', id: 'a b' })
+    expect(parseRoute('/run/abc')).toEqual({ mode: 'run', id: 'abc' })
+    expect(parseRoute('/edit/%')).toBeNull()
+    expect(parseRoute('/else/abc')).toBeNull()
   })
   it('embeds only recognized YouTube video URLs', () => {
     for (const url of [

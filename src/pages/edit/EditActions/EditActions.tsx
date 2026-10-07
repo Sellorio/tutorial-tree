@@ -35,7 +35,7 @@ export function EditActions({
       </button>
       <span className={styles.saveState}>
         {dirty ? <Circle size={9} /> : <Check size={13} />}
-        {dirty ? 'Unsaved changes' : 'Saved locally'}
+        {dirty ? 'Unsaved changes' : 'Saved'}
       </span>
       <button className={styles.secondaryButton} onClick={save}>
         <Save size={15} />
@@ -43,8 +43,8 @@ export function EditActions({
       </button>
       <button
         className={styles.primaryButton}
-        onClick={() => {
-          if (save()) navigate('/', true)
+        onClick={async () => {
+          if (await save()) navigate('/', true)
         }}
       >
         <ArrowLeft size={15} />

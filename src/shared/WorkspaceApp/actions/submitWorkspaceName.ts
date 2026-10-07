@@ -2,7 +2,7 @@ import { createDiagram } from '../../model/createDiagram'
 import { createInstance } from '../../model/createInstance'
 import type { WorkspaceOperationContext } from '../WorkspaceOperationContext'
 
-export function submitWorkspaceName(
+export async function submitWorkspaceName(
   state: WorkspaceOperationContext,
   name: string,
 ) {
@@ -11,7 +11,9 @@ export function submitWorkspaceName(
   if (!dialog) return
   if (dialog.kind === 'diagram') {
     const created = createDiagram(name)
-    if (commit({ ...library, diagrams: [...library.diagrams, created] })) {
+    if (
+      await commit({ ...library, diagrams: [...library.diagrams, created] })
+    ) {
       setDialog(null)
       navigate(`/edit/${created.id}`)
     }
@@ -22,7 +24,7 @@ export function submitWorkspaceName(
       next.diagrams.find((entry) => entry.id === dialog.diagram.id) ??
       dialog.diagram
     const created = createInstance(target, name)
-    if (commit({ ...next, instances: [...next.instances, created] })) {
+    if (await commit({ ...next, instances: [...next.instances, created] })) {
       setDialog(null)
       navigate(`/run/${created.id}`, true)
     }

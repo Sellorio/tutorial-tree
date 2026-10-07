@@ -7,7 +7,7 @@ export type JourneyListProps = {
   visibleInstances: Instance[]
   library: Library
   download: (diagram: Diagram, instance?: Instance) => void
-  commit: (library: Library) => boolean
+  commit: (library: Library) => Promise<boolean>
   navigate: (path: string, skipGuard?: boolean) => void
   query: string
   setTab: (tab: MenuTab) => void

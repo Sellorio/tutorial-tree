@@ -9,87 +9,261 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as EditIdRouteImport } from './routes/edit.$id'
-import { Route as RunIdRouteImport } from './routes/run.$id'
+import { Route as AdminRouteImport } from './routes/_admin'
+import { Route as WorkspaceRouteImport } from './routes/_workspace'
+import { Route as ChangePasswordRouteImport } from './routes/change-password'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as WorkspaceIndexRouteImport } from './routes/_workspace.index'
+import { Route as AdminAdminRegistrationsRouteImport } from './routes/_admin.admin.registrations'
+import { Route as AdminAdminUsersRouteImport } from './routes/_admin.admin.users'
+import { Route as WorkspaceEditIdRouteImport } from './routes/_workspace.edit.$id'
+import { Route as WorkspaceRunIdRouteImport } from './routes/_workspace.run.$id'
 
-const IndexRoute = IndexRouteImport.update({
+const AdminRoute = AdminRouteImport.update({
+  id: '/_admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkspaceRoute = WorkspaceRouteImport.update({
+  id: '/_workspace',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChangePasswordRoute = ChangePasswordRouteImport.update({
+  id: '/change-password',
+  path: '/change-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkspaceIndexRoute = WorkspaceIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => WorkspaceRoute,
 } as any)
-const EditIdRoute = EditIdRouteImport.update({
+const AdminAdminRegistrationsRoute = AdminAdminRegistrationsRouteImport.update({
+  id: '/admin/registrations',
+  path: '/admin/registrations',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAdminUsersRoute = AdminAdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const WorkspaceEditIdRoute = WorkspaceEditIdRouteImport.update({
   id: '/edit/$id',
   path: '/edit/$id',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => WorkspaceRoute,
 } as any)
-const RunIdRoute = RunIdRouteImport.update({
+const WorkspaceRunIdRoute = WorkspaceRunIdRouteImport.update({
   id: '/run/$id',
   path: '/run/$id',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => WorkspaceRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/edit/$id': typeof EditIdRoute
-  '/run/$id': typeof RunIdRoute
+  '/': typeof WorkspaceIndexRoute
+  '/change-password': typeof ChangePasswordRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/admin/registrations': typeof AdminAdminRegistrationsRoute
+  '/admin/users': typeof AdminAdminUsersRoute
+  '/edit/$id': typeof WorkspaceEditIdRoute
+  '/run/$id': typeof WorkspaceRunIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/edit/$id': typeof EditIdRoute
-  '/run/$id': typeof RunIdRoute
+  '/': typeof WorkspaceIndexRoute
+  '/change-password': typeof ChangePasswordRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/admin/registrations': typeof AdminAdminRegistrationsRoute
+  '/admin/users': typeof AdminAdminUsersRoute
+  '/edit/$id': typeof WorkspaceEditIdRoute
+  '/run/$id': typeof WorkspaceRunIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/edit/$id': typeof EditIdRoute
-  '/run/$id': typeof RunIdRoute
+  '/_admin': typeof AdminRouteWithChildren
+  '/_workspace': typeof WorkspaceRouteWithChildren
+  '/change-password': typeof ChangePasswordRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/_workspace/': typeof WorkspaceIndexRoute
+  '/_admin/admin/registrations': typeof AdminAdminRegistrationsRoute
+  '/_admin/admin/users': typeof AdminAdminUsersRoute
+  '/_workspace/edit/$id': typeof WorkspaceEditIdRoute
+  '/_workspace/run/$id': typeof WorkspaceRunIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/edit/$id' | '/run/$id'
+  fullPaths:
+    | '/'
+    | '/change-password'
+    | '/login'
+    | '/register'
+    | '/admin/registrations'
+    | '/admin/users'
+    | '/edit/$id'
+    | '/run/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/edit/$id' | '/run/$id'
-  id: '__root__' | '/' | '/edit/$id' | '/run/$id'
+  to:
+    | '/'
+    | '/change-password'
+    | '/login'
+    | '/register'
+    | '/admin/registrations'
+    | '/admin/users'
+    | '/edit/$id'
+    | '/run/$id'
+  id:
+    | '__root__'
+    | '/_admin'
+    | '/_workspace'
+    | '/change-password'
+    | '/login'
+    | '/register'
+    | '/_workspace/'
+    | '/_admin/admin/registrations'
+    | '/_admin/admin/users'
+    | '/_workspace/edit/$id'
+    | '/_workspace/run/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  EditIdRoute: typeof EditIdRoute
-  RunIdRoute: typeof RunIdRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  WorkspaceRoute: typeof WorkspaceRouteWithChildren
+  ChangePasswordRoute: typeof ChangePasswordRoute
+  LoginRoute: typeof LoginRoute
+  RegisterRoute: typeof RegisterRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_admin': {
+      id: '/_admin'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_workspace': {
+      id: '/_workspace'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof WorkspaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/change-password': {
+      id: '/change-password'
+      path: '/change-password'
+      fullPath: '/change-password'
+      preLoaderRoute: typeof ChangePasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_workspace/': {
+      id: '/_workspace/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof WorkspaceIndexRouteImport
+      parentRoute: typeof WorkspaceRoute
     }
-    '/edit/$id': {
-      id: '/edit/$id'
+    '/_admin/admin/registrations': {
+      id: '/_admin/admin/registrations'
+      path: '/admin/registrations'
+      fullPath: '/admin/registrations'
+      preLoaderRoute: typeof AdminAdminRegistrationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/admin/users': {
+      id: '/_admin/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminAdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_workspace/edit/$id': {
+      id: '/_workspace/edit/$id'
       path: '/edit/$id'
       fullPath: '/edit/$id'
-      preLoaderRoute: typeof EditIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof WorkspaceEditIdRouteImport
+      parentRoute: typeof WorkspaceRoute
     }
-    '/run/$id': {
-      id: '/run/$id'
+    '/_workspace/run/$id': {
+      id: '/_workspace/run/$id'
       path: '/run/$id'
       fullPath: '/run/$id'
-      preLoaderRoute: typeof RunIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof WorkspaceRunIdRouteImport
+      parentRoute: typeof WorkspaceRoute
     }
   }
 }
 
+interface AdminRouteChildren {
+  AdminAdminRegistrationsRoute: typeof AdminAdminRegistrationsRoute
+  AdminAdminUsersRoute: typeof AdminAdminUsersRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAdminRegistrationsRoute: AdminAdminRegistrationsRoute,
+  AdminAdminUsersRoute: AdminAdminUsersRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface WorkspaceRouteChildren {
+  WorkspaceIndexRoute: typeof WorkspaceIndexRoute
+  WorkspaceEditIdRoute: typeof WorkspaceEditIdRoute
+  WorkspaceRunIdRoute: typeof WorkspaceRunIdRoute
+}
+
+const WorkspaceRouteChildren: WorkspaceRouteChildren = {
+  WorkspaceIndexRoute: WorkspaceIndexRoute,
+  WorkspaceEditIdRoute: WorkspaceEditIdRoute,
+  WorkspaceRunIdRoute: WorkspaceRunIdRoute,
+}
+
+const WorkspaceRouteWithChildren = WorkspaceRoute._addFileChildren(
+  WorkspaceRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  EditIdRoute: EditIdRoute,
-  RunIdRoute: RunIdRoute,
+  AdminRoute: AdminRouteWithChildren,
+  WorkspaceRoute: WorkspaceRouteWithChildren,
+  ChangePasswordRoute: ChangePasswordRoute,
+  LoginRoute: LoginRoute,
+  RegisterRoute: RegisterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
