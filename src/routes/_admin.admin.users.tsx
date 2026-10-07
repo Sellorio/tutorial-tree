@@ -1,8 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { UsersPage } from '../pages/auth/UsersPage/UsersPage'
-import { getUsersFn } from '../shared/server/adminFunctions'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_admin/admin/users')({
-  loader: () => getUsersFn(),
-  component: UsersPage,
+  beforeLoad: () => {
+    throw redirect({ to: '/admin' })
+  },
 })

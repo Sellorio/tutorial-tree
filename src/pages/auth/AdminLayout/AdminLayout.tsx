@@ -1,23 +1,16 @@
-import { Link, Outlet } from '@tanstack/react-router'
-import { ArrowLeft, Shield } from 'lucide-react'
+import { Outlet, useRouteContext } from '@tanstack/react-router'
+import { WorkspaceHeader } from '../../../shared/WorkspaceHeader/WorkspaceHeader'
+import { useWorkspace } from '../../../shared/WorkspaceApp/useWorkspace'
 import styles from './AdminLayout.module.css'
 
 export function AdminLayout() {
+  const { user } = useRouteContext({ from: '/_admin' })
+  const workspace = useWorkspace(undefined, undefined, user, '/admin')
+
   return (
-    <main className={styles.layout}>
-      <header className={styles.header}>
-        <Link className={styles.back} to="/">
-          <ArrowLeft size={16} /> Workspace
-        </Link>
-        <h1>
-          <Shield size={19} /> Administration
-        </h1>
-        <nav aria-label="Administration">
-          <Link to="/admin/registrations">Registrations</Link>
-          <Link to="/admin/users">Users</Link>
-        </nav>
-      </header>
+    <div className={styles.layout}>
+      <WorkspaceHeader {...workspace} admin />
       <Outlet />
-    </main>
+    </div>
   )
 }

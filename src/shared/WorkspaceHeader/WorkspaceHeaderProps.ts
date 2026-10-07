@@ -9,6 +9,7 @@ import type { MenuTab } from '../../pages/menu/MenuToolbar/MenuTab'
 import type { PublicUser } from '../server/PublicUser'
 
 export type WorkspaceHeaderProps = {
+  admin?: boolean
   navigate: (path: string, skipGuard?: boolean) => void
   route: Route
   diagram: Diagram | null | undefined

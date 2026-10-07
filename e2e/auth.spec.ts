@@ -75,7 +75,16 @@ test('registration consumes its ticket, scopes libraries, and denies admin route
   await adminPage.goto(baseURL)
   const adminLibrary = await readLibrary(adminPage)
   expect(adminLibrary.diagrams[0].name).not.toBe('Private account tree')
+  await adminPage.goto(`${baseURL}/admin`)
+  await expect(
+    adminPage.getByRole('heading', { name: 'Registrations' }),
+  ).toBeVisible()
+  await expect(adminPage.getByRole('heading', { name: 'Users' })).toBeVisible()
+  await expect(
+    adminPage.getByRole('button', { name: 'Branch main menu' }),
+  ).toBeVisible()
   await adminPage.goto(`${baseURL}/admin/registrations`)
+  await expect(adminPage).toHaveURL(`${baseURL}/admin`)
   await expect(adminPage.getByText('No unconsumed tickets.')).toBeVisible()
   await adminContext.close()
 

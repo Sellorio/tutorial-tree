@@ -6,7 +6,7 @@ import { resetUserPasswordFn } from '../../../shared/server/adminFunctions'
 import styles from './UsersPage.module.css'
 
 export function UsersPage() {
-  const users = useLoaderData({ from: '/_admin/admin/users' })
+  const { users } = useLoaderData({ from: '/_admin/admin' })
   const resetPassword = useServerFn(resetUserPasswordFn)
   const router = useRouter()
   const [message, setMessage] = useState('')

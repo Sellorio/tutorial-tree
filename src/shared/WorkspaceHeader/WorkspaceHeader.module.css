@@ -29,20 +29,16 @@
 .brandDot {
   color: var(--accent);
 }
+.adminTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
 .headerDivider {
   height: 20px;
   width: 1px;
   background: var(--border);
   flex-shrink: 0;
-}
-.headerActions {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.hidden {
-  display: none;
 }
 @media (max-width: 700px) {
   .header {
@@ -58,11 +54,5 @@
   }
   .header > .headerDivider {
     display: none;
-  }
-  .headerActions {
-    gap: 6px;
-    grid-column: 1 / -1;
-    margin-left: 0;
-    justify-content: flex-end;
   }
 }

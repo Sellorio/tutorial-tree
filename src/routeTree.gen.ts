@@ -14,6 +14,7 @@ import { Route as WorkspaceRouteImport } from './routes/_workspace'
 import { Route as ChangePasswordRouteImport } from './routes/change-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as AdminAdminRouteImport } from './routes/_admin.admin'
 import { Route as WorkspaceIndexRouteImport } from './routes/_workspace.index'
 import { Route as AdminAdminRegistrationsRouteImport } from './routes/_admin.admin.registrations'
 import { Route as AdminAdminUsersRouteImport } from './routes/_admin.admin.users'
@@ -43,20 +44,25 @@ const RegisterRoute = RegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAdminRoute = AdminAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AdminRoute,
+} as any)
 const WorkspaceIndexRoute = WorkspaceIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => WorkspaceRoute,
 } as any)
 const AdminAdminRegistrationsRoute = AdminAdminRegistrationsRouteImport.update({
-  id: '/admin/registrations',
-  path: '/admin/registrations',
-  getParentRoute: () => AdminRoute,
+  id: '/registrations',
+  path: '/registrations',
+  getParentRoute: () => AdminAdminRoute,
 } as any)
 const AdminAdminUsersRoute = AdminAdminUsersRouteImport.update({
-  id: '/admin/users',
-  path: '/admin/users',
-  getParentRoute: () => AdminRoute,
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminAdminRoute,
 } as any)
 const WorkspaceEditIdRoute = WorkspaceEditIdRouteImport.update({
   id: '/edit/$id',
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/change-password': typeof ChangePasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/admin': typeof AdminAdminRouteWithChildren
   '/admin/registrations': typeof AdminAdminRegistrationsRoute
   '/admin/users': typeof AdminAdminUsersRoute
   '/edit/$id': typeof WorkspaceEditIdRoute
@@ -84,6 +91,7 @@ export interface FileRoutesByTo {
   '/change-password': typeof ChangePasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/admin': typeof AdminAdminRouteWithChildren
   '/admin/registrations': typeof AdminAdminRegistrationsRoute
   '/admin/users': typeof AdminAdminUsersRoute
   '/edit/$id': typeof WorkspaceEditIdRoute
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/change-password': typeof ChangePasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/_admin/admin': typeof AdminAdminRouteWithChildren
   '/_workspace/': typeof WorkspaceIndexRoute
   '/_admin/admin/registrations': typeof AdminAdminRegistrationsRoute
   '/_admin/admin/users': typeof AdminAdminUsersRoute
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/change-password'
     | '/login'
     | '/register'
+    | '/admin'
     | '/admin/registrations'
     | '/admin/users'
     | '/edit/$id'
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/change-password'
     | '/login'
     | '/register'
+    | '/admin'
     | '/admin/registrations'
     | '/admin/users'
     | '/edit/$id'
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
     | '/change-password'
     | '/login'
     | '/register'
+    | '/_admin/admin'
     | '/_workspace/'
     | '/_admin/admin/registrations'
     | '/_admin/admin/users'
@@ -182,6 +194,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_admin/admin': {
+      id: '/_admin/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminAdminRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_workspace/': {
       id: '/_workspace/'
       path: '/'
@@ -191,17 +210,17 @@ declare module '@tanstack/react-router' {
     }
     '/_admin/admin/registrations': {
       id: '/_admin/admin/registrations'
-      path: '/admin/registrations'
+      path: '/registrations'
       fullPath: '/admin/registrations'
       preLoaderRoute: typeof AdminAdminRegistrationsRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof AdminAdminRoute
     }
     '/_admin/admin/users': {
       id: '/_admin/admin/users'
-      path: '/admin/users'
+      path: '/users'
       fullPath: '/admin/users'
       preLoaderRoute: typeof AdminAdminUsersRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof AdminAdminRoute
     }
     '/_workspace/edit/$id': {
       id: '/_workspace/edit/$id'
@@ -220,14 +239,26 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AdminRouteChildren {
+interface AdminAdminRouteChildren {
   AdminAdminRegistrationsRoute: typeof AdminAdminRegistrationsRoute
   AdminAdminUsersRoute: typeof AdminAdminUsersRoute
 }
 
-const AdminRouteChildren: AdminRouteChildren = {
+const AdminAdminRouteChildren: AdminAdminRouteChildren = {
   AdminAdminRegistrationsRoute: AdminAdminRegistrationsRoute,
   AdminAdminUsersRoute: AdminAdminUsersRoute,
+}
+
+const AdminAdminRouteWithChildren = AdminAdminRoute._addFileChildren(
+  AdminAdminRouteChildren,
+)
+
+interface AdminRouteChildren {
+  AdminAdminRoute: typeof AdminAdminRouteWithChildren
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAdminRoute: AdminAdminRouteWithChildren,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

@@ -1,35 +1,24 @@
 import { WorkspaceTitle } from '../WorkspaceTitle/WorkspaceTitle'
-import { MenuActions } from '../../pages/menu/MenuActions/MenuActions'
-import { EditActions } from '../../pages/edit/EditActions/EditActions'
-import { RunActions } from '../../pages/run/RunActions/RunActions'
-import { ThemePicker } from '../ThemePicker/ThemePicker'
-import { UserMenu } from '../UserMenu/UserMenu'
 import type { WorkspaceHeaderProps } from './WorkspaceHeaderProps'
+import { WorkspaceHeaderActions } from './WorkspaceHeaderActions/WorkspaceHeaderActions'
 import { GitBranch } from 'lucide-react'
 import styles from './WorkspaceHeader.module.css'
 
-export function WorkspaceHeader({
-  navigate,
-  route,
-  diagram,
-  editing,
-  draft,
-  setDraft,
-  instance,
-  skillCount,
-  tab,
-  library,
-  fileRef,
-  setDialog,
-  completedCount,
-  preference,
-  theme,
-  changeTheme,
-  setNotice,
-  importFile,
-  user,
-  ...history
-}: WorkspaceHeaderProps) {
+export function WorkspaceHeader(props: WorkspaceHeaderProps) {
+  const {
+    admin = false,
+    navigate,
+    route,
+    diagram,
+    editing,
+    draft,
+    setDraft,
+    instance,
+    skillCount,
+    tab,
+    library,
+  } = props
+
   return (
     <header className={styles.header}>
       <button
@@ -43,58 +32,22 @@ export function WorkspaceHeader({
         </span>
       </button>
       <span className={styles.headerDivider} />
-      <WorkspaceTitle
-        route={route}
-        diagram={diagram}
-        editing={editing}
-        draft={draft}
-        setDraft={setDraft}
-        instance={instance}
-        skillCount={skillCount}
-        tab={tab}
-        library={library}
-      />
-      <div className={styles.headerActions}>
-        {!route && (
-          <MenuActions
-            tab={tab}
-            fileRef={fileRef}
-            library={library}
-            setDialog={setDialog}
-          />
-        )}
-        {route &&
-          diagram &&
-          (editing ? (
-            <EditActions {...history} navigate={navigate} />
-          ) : (
-            <RunActions
-              completedCount={completedCount}
-              skillCount={skillCount}
-              navigate={navigate}
-              diagram={diagram}
-            />
-          ))}
-        <span className={styles.headerDivider} />
-        <ThemePicker
-          preference={preference}
-          theme={theme}
-          changeTheme={changeTheme}
-          setNotice={setNotice}
+      {admin ? (
+        <h1 className={styles.adminTitle}>Administration</h1>
+      ) : (
+        <WorkspaceTitle
+          route={route}
+          diagram={diagram}
+          editing={editing}
+          draft={draft}
+          setDraft={setDraft}
+          instance={instance}
+          skillCount={skillCount}
+          tab={tab}
+          library={library}
         />
-        {user && <UserMenu user={user} />}
-      </div>
-      <input
-        ref={fileRef}
-        className={styles.hidden}
-        type="file"
-        accept=".json,application/json"
-        aria-label="Import JSON file"
-        onChange={(event) => {
-          void importFile(event.target.files?.[0])
-          event.target.value = ''
-        }}
-      />
+      )}
+      <WorkspaceHeaderActions {...props} />
     </header>
   )
 }

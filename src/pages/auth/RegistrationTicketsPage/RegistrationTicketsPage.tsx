@@ -6,7 +6,7 @@ import { createRegistrationTicketFn } from '../../../shared/server/adminFunction
 import styles from './RegistrationTicketsPage.module.css'
 
 export function RegistrationTicketsPage() {
-  const tickets = useLoaderData({ from: '/_admin/admin/registrations' })
+  const { tickets } = useLoaderData({ from: '/_admin/admin' })
   const createTicket = useServerFn(createRegistrationTicketFn)
   const router = useRouter()
   const [message, setMessage] = useState('')

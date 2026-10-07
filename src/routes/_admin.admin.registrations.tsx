@@ -1,8 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { RegistrationTicketsPage } from '../pages/auth/RegistrationTicketsPage/RegistrationTicketsPage'
-import { getRegistrationTicketsFn } from '../shared/server/adminFunctions'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_admin/admin/registrations')({
-  loader: () => getRegistrationTicketsFn(),
-  component: RegistrationTicketsPage,
+  beforeLoad: () => {
+    throw redirect({ to: '/admin' })
+  },
 })
