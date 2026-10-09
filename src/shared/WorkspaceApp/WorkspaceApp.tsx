@@ -3,7 +3,6 @@ import { WorkspaceHeader } from '../WorkspaceHeader/WorkspaceHeader'
 import { ErrorBanner } from '../ErrorBanner/ErrorBanner'
 import { DiagramCanvas } from '../DiagramCanvas/DiagramCanvas'
 import { DiagramInspector } from '../../pages/edit/DiagramInspector/DiagramInspector'
-import { WorkspaceFooter } from '../WorkspaceFooter/WorkspaceFooter'
 import { MissingRoute } from '../MissingRoute/MissingRoute'
 import { MenuScreen } from '../../pages/menu/MenuScreen/MenuScreen'
 import { Notice } from '../Notice/Notice'
@@ -36,7 +35,6 @@ export function WorkspaceApp({
             <DiagramCanvas {...workspace} route={route} diagram={diagram} />
             {editing && <DiagramInspector {...workspace} diagram={diagram} />}
           </main>
-          {editing && <WorkspaceFooter {...workspace} />}
         </>
       )}
       {route && !diagram && <MissingRoute {...workspace} />}

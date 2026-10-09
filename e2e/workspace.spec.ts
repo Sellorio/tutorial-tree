@@ -262,6 +262,7 @@ test('edit history supports title-bar buttons and all undo redo shortcuts', asyn
   page,
 }) => {
   await page.getByRole('button', { name: 'Edit Creative foundations' }).click()
+  await expect(page.getByRole('contentinfo')).toHaveCount(0)
   const nodes = page.locator('.react-flow__node')
   await expect(nodes).toHaveCount(8)
   await expect(

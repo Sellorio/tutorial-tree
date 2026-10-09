@@ -38,6 +38,8 @@ if (buildExitCode !== 0) {
       '5173:5173',
       '--env',
       'APP_DATA_DIR=/data',
+      '--env',
+      'CHOKIDAR_USEPOLLING=true',
       '--volume',
       `${projectDirectory}:/app`,
       '--volume',

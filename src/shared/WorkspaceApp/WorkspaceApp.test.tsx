@@ -142,6 +142,7 @@ describe('workspace orchestration', () => {
   })
   it('undoes and redoes edits with buttons and shortcuts inside settings', () => {
     openEditor()
+    expect(screen.queryByRole('contentinfo')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Undo' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Redo' })).toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: 'Canvas add' }))

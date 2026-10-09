@@ -15,11 +15,11 @@
 * Ensure naming conventions in similar code is adhered to
 * Group related files into folders
 * Do not overload a file/function/class with too many lines of code - instead break down large blocks of code into smaller parts
-* Fix any code that violates the coding guidelines/conventions in this document as you encounter them.
+* When updating a file, update any existing code in that file to align with these standards
 
 ## TypeScript/TSX
 
-* Do not omit semi-colons
+* Do not omit semi-colons. Always include semi-colons at the end of a statement.
 * Do not use non-erasable syntax
 * Prefer `type` over `class` or `interface`
 * Prefer maximum of one type per file
