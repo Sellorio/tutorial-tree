@@ -12,6 +12,7 @@ import { database } from './database'
 import { getAppSession } from './getAppSession'
 import { getDatabaseUserByUsername } from './getDatabaseUserByUsername'
 import { getSessionUser } from './getSessionUser'
+import { getSharedSourceDiagram } from './getSharedSourceDiagram'
 import { seedAdmin } from './seedAdmin'
 
 const loginAttempts = new Map<string, { count: number; expiresAt: number }>()
@@ -90,10 +91,25 @@ export const registerFn = createServerFn({ method: 'POST' })
       const ticket = database
         .query('SELECT ticket FROM registration_tickets WHERE ticket = ?')
         .get(data.ticket)
+      const invite = data.inviteCode
+        ? database
+            .query(
+              `SELECT code FROM invites
+               WHERE code = ? AND registration_ticket = ? AND created_at > ?`,
+            )
+            .get(
+              data.inviteCode,
+              data.ticket,
+              new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+            )
+        : database
+            .query('SELECT code FROM invites WHERE registration_ticket = ?')
+            .get(data.ticket)
       const existing = database
         .query('SELECT id FROM users WHERE username = ?')
         .get(data.username)
-      if (!ticket || existing) return false
+      if (!ticket || existing || (data.inviteCode ? !invite : invite))
+        return false
 
       database
         .query(
@@ -153,7 +169,25 @@ export const getLibraryFn = createServerFn({ method: 'GET' }).handler(
              updated_at = excluded.updated_at`,
         )
         .run(user.id, JSON.stringify(initial.library), new Date().toISOString())
-    return { library: initial.library, error: initial.error }
+    const sharedDiagrams: NonNullable<Library['sharedDiagrams']> = []
+    for (const instance of initial.library.instances) {
+      const source = instance.sharedSource
+      if (
+        !source ||
+        sharedDiagrams.some(
+          (entry) =>
+            entry.ownerId === source.ownerId &&
+            entry.diagram.id === source.diagramId,
+        )
+      )
+        continue
+      const diagram = getSharedSourceDiagram(source.ownerId, source.diagramId)
+      if (diagram) sharedDiagrams.push({ ownerId: source.ownerId, diagram })
+    }
+    return {
+      library: { ...initial.library, sharedDiagrams },
+      error: initial.error,
+    }
   },
 )
 
@@ -164,7 +198,11 @@ export const saveLibraryFn = createServerFn({ method: 'POST' })
     if (!user || user.mustChangePassword)
       throw new Error('Sign in and change your password before saving.')
 
-    const validated: Library = librarySchema.parse(data)
+    const validated: Library = librarySchema.parse({
+      version: data.version,
+      diagrams: data.diagrams,
+      instances: data.instances,
+    })
     database
       .query(
         `INSERT INTO libraries (user_id, library_json, updated_at)
@@ -176,3 +214,5 @@ export const saveLibraryFn = createServerFn({ method: 'POST' })
       .run(user.id, JSON.stringify(validated), new Date().toISOString())
     return { success: true }
   })
+
+export { createInviteFn } from './inviteFunctions'

@@ -1,4 +1,5 @@
 import { reconcileStatuses } from '../model/reconcileStatuses'
+import { getInstanceDiagram } from '../model/getInstanceDiagram'
 import type { TalentNode } from '../model/types/TalentNode'
 import type { WorkspaceStore } from './WorkspaceStore'
 
@@ -13,10 +14,12 @@ export function getWorkspaceView({
     route?.mode === 'run'
       ? library.instances.find((entry) => entry.id === route.id)
       : undefined
-  const savedDiagram = library.diagrams.find(
-    (entry) =>
-      entry.id === (route?.mode === 'edit' ? route.id : instance?.diagramId),
-  )
+  const savedDiagram =
+    route?.mode === 'edit'
+      ? library.diagrams.find((entry) => entry.id === route.id)
+      : instance
+        ? getInstanceDiagram(library, instance)
+        : undefined
   const diagram = route?.mode === 'edit' ? draft : savedDiagram
   const editing = route?.mode === 'edit'
   const dirty = Boolean(

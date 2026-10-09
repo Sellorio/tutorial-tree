@@ -20,7 +20,7 @@ import { importWorkspaceFile } from './actions/importWorkspaceFile'
 import { submitWorkspaceName } from './actions/submitWorkspaceName'
 import { useEditHistoryShortcuts } from '../../pages/edit/actions/useEditHistoryShortcuts'
 import type { PublicUser } from '../server/PublicUser'
-import { getLibraryFn } from '../server/serverFunctions'
+import { createInviteFn, getLibraryFn } from '../server/serverFunctions'
 import { parseRoute } from '../model/parseRoute'
 import { useState } from 'react'
 
@@ -40,6 +40,21 @@ export function useWorkspace(
   useEditHistoryShortcuts(state)
   const [loadingRoute, setLoadingRoute] = useState<'edit' | 'run' | null>(null)
   const commit = (next: Library) => commitLibrary(state, next)
+  const createInvite = async (diagram: Diagram) => {
+    state.setMessage('')
+    try {
+      const result = await createInviteFn({ data: { diagramId: diagram.id } })
+      if (result.error) {
+        state.setMessage(result.error)
+        return
+      }
+      const link = new URL('/invite', window.location.origin)
+      link.searchParams.set('code', result.code)
+      state.setDialog({ kind: 'invite', url: link.toString() })
+    } catch {
+      state.setMessage('Could not create an invitation. Try again.')
+    }
+  }
   const navigate = (path: string, skipGuard = false) => {
     const target = parseRoute(path)
     if (!state.serverBacked || !target) {
@@ -66,6 +81,7 @@ export function useWorkspace(
   return {
     ...context,
     loadingRoute,
+    createInvite,
     save: () => saveDraft(context),
     addNode: (position: Point, source?: string, kind?: 'task' | 'dot') =>
       addDraftNode(context, position, source, kind),

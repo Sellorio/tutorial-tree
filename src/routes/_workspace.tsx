@@ -13,8 +13,9 @@ import {
 export const Route = createFileRoute('/_workspace')({
   beforeLoad: async () => {
     const user = await getCurrentUserFn()
-    if (!user) throw redirect({ to: '/login' })
-    if (user.mustChangePassword) throw redirect({ to: '/change-password' })
+    if (!user) throw redirect({ to: '/login', search: { inviteCode: '' } })
+    if (user.mustChangePassword)
+      throw redirect({ to: '/change-password', search: { inviteCode: '' } })
     return { user }
   },
   loader: () => getLibraryFn(),

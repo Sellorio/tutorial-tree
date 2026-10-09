@@ -24,11 +24,11 @@ export function WorkspaceHeader(props: WorkspaceHeaderProps) {
       <button
         className={styles.brand}
         onClick={() => navigate('/')}
-        aria-label="Branch main menu"
+        aria-label="Tutorial Tree main menu"
       >
         <GitBranch size={25} strokeWidth={1.8} />
         <span>
-          branch<span className={styles.brandDot}>.</span>
+          Tutorial Tree<span className={styles.brandDot}>.</span>
         </span>
       </button>
       <span className={styles.headerDivider} />

@@ -1,16 +1,23 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { useRouter, useSearch } from '@tanstack/react-router'
+import { useLoaderData, useRouter, useSearch } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { AuthPage } from '../AuthPage/AuthPage'
 import { registerFn } from '../../../shared/server/serverFunctions'
+import { RegistrationFields } from '../RegistrationFields/RegistrationFields'
 
 export function RegistrationPage() {
-  const { ticket } = useSearch({ from: '/register' })
+  const { ticket, inviteCode } = useSearch({ from: '/register' })
+  const inviteRegistration = useLoaderData({ from: '/register' })
   const register = useServerFn(registerFn)
   const router = useRouter()
+  const registrationTicket = inviteCode ? inviteRegistration.ticket : ticket
   const [error, setError] = useState(
-    ticket ? '' : 'A registration ticket is required.',
+    inviteCode
+      ? inviteRegistration.error
+      : ticket
+        ? ''
+        : 'A registration ticket is required.',
   )
   const [pending, setPending] = useState(false)
 
@@ -21,7 +28,7 @@ export function RegistrationPage() {
     const name = form.get('name')
     const password = form.get('password')
     if (
-      !ticket ||
+      !registrationTicket ||
       typeof username !== 'string' ||
       typeof name !== 'string' ||
       typeof password !== 'string'
@@ -31,12 +38,20 @@ export function RegistrationPage() {
     setError('')
     try {
       const result = await register({
-        data: { ticket, username, name, password },
+        data: {
+          ticket: registrationTicket,
+          username,
+          name,
+          password,
+          ...(inviteCode ? { inviteCode } : {}),
+        },
       })
       if (result.error) setError(result.error)
       else {
         await router.invalidate()
-        await router.navigate({ to: '/' })
+        if (inviteCode)
+          await router.navigate({ to: '/invite', search: { code: inviteCode } })
+        else await router.navigate({ to: '/' })
       }
     } catch {
       setError('Registration failed. Check your details and try again.')
@@ -48,40 +63,13 @@ export function RegistrationPage() {
   return (
     <AuthPage title="Create account">
       <form className="auth-form" method="post" onSubmit={submit}>
-        <label>
-          Registration ticket
-          <input value={ticket} readOnly required />
-        </label>
-        <label>
-          Username
-          <input
-            name="username"
-            autoComplete="username"
-            minLength={3}
-            maxLength={32}
-            required
-          />
-        </label>
-        <label>
-          Name
-          <input name="name" autoComplete="name" maxLength={80} required />
-        </label>
-        <label>
-          Password
-          <input
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            minLength={12}
-            required
-          />
-        </label>
+        <RegistrationFields registrationTicket={registrationTicket} />
         {error && (
           <p className="auth-error" role="alert">
             {error}
           </p>
         )}
-        <button type="submit" disabled={pending || !ticket}>
+        <button type="submit" disabled={pending || !registrationTicket}>
           {pending ? 'Creating account…' : 'Create account'}
         </button>
       </form>

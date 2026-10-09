@@ -7,6 +7,9 @@ export const librarySchema = z
     version: z.literal(1),
     diagrams: z.array(diagramSchema),
     instances: z.array(instanceSchema),
+    sharedDiagrams: z
+      .array(z.object({ ownerId: z.string(), diagram: diagramSchema }))
+      .optional(),
   })
   .superRefine((library, context) => {
     if (
@@ -19,6 +22,7 @@ export const librarySchema = z
     if (
       library.instances.some(
         (instance) =>
+          !instance.sharedSource &&
           !library.diagrams.some(
             (diagram) => diagram.id === instance.diagramId,
           ),

@@ -14,7 +14,7 @@ export function saveDiagram(library: Library, diagram: Diagram): Library {
       saved,
     ],
     instances: library.instances.map((instance) =>
-      instance.diagramId === saved.id
+      !instance.sharedSource && instance.diagramId === saved.id
         ? {
             ...instance,
             statuses: persistedStatuses(

@@ -19,6 +19,7 @@ export const registrationSchema = z.object({
     .regex(/^[a-zA-Z0-9_.-]+$/),
   name: z.string().trim().min(1).max(80),
   password: z.string().min(12).max(200),
+  inviteCode: z.string().uuid().optional(),
 })
 
 export const changePasswordSchema = z.object({

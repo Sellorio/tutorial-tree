@@ -12,6 +12,7 @@ export function WorkspaceHeaderActions({
   route,
   diagram,
   editing,
+  instance,
   skillCount,
   tab,
   library,
@@ -23,6 +24,7 @@ export function WorkspaceHeaderActions({
   changeTheme,
   setNotice,
   importFile,
+  createInvite,
   user,
   ...history
 }: WorkspaceHeaderProps) {
@@ -40,13 +42,19 @@ export function WorkspaceHeaderActions({
         {route &&
           diagram &&
           (editing ? (
-            <EditActions {...history} navigate={navigate} />
+            <EditActions
+              {...history}
+              navigate={navigate}
+              diagram={diagram}
+              createInvite={createInvite}
+            />
           ) : (
             <RunActions
               completedCount={completedCount}
               skillCount={skillCount}
               navigate={navigate}
               diagram={diagram}
+              canEdit={!instance?.sharedSource}
             />
           ))}
         <span className={styles.headerDivider} />

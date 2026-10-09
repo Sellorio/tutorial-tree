@@ -5,10 +5,10 @@ import styles from './AuthPage.module.css'
 export function AuthPage({ title, children }: AuthPageProps) {
   return (
     <main className={styles.page}>
-      <a className={styles.brand} href="/" aria-label="Branch">
+      <a className={styles.brand} href="/" aria-label="Tutorial Tree">
         <GitBranch size={24} />
         <span>
-          branch<span>.</span>
+          Tutorial Tree<span>.</span>
         </span>
       </a>
       <section className={styles.panel}>

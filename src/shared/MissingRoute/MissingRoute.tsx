@@ -7,7 +7,7 @@ export function MissingRoute({ navigate }: MissingRouteProps) {
     <main className={styles.notFound}>
       <GitBranch size={35} />
       <h1>That tree isn't here.</h1>
-      <p>This browser doesn't have the selected diagram or journey.</p>
+      <p>This diagram does not exist or you do not have access to it.</p>
       <button className={styles.primaryButton} onClick={() => navigate('/')}>
         <ArrowLeft size={16} />
         Back to workspace

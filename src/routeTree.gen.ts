@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as WorkspaceRouteImport } from './routes/_workspace'
 import { Route as ChangePasswordRouteImport } from './routes/change-password'
+import { Route as InviteRouteImport } from './routes/invite'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AdminAdminRouteImport } from './routes/_admin.admin'
@@ -32,6 +33,11 @@ const WorkspaceRoute = WorkspaceRouteImport.update({
 const ChangePasswordRoute = ChangePasswordRouteImport.update({
   id: '/change-password',
   path: '/change-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InviteRoute = InviteRouteImport.update({
+  id: '/invite',
+  path: '/invite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -78,6 +84,7 @@ const WorkspaceRunIdRoute = WorkspaceRunIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof WorkspaceIndexRoute
   '/change-password': typeof ChangePasswordRoute
+  '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/admin': typeof AdminAdminRouteWithChildren
@@ -89,6 +96,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof WorkspaceIndexRoute
   '/change-password': typeof ChangePasswordRoute
+  '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/admin': typeof AdminAdminRouteWithChildren
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/_admin': typeof AdminRouteWithChildren
   '/_workspace': typeof WorkspaceRouteWithChildren
   '/change-password': typeof ChangePasswordRoute
+  '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/_admin/admin': typeof AdminAdminRouteWithChildren
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/change-password'
+    | '/invite'
     | '/login'
     | '/register'
     | '/admin'
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/change-password'
+    | '/invite'
     | '/login'
     | '/register'
     | '/admin'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/_admin'
     | '/_workspace'
     | '/change-password'
+    | '/invite'
     | '/login'
     | '/register'
     | '/_admin/admin'
@@ -153,6 +165,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   WorkspaceRoute: typeof WorkspaceRouteWithChildren
   ChangePasswordRoute: typeof ChangePasswordRoute
+  InviteRoute: typeof InviteRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
 }
@@ -178,6 +191,13 @@ declare module '@tanstack/react-router' {
       path: '/change-password'
       fullPath: '/change-password'
       preLoaderRoute: typeof ChangePasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invite': {
+      id: '/invite'
+      path: '/invite'
+      fullPath: '/invite'
+      preLoaderRoute: typeof InviteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -283,6 +303,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   WorkspaceRoute: WorkspaceRouteWithChildren,
   ChangePasswordRoute: ChangePasswordRoute,
+  InviteRoute: InviteRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
 }

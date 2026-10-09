@@ -17,6 +17,7 @@ export function MenuScreen({
   download,
   setDialog,
   visibleInstances,
+  createInvite,
 }: MenuScreenProps) {
   return (
     <main className={styles.library}>
@@ -36,6 +37,7 @@ export function MenuScreen({
             library={library}
             download={download}
             setDialog={setDialog}
+            createInvite={createInvite}
           />
         )}
         {tab === 'instances' && (

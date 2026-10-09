@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { useRouter } from '@tanstack/react-router'
+import { useRouter, useSearch } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { AuthPage } from '../AuthPage/AuthPage'
 import { loginFn } from '../../../shared/server/serverFunctions'
 
 export function LoginPage() {
+  const { inviteCode } = useSearch({ from: '/login' })
   const login = useServerFn(loginFn)
   const router = useRouter()
   const [error, setError] = useState('')
@@ -24,7 +25,9 @@ export function LoginPage() {
       if (result.error) setError(result.error)
       else {
         await router.invalidate()
-        await router.navigate({ to: '/' })
+        if (inviteCode)
+          await router.navigate({ to: '/invite', search: { code: inviteCode } })
+        else await router.navigate({ to: '/' })
       }
     } catch {
       setError('Sign in failed. Try again.')

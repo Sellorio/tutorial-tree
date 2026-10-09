@@ -1,4 +1,5 @@
 import { NameDialog } from '../NameDialog/NameDialog'
+import { InviteLinkDialog } from '../InviteLinkDialog/InviteLinkDialog'
 import type { WorkspaceDialogProps } from './WorkspaceDialogProps'
 
 export function WorkspaceDialog({
@@ -7,6 +8,9 @@ export function WorkspaceDialog({
   setDialog,
   library,
 }: WorkspaceDialogProps) {
+  if (dialog.kind === 'invite')
+    return <InviteLinkDialog url={dialog.url} onClose={() => setDialog(null)} />
+
   return (
     <NameDialog
       title={

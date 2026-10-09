@@ -16,4 +16,5 @@ export type MenuScreenProps = {
   download: (diagram: Diagram, instance?: Instance) => void
   setDialog: (dialog: Dialog | null) => void
   visibleInstances: Instance[]
+  createInvite?: (diagram: Diagram) => Promise<void>
 }

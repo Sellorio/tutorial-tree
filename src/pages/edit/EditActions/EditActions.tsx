@@ -1,5 +1,13 @@
 import type { EditActionsProps } from './EditActionsProps'
-import { ArrowLeft, Check, Circle, Save, Undo2, Redo2 } from 'lucide-react'
+import {
+  ArrowLeft,
+  Check,
+  Circle,
+  Save,
+  Undo2,
+  Redo2,
+  UserPlus,
+} from 'lucide-react'
 import styles from './EditActions.module.css'
 
 export function EditActions({
@@ -10,6 +18,8 @@ export function EditActions({
   canRedo,
   undo,
   redo,
+  diagram,
+  createInvite,
 }: EditActionsProps) {
   return (
     <>
@@ -41,6 +51,17 @@ export function EditActions({
         <Save size={15} />
         Save
       </button>
+      {createInvite && (
+        <button
+          className={styles.secondaryButton}
+          onClick={async () => {
+            if (await save()) await createInvite(diagram)
+          }}
+        >
+          <UserPlus size={15} />
+          Invite
+        </button>
+      )}
       <button
         className={styles.primaryButton}
         onClick={async () => {

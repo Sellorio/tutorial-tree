@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { useRouter } from '@tanstack/react-router'
+import { useRouter, useSearch } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { AuthPage } from '../AuthPage/AuthPage'
 import { changePasswordFn } from '../../../shared/server/serverFunctions'
 
 export function ChangePasswordPage() {
+  const { inviteCode } = useSearch({ from: '/change-password' })
   const changePassword = useServerFn(changePasswordFn)
   const router = useRouter()
   const [error, setError] = useState('')
@@ -36,7 +37,9 @@ export function ChangePasswordPage() {
       if (result.error) setError(result.error)
       else {
         await router.invalidate()
-        await router.navigate({ to: '/' })
+        if (inviteCode)
+          await router.navigate({ to: '/invite', search: { code: inviteCode } })
+        else await router.navigate({ to: '/' })
       }
     } catch {
       setError('Password change failed. Try again.')

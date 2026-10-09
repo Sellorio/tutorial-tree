@@ -5,4 +5,5 @@ export type RunActionsProps = {
   skillCount: number
   navigate: (path: string, skipGuard?: boolean) => void
   diagram: Diagram
+  canEdit: boolean
 }

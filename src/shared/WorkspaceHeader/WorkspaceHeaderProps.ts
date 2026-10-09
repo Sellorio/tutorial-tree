@@ -34,5 +34,6 @@ export type WorkspaceHeaderProps = {
   changeTheme: (preference: ThemePreference) => boolean
   setNotice: (notice: string) => void
   importFile: (file?: File) => Promise<void>
+  createInvite?: (diagram: Diagram) => Promise<void>
   user?: PublicUser
 }

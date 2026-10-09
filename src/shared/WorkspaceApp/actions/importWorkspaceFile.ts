@@ -50,7 +50,7 @@ export async function importWorkspaceFile(
     }
   } catch (error) {
     setMessage(
-      `Import failed. ${error instanceof SyntaxError ? 'The file is not valid JSON.' : error instanceof Error && error.message.startsWith('Choose ') ? error.message : 'Use a valid Branch diagram or instance export with compatible data.'}`,
+      `Import failed. ${error instanceof SyntaxError ? 'The file is not valid JSON.' : error instanceof Error && error.message.startsWith('Choose ') ? error.message : 'Use a valid Tutorial Tree diagram or instance export with compatible data.'}`,
     )
   }
 }

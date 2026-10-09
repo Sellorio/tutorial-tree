@@ -10,6 +10,7 @@ export function TreeGrid({
   library,
   download,
   setDialog,
+  createInvite,
 }: TreeGridProps) {
   return (
     <div className={styles.treeGrid}>
@@ -22,6 +23,7 @@ export function TreeGrid({
           library={library}
           download={download}
           setDialog={setDialog}
+          createInvite={createInvite}
         />
       ))}
       <NewTreeButton setDialog={setDialog} />

@@ -2,6 +2,7 @@ import { JourneyRow } from '../JourneyRow/JourneyRow'
 import { EmptyJourneys } from '../EmptyJourneys/EmptyJourneys'
 import type { JourneyListProps } from './JourneyListProps'
 import styles from './JourneyList.module.css'
+import { getInstanceDiagram } from '../../../shared/model/getInstanceDiagram'
 
 export function JourneyList({
   visibleInstances,
@@ -16,9 +17,8 @@ export function JourneyList({
   return (
     <div className={styles.journeyList}>
       {visibleInstances.map((entry) => {
-        const source = library.diagrams.find(
-          (tree) => tree.id === entry.diagramId,
-        )!
+        const source = getInstanceDiagram(library, entry)
+        if (!source) return null
         const total = source.nodes.filter(
           (node) => node.kind !== 'start' && node.kind !== 'dot',
         ).length

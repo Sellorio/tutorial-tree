@@ -35,6 +35,16 @@ database.exec(`
     created_at TEXT NOT NULL
   );
 
+  CREATE TABLE IF NOT EXISTS invites (
+    code TEXT PRIMARY KEY,
+    registration_ticket TEXT UNIQUE
+      REFERENCES registration_tickets(ticket) ON DELETE SET NULL,
+    diagram_json TEXT NOT NULL CHECK (json_valid(diagram_json)),
+    owner_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+    diagram_id TEXT,
+    created_at TEXT NOT NULL
+  );
+
   CREATE TABLE IF NOT EXISTS libraries (
     user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     library_json TEXT NOT NULL CHECK (json_valid(library_json)),
@@ -46,3 +56,50 @@ database.exec(`
     value TEXT NOT NULL
   );
 `)
+
+if (
+  !database
+    .query("SELECT 1 FROM pragma_table_info('invites') WHERE name = 'owner_id'")
+    .get()
+)
+  database.exec(
+    'ALTER TABLE invites ADD COLUMN owner_id TEXT REFERENCES users(id) ON DELETE CASCADE',
+  )
+if (
+  !database
+    .query(
+      "SELECT 1 FROM pragma_table_info('invites') WHERE name = 'diagram_id'",
+    )
+    .get()
+)
+  database.exec('ALTER TABLE invites ADD COLUMN diagram_id TEXT')
+database.exec(`
+  UPDATE invites SET
+    owner_id = COALESCE(owner_id, (
+      SELECT created_by FROM registration_tickets
+      WHERE ticket = registration_ticket
+    )),
+    diagram_id = COALESCE(diagram_id, json_extract(diagram_json, '$.id'))
+  WHERE owner_id IS NULL OR diagram_id IS NULL;
+`)
+
+const inviteLifetime = 14 * 24 * 60 * 60 * 1000
+
+export function cleanExpiredInvites() {
+  const cutoff = new Date(Date.now() - inviteLifetime).toISOString()
+  database.transaction(() => {
+    database
+      .query(
+        `DELETE FROM registration_tickets
+         WHERE ticket IN (
+           SELECT registration_ticket FROM invites WHERE created_at <= ?
+         )`,
+      )
+      .run(cutoff)
+    database.query('DELETE FROM invites WHERE created_at <= ?').run(cutoff)
+  })()
+}
+
+cleanExpiredInvites()
+const inviteCleanupTimer = setInterval(cleanExpiredInvites, 24 * 60 * 60 * 1000)
+inviteCleanupTimer.unref()

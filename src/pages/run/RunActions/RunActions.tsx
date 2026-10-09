@@ -7,6 +7,7 @@ export function RunActions({
   skillCount,
   navigate,
   diagram,
+  canEdit,
 }: RunActionsProps) {
   return (
     <>
@@ -16,13 +17,15 @@ export function RunActions({
         </span>
         <progress value={completedCount} max={skillCount || 1} />
       </div>
-      <button
-        className={styles.secondaryButton}
-        onClick={() => navigate(`/edit/${diagram.id}`)}
-      >
-        <Pencil size={14} />
-        Edit tree
-      </button>
+      {canEdit && (
+        <button
+          className={styles.secondaryButton}
+          onClick={() => navigate(`/edit/${diagram.id}`)}
+        >
+          <Pencil size={14} />
+          Edit tree
+        </button>
+      )}
     </>
   )
 }

@@ -5,7 +5,7 @@ export function deleteDiagram(library: Library, diagramId: string): Library {
     ...library,
     diagrams: library.diagrams.filter((diagram) => diagram.id !== diagramId),
     instances: library.instances.filter(
-      (instance) => instance.diagramId !== diagramId,
+      (instance) => instance.sharedSource || instance.diagramId !== diagramId,
     ),
   }
 }

@@ -17,7 +17,7 @@ export async function submitWorkspaceName(
       setDialog(null)
       navigate(`/edit/${created.id}`)
     }
-  } else {
+  } else if (dialog.kind === 'instance') {
     if (editing) return
     const next = library
     const target =

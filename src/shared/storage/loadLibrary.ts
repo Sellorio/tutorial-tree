@@ -20,9 +20,15 @@ export function loadLibrary(storage: Pick<Storage, 'getItem'>): {
       library: {
         ...library,
         instances: library.instances.map((instance) => {
-          const diagram = library.diagrams.find(
-            (entry) => entry.id === instance.diagramId,
-          )!
+          const source = instance.sharedSource
+          const diagram = source
+            ? library.sharedDiagrams?.find(
+                (entry) =>
+                  entry.ownerId === source.ownerId &&
+                  entry.diagram.id === source.diagramId,
+              )?.diagram
+            : library.diagrams.find((entry) => entry.id === instance.diagramId)
+          if (!diagram) return instance
           const normalized = ensureStatusTimestamps(diagram, {
             ...instance,
             statuses: persistedStatuses(

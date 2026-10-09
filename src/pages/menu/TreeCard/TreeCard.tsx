@@ -10,6 +10,7 @@ export function TreeCard({
   library,
   download,
   setDialog,
+  createInvite,
 }: TreeCardProps) {
   return (
     <article className={styles.treeCard} key={entry.id}>
@@ -39,6 +40,7 @@ export function TreeCard({
           navigate={navigate}
           download={download}
           setDialog={setDialog}
+          createInvite={createInvite}
         />
       </div>
     </article>

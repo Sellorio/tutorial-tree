@@ -5,6 +5,7 @@ import { z } from 'zod'
 export const instanceSchema = z.object({
   id: idSchema,
   diagramId: idSchema,
+  sharedSource: z.object({ ownerId: idSchema, diagramId: idSchema }).optional(),
   name: z.string().trim().min(1).max(100),
   statuses: z.record(z.string(), statusSchema),
   statusTimestamps: z

@@ -1,4 +1,4 @@
-# Branch
+# Tutorial Tree
 
 A skill-tree editor and learning-progress tracker, built with React, TypeScript, TanStack Start, and React Flow. Accounts and per-user libraries are stored in SQLite on the server.
 

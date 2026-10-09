@@ -1204,7 +1204,7 @@ test('imports diagrams and instances, merges newer local graphs, and downloads p
     'locked',
   )
   expect((await stored(page)).diagrams[0].name).toBe('Newer local tree')
-  await page.getByRole('button', { name: 'Branch main menu' }).click()
+  await page.getByRole('button', { name: 'Tutorial Tree main menu' }).click()
   const downloadPromise = page.waitForEvent('download')
   await page.getByRole('button', { name: 'Export Imported journey' }).click()
   const download = await downloadPromise
@@ -1225,13 +1225,13 @@ test('main menu manages independent instances and confirms cascading diagram del
   await startJourney(page, 'First journey')
   await openNode(page, 'seeing')
   await page.getByRole('button', { name: 'Completed', exact: true }).click()
-  await page.getByRole('button', { name: 'Branch main menu' }).click()
+  await page.getByRole('button', { name: 'Tutorial Tree main menu' }).click()
   await startJourney(page, 'Second journey')
   await expect(page.getByTestId('talent-seeing')).toHaveAttribute(
     'data-status',
     'unlocked',
   )
-  await page.getByRole('button', { name: 'Branch main menu' }).click()
+  await page.getByRole('button', { name: 'Tutorial Tree main menu' }).click()
   await page.getByRole('tab', { name: /My journeys/ }).click()
   const first = page
     .getByRole('article')
@@ -1241,7 +1241,7 @@ test('main menu manages independent instances and confirms cascading diagram del
     'data-status',
     'completed',
   )
-  await page.getByRole('button', { name: 'Branch main menu' }).click()
+  await page.getByRole('button', { name: 'Tutorial Tree main menu' }).click()
   page.once('dialog', (dialog) => dialog.dismiss())
   await page.getByRole('button', { name: 'Delete First journey' }).click()
   expect((await stored(page)).instances).toHaveLength(2)
@@ -1278,12 +1278,12 @@ test('saved graph changes reconcile existing journeys and unsaved navigation can
   await expect(diagramName).toHaveValue('Updated tree')
   await expect(page.getByText('Unsaved changes')).toBeVisible()
   page.once('dialog', (dialog) => dialog.dismiss())
-  await page.getByRole('button', { name: 'Branch main menu' }).click()
+  await page.getByRole('button', { name: 'Tutorial Tree main menu' }).click()
   await expect(page).toHaveURL(/\/edit\//)
   await expect(page.getByLabel('Diagram name')).toHaveValue('Updated tree')
   await page.getByRole('button', { name: 'Save', exact: true }).click()
   expect((await stored(page)).instances[0].statuses.seeing).toBe('completed')
-  await page.getByRole('button', { name: 'Branch main menu' }).click()
+  await page.getByRole('button', { name: 'Tutorial Tree main menu' }).click()
   await page.getByRole('tab', { name: /My journeys/ }).click()
   await page.getByRole('button', { name: 'Continue' }).click()
   await expect(page.getByText('Updated tree', { exact: true })).toBeVisible()
@@ -1406,7 +1406,7 @@ test('ALL and ANY prerequisites reconcile in browser, preserving completed nodes
   await page.getByRole('button', { name: 'Any input', exact: true }).click()
   await page.getByRole('button', { name: 'Save', exact: true }).click()
   expect((await stored(page)).instances[0].statuses.study).toBe('unlocked')
-  await page.getByRole('button', { name: 'Branch main menu' }).click()
+  await page.getByRole('button', { name: 'Tutorial Tree main menu' }).click()
   await page.getByRole('tab', { name: /My journeys/ }).click()
   await page.getByRole('button', { name: 'Continue' }).click()
   await openNode(page, 'study')

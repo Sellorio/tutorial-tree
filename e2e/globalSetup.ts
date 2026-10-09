@@ -23,7 +23,7 @@ export default async function globalSetup(config: FullConfig) {
   await page.getByLabel('Username').fill('e2e_admin')
   await page.getByLabel('Password').fill(initialPassword)
   await page.getByRole('button', { name: 'Sign in' }).click()
-  await page.waitForURL('**/change-password')
+  await page.waitForURL('**/change-password*')
   await page.getByLabel('Current password').fill(initialPassword)
   await page.getByLabel('New password', { exact: true }).fill(adminPassword)
   await page.getByLabel('Confirm new password').fill(adminPassword)
@@ -48,7 +48,7 @@ export default async function globalSetup(config: FullConfig) {
   await page.waitForLoadState('networkidle')
   await page.locator('summary[aria-label^="Account menu for"]').click()
   await page.getByRole('button', { name: 'Sign out' }).click()
-  await page.waitForURL('**/login')
+  await page.waitForURL('**/login*')
 
   await page.goto(`${baseURL}/register?ticket=${ticket}`)
   await page.waitForLoadState('networkidle')

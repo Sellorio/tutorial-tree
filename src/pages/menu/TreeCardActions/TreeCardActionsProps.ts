@@ -10,4 +10,5 @@ export type TreeCardActionsProps = {
   navigate: (path: string, skipGuard?: boolean) => void
   download: (diagram: Diagram, instance?: Instance) => void
   setDialog: (dialog: Dialog | null) => void
+  createInvite?: (diagram: Diagram) => Promise<void>
 }

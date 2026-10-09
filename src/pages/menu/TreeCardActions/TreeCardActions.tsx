@@ -1,6 +1,6 @@
 import { deleteDiagram } from '../../../shared/model/deleteDiagram'
 import type { TreeCardActionsProps } from './TreeCardActionsProps'
-import { ArrowRight, Download, Pencil, Trash2 } from 'lucide-react'
+import { ArrowRight, Download, Pencil, Trash2, UserPlus } from 'lucide-react'
 import styles from './TreeCardActions.module.css'
 
 export function TreeCardActions({
@@ -10,6 +10,7 @@ export function TreeCardActions({
   navigate,
   download,
   setDialog,
+  createInvite,
 }: TreeCardActionsProps) {
   return (
     <div className={styles.cardActions}>
@@ -35,6 +36,15 @@ export function TreeCardActions({
         <Pencil size={13} />
         Edit tree
       </button>
+      {createInvite && (
+        <button
+          className={styles.textButton}
+          onClick={() => void createInvite(entry)}
+        >
+          <UserPlus size={13} />
+          Invite
+        </button>
+      )}
       <button
         className={styles.iconButton}
         title="Export tree"

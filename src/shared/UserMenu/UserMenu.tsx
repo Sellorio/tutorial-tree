@@ -16,7 +16,7 @@ export function UserMenu({ user }: UserMenuProps) {
     try {
       await logout()
       await router.invalidate()
-      await router.navigate({ to: '/login' })
+      await router.navigate({ to: '/login', search: { inviteCode: '' } })
     } catch {
       setError('Could not sign out. Try again.')
     }
@@ -32,7 +32,9 @@ export function UserMenu({ user }: UserMenuProps) {
         {user.role === 'admin' && (
           <Link to="/admin/registrations">Administration</Link>
         )}
-        <Link to="/change-password">Change password</Link>
+        <Link to="/change-password" search={{ inviteCode: '' }}>
+          Change password
+        </Link>
         <button type="button" onClick={() => void signOut()}>
           <LogOut size={15} /> Sign out
         </button>

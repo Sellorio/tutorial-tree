@@ -3,7 +3,9 @@ import { DEFAULT_CATEGORIES, LEGACY_CATEGORY_IDS } from './constants/CATEGORIES'
 import { connectionCurve } from './connectionCurve'
 import { connectionError } from './connectionError'
 import { createDiagram } from './createDiagram'
+import { createInvitedJourney } from './createInvitedJourney'
 import { createInstance } from './createInstance'
+import { getInstanceDiagram } from './getInstanceDiagram'
 import { createNode } from './createNode'
 import { deleteDiagram } from './deleteDiagram'
 import { ensureStatusTimestamps } from './ensureStatusTimestamps'
@@ -53,6 +55,45 @@ function fixture() {
   }
   return { diagram, start, first, second, final, instance, library }
 }
+
+describe('invited journeys', () => {
+  it('references the source diagram without adding it to the recipient library', () => {
+    const { diagram } = fixture()
+    const recipientDiagram = createDiagram('Recipient tree')
+    const recipient: Library = {
+      version: 1,
+      diagrams: [recipientDiagram],
+      instances: [],
+    }
+
+    const ownerId = crypto.randomUUID()
+    const accepted = createInvitedJourney(recipient, diagram, ownerId)
+
+    expect(accepted.library.diagrams).toEqual([recipientDiagram])
+    expect(accepted.library.instances).toEqual([accepted.instance])
+    expect(accepted.instance.diagramId).toBe(diagram.id)
+    expect(accepted.instance.sharedSource).toEqual({
+      ownerId,
+      diagramId: diagram.id,
+    })
+    expect(accepted.instance.name).toBe(`${diagram.name} journey`)
+    expect(
+      getInstanceDiagram(
+        {
+          ...accepted.library,
+          sharedDiagrams: [{ ownerId, diagram }],
+        },
+        accepted.instance,
+      ),
+    ).toEqual(diagram)
+    expect(
+      getInstanceDiagram(
+        recipient,
+        createInstance(recipientDiagram, 'Owned journey'),
+      ),
+    ).toEqual(recipientDiagram)
+  })
+})
 
 describe('progress rules', () => {
   it('records progress and completion timestamps for status changes', () => {
