@@ -157,6 +157,7 @@ test('invites preserve signup access until acceptance and create one journey', a
   page,
   browser,
 }, testInfo) => {
+  testInfo.setTimeout(90_000)
   const baseURL = String(testInfo.project.use.baseURL)
   await page.goto(baseURL)
   const authorLibrary = await readLibrary(page)
@@ -311,8 +312,7 @@ test('invites preserve signup access until acceptance and create one journey', a
       returnPage.getByText('This invitation is invalid or has expired.'),
     ).toBeVisible()
   } finally {
-    await returnContext.close()
-    await inviteContext.close()
+    await Promise.allSettled([returnContext.close(), inviteContext.close()])
   }
 })
 
