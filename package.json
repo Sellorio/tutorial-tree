@@ -5,13 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "bun run scripts/docker-dev.ts",
-    "tsc": "tsc -b",
+    "tsc": "bun --bun run tsc -b",
     "build": "bun ./node_modules/vite/bin/vite.js build && bun ./node_modules/typescript/bin/tsc -b",
     "publish": "docker build --tag tutorial-tree:latest ./scripts && docker save --output tutorial-tree.tar tutorial-tree:latest",
     "lint": "bun --bun run oxlint",
-    "test": "bun run vitest run",
-    "test:watch": "bun run vitest",
-    "test:coverage": "bun run vitest run --coverage",
+    "test": "bun --bun run vitest run",
+    "test:watch": "bun --bun run vitest",
+    "test:coverage": "bun --bun run vitest run --coverage",
     "test:e2e": "bun run e2e/prepare.ts && bun --bun run playwright test",
     "format": "bun --bun run prettier --write src e2e *.ts *.json *.html README.md",
     "format:check": "bun --bun run prettier --check src e2e *.ts *.json *.html README.md",
@@ -38,12 +38,12 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
-    "@vitest/coverage-v8": "^5.0.2",
-    "jsdom": "^30.1.1",
+    "@vitest/coverage-istanbul": "5.0.2",
+    "happy-dom": "^20.14.6",
     "oxlint": "^1.81.0",
     "prettier": "^3.9.9",
     "typescript": "~6.0.2",
     "vite": "^8.3.0",
-    "vitest": "^5.0.2"
+    "vitest": "5.0.2"
   }
 }

@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { useRouter, useSearch } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { AuthPage } from '../AuthPage/AuthPage'
+import { AuthForm } from '../AuthForm/AuthForm'
 import { changePasswordFn } from '../../../shared/server/serverFunctions'
 
 export function ChangePasswordPage() {
@@ -50,7 +51,7 @@ export function ChangePasswordPage() {
 
   return (
     <AuthPage title="Change password">
-      <form className="auth-form" method="post" onSubmit={submit}>
+      <AuthForm onSubmit={submit}>
         <label>
           Current password
           <input
@@ -88,7 +89,7 @@ export function ChangePasswordPage() {
         <button type="submit" disabled={pending}>
           {pending ? 'Updating…' : 'Update password'}
         </button>
-      </form>
+      </AuthForm>
     </AuthPage>
   )
 }

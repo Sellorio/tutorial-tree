@@ -19,7 +19,6 @@ export default async function globalSetup(config: FullConfig) {
   const page = await context.newPage()
 
   await page.goto(`${baseURL}/login`)
-  await page.waitForLoadState('networkidle')
   await page.getByLabel('Username').fill('e2e_admin')
   await page.getByLabel('Password').fill(initialPassword)
   await page.getByRole('button', { name: 'Sign in' }).click()
@@ -51,7 +50,6 @@ export default async function globalSetup(config: FullConfig) {
   await page.waitForURL('**/login*')
 
   await page.goto(`${baseURL}/register?ticket=${ticket}`)
-  await page.waitForLoadState('networkidle')
   await page.getByLabel('Username').fill('e2e_user')
   await page.getByLabel('Name', { exact: true }).fill('E2E User')
   await page.getByLabel('Password').fill(userPassword)

@@ -66,7 +66,10 @@ beforeEach(() => {
   )
   localStorage.clear()
   history.replaceState(null, '', '/')
-  vi.spyOn(window, 'confirm').mockReturnValue(true)
+  vi.stubGlobal(
+    'confirm',
+    vi.fn(() => true),
+  )
 })
 
 function openEditor(library = starterLibrary()) {
@@ -314,8 +317,11 @@ describe('workspace orchestration', () => {
   })
   it('leaves the edited draft open on quota failure', () => {
     openEditor()
-    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
-      throw new Error('Quota exceeded')
+    vi.stubGlobal('localStorage', {
+      getItem: localStorage.getItem.bind(localStorage),
+      setItem: () => {
+        throw new Error('Quota exceeded')
+      },
     })
     fireEvent.change(screen.getByLabelText('Diagram name'), {
       target: { value: 'Unsaved draft' },

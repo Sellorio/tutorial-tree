@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { useRouter, useSearch } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { AuthPage } from '../AuthPage/AuthPage'
+import { AuthForm } from '../AuthForm/AuthForm'
 import { loginFn } from '../../../shared/server/serverFunctions'
 
 export function LoginPage() {
@@ -38,7 +39,7 @@ export function LoginPage() {
 
   return (
     <AuthPage title="Sign in">
-      <form className="auth-form" method="post" onSubmit={submit}>
+      <AuthForm onSubmit={submit}>
         <label>
           Username
           <input name="username" autoComplete="username" required />
@@ -60,7 +61,7 @@ export function LoginPage() {
         <button type="submit" disabled={pending}>
           {pending ? 'Signing in…' : 'Sign in'}
         </button>
-      </form>
+      </AuthForm>
     </AuthPage>
   )
 }

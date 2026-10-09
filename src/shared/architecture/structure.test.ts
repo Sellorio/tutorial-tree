@@ -3,6 +3,10 @@ import { dirname, basename, relative } from 'node:path'
 import ts from 'typescript'
 import { expect, it } from 'vitest'
 
+it('runs verification tests under Bun', () => {
+  expect(process.versions.bun).toBeDefined()
+})
+
 it('keeps production units individual and UI components small and colocated', () => {
   const root = process.cwd()
   const files = ts.sys.readDirectory(root, ['.ts', '.tsx'], [], ['src/**/*'])

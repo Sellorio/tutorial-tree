@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import type { Library } from '../src/shared/model/types/Library'
+import { holdScripts } from './helpers/holdScripts'
 
 const adminState = 'test-results/.auth/admin.json'
 const registrationPassword = 'E2e-Registered-Account-2026!'
@@ -25,7 +26,6 @@ async function registerUser(page: Page, username: string, ticket: string) {
   await page.getByRole('button', { name: 'Sign out' }).click()
   await page.waitForURL('**/login*')
   await page.goto(`/register?ticket=${ticket}`)
-  await page.waitForLoadState('networkidle')
   await page.getByLabel('Username', { exact: true }).fill(username)
   await page.getByLabel('Name', { exact: true }).fill('E2E Account')
   await page.getByLabel('Password', { exact: true }).fill(registrationPassword)
@@ -54,6 +54,57 @@ async function saveLibrary(page: Page, library: Library) {
     },
     { modulePath: '/src/shared/server/serverFunctions.ts', value: library },
   )
+}
+
+for (const width of [1440, 390]) {
+  test(`registration waits for hydration before accepting input at ${width}px`, async ({
+    page,
+    browser,
+  }, testInfo) => {
+    const ticket = await createTicket(page)
+    const context = await browser.newContext({
+      storageState: { cookies: [], origins: [] },
+      viewport: { width, height: 900 },
+    })
+    const releaseScripts = await holdScripts(context)
+    const registrationPage = await context.newPage()
+    try {
+      await registrationPage.goto(
+        `${testInfo.project.use.baseURL}/register?ticket=${ticket}`,
+        { waitUntil: 'commit' },
+      )
+      const username = registrationPage.getByLabel('Username', { exact: true })
+      const submit = registrationPage.getByRole('button', {
+        name: 'Create account',
+      })
+      await expect(username).toBeVisible()
+      await expect(username).toBeDisabled()
+      await expect(submit).toBeDisabled()
+      expect(
+        await registrationPage.evaluate(
+          () => document.documentElement.scrollWidth <= window.innerWidth,
+        ),
+      ).toBe(true)
+      releaseScripts()
+      await expect(username).toBeEnabled()
+      await username.fill(`hydration_signup_${width}`)
+      await registrationPage
+        .getByLabel('Name', { exact: true })
+        .fill('Hydration')
+      await registrationPage
+        .getByLabel('Password', { exact: true })
+        .fill(registrationPassword)
+      await submit.click()
+      await expect(
+        registrationPage.locator(
+          `summary[aria-label="Account menu for hydration_signup_${width}"]`,
+        ),
+      ).toBeVisible()
+    } finally {
+      releaseScripts()
+      await context.close()
+    }
+  })
 }
 
 test('registration consumes its ticket, scopes libraries, and denies admin routes', async ({
@@ -128,7 +179,6 @@ test('password resets force a change before protected routes are available', asy
   const resetContext = await browser.newContext()
   const resetPage = await resetContext.newPage()
   await resetPage.goto(`${baseURL}/login`)
-  await resetPage.waitForLoadState('networkidle')
   await resetPage.getByLabel('Username', { exact: true }).fill('reset_target')
   await resetPage.getByLabel('Password', { exact: true }).fill(resetPassword)
   await resetPage.getByRole('button', { name: 'Sign in' }).click()
@@ -157,7 +207,6 @@ test('invites preserve signup access until acceptance and create one journey', a
   page,
   browser,
 }, testInfo) => {
-  testInfo.setTimeout(90_000)
   const baseURL = String(testInfo.project.use.baseURL)
   await page.goto(baseURL)
   const authorLibrary = await readLibrary(page)
@@ -195,22 +244,29 @@ test('invites preserve signup access until acceptance and create one journey', a
     storageState: { cookies: [], origins: [] },
   })
   const invitePage = await inviteContext.newPage()
-  invitePage.setDefaultNavigationTimeout(8000)
+  const releaseInviteScripts = await holdScripts(inviteContext)
   const returnContext = await browser.newContext({
     storageState: { cookies: [], origins: [] },
   })
   const returnPage = await returnContext.newPage()
   try {
-    await invitePage.goto(inviteLink)
+    await invitePage.goto(inviteLink, { waitUntil: 'commit' })
     await expect(
       invitePage.getByRole('link', { name: 'Register', exact: true }),
     ).toBeVisible()
     await invitePage
       .getByRole('link', { name: 'Register', exact: true })
-      .click()
+      .click({ noWaitAfter: true })
     await expect(invitePage.getByLabel('Registration ticket')).toHaveValue(
       /^[A-Z0-9]{6}$/,
     )
+    await expect(
+      invitePage.getByLabel('Username', { exact: true }),
+    ).toBeDisabled()
+    await expect(
+      invitePage.getByRole('button', { name: 'Create account' }),
+    ).toBeDisabled()
+    releaseInviteScripts()
     await invitePage
       .getByLabel('Username', { exact: true })
       .fill('invite_signup')
@@ -312,6 +368,7 @@ test('invites preserve signup access until acceptance and create one journey', a
       returnPage.getByText('This invitation is invalid or has expired.'),
     ).toBeVisible()
   } finally {
+    releaseInviteScripts()
     await Promise.allSettled([returnContext.close(), inviteContext.close()])
   }
 })

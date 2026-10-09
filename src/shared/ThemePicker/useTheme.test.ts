@@ -34,8 +34,10 @@ it('loads saved overrides and keeps changes usable when storage fails', () => {
   vi.stubGlobal('matchMedia', undefined)
   const { result } = renderHook(useTheme)
   expect(result.current.preference).toBe('light')
-  vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
-    throw new Error('blocked')
+  vi.stubGlobal('localStorage', {
+    setItem: () => {
+      throw new Error('blocked')
+    },
   })
   act(() => expect(result.current.changeTheme('dark')).toBe(false))
   expect(result.current.theme).toBe('dark')

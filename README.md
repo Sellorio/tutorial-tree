@@ -64,6 +64,10 @@ Exports are versioned JSON with stable diagram, node, connection, and instance I
 
 ## Verification
 
+Run the full local and CI verification pipeline with `bun run verify`. Bun 1.4.2 is the only required JavaScript runtime. CI and the development Docker image use this same version. Install dependencies with `bun install --frozen-lockfile`; `bun.lock` is the authoritative lockfile.
+
+Unit tests explicitly run Vitest under Bun with Happy DOM and Istanbul instrumentation. They do not depend on a Node executable, jsdom, or V8 coverage APIs.
+
 ```sh
 bun run test
 bun run test:coverage
@@ -75,6 +79,12 @@ bun run test:e2e
 ```
 
 `bun run format` applies the repository's Prettier configuration. Playwright starts an isolated Bun/Vite server and SQLite database; its users and state do not alter application data.
+
+### Reliable Browser Interactions
+
+Server-rendered controls can be visible before React attaches event handlers. Use [AuthForm](src/pages/auth/AuthForm/AuthForm.tsx) for JavaScript-handled authentication forms: its fieldset disables input and submission until TanStack Router reports hydration complete. Other server-rendered controls that require JavaScript should also remain disabled until hydrated. Native links can remain usable without JavaScript.
+
+Browser tests should wait for observable readiness with locator actions and retrying assertions, not `networkidle`, sleeps, or larger timeouts. Network quietness does not imply hydration, completed saves, or stable geometry. The authentication suite deliberately holds script requests to exercise server-rendered forms and the native invite-to-registration navigation on fast and slow machines. It checks the form boundary at desktop and mobile sizes.
 
 | Area                                                                    | Tests                                                                                                               |
 | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |

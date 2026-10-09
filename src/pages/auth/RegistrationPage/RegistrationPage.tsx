@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { useLoaderData, useRouter, useSearch } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { AuthPage } from '../AuthPage/AuthPage'
+import { AuthForm } from '../AuthForm/AuthForm'
 import { registerFn } from '../../../shared/server/serverFunctions'
 import { RegistrationFields } from '../RegistrationFields/RegistrationFields'
 
@@ -62,7 +63,7 @@ export function RegistrationPage() {
 
   return (
     <AuthPage title="Create account">
-      <form className="auth-form" method="post" onSubmit={submit}>
+      <AuthForm onSubmit={submit}>
         <RegistrationFields registrationTicket={registrationTicket} />
         {error && (
           <p className="auth-error" role="alert">
@@ -72,7 +73,7 @@ export function RegistrationPage() {
         <button type="submit" disabled={pending || !registrationTicket}>
           {pending ? 'Creating account…' : 'Create account'}
         </button>
-      </form>
+      </AuthForm>
     </AuthPage>
   )
 }
