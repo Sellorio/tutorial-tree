@@ -30,6 +30,9 @@ export function InviteLinkDialog({ url, onClose }: InviteLinkDialogProps) {
       ref={dialogRef}
       className={styles.dialog}
       onCancel={onClose}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose()
+      }}
       aria-labelledby="invite-dialog-title"
     >
       <div className={styles.row}>

@@ -170,9 +170,18 @@ test('invites preserve signup access until acceptance and create one journey', a
   await expect(
     page.getByRole('button', { name: 'Invite', exact: true }),
   ).toBeVisible()
+  const accountSummary = page.locator('summary[aria-label^="Account menu for"]')
+  const accountMenu = accountSummary.locator('xpath=..')
+  await accountSummary.click()
+  await expect(accountMenu).toHaveAttribute('open', '')
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
   await page.getByRole('button', { name: 'Invite', exact: true }).click()
+  await expect(accountMenu).not.toHaveAttribute('open', '')
   const dialog = page.getByRole('dialog', { name: 'Invite to this journey' })
+  await expect(dialog).toBeVisible()
+  await page.mouse.click(5, 5)
+  await expect(dialog).not.toBeVisible()
+  await page.getByRole('button', { name: 'Invite', exact: true }).click()
   await expect(dialog).toBeVisible()
   const inviteLink = await dialog.getByLabel('Invite link').inputValue()
   await dialog.getByRole('button', { name: 'Copy link' }).click()
@@ -290,7 +299,7 @@ test('invites preserve signup access until acceptance and create one journey', a
     )
     await expect(
       returnPage.getByText(
-        "This diagram does not exist or you do not have access to it.",
+        'This diagram does not exist or you do not have access to it.',
       ),
     ).toBeVisible()
     await returnPage.goto(inviteLink)

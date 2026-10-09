@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { LogOut, UserRound } from 'lucide-react'
@@ -9,7 +9,23 @@ import styles from './UserMenu.module.css'
 export function UserMenu({ user }: UserMenuProps) {
   const logout = useServerFn(logoutFn)
   const router = useRouter()
+  const menuRef = useRef<HTMLDetailsElement>(null)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    const menu = menuRef.current
+    if (!menu) return
+
+    const closeOnOutsidePointerDown = (event: PointerEvent) => {
+      if (event.target instanceof Node && !menu.contains(event.target)) {
+        menu.open = false
+      }
+    }
+
+    document.addEventListener('pointerdown', closeOnOutsidePointerDown)
+    return () =>
+      document.removeEventListener('pointerdown', closeOnOutsidePointerDown)
+  }, [])
 
   const signOut = async () => {
     setError('')
@@ -23,7 +39,7 @@ export function UserMenu({ user }: UserMenuProps) {
   }
 
   return (
-    <details className={styles.menu}>
+    <details ref={menuRef} className={styles.menu}>
       <summary aria-label={`Account menu for ${user.username}`}>
         <UserRound size={17} />
         <span>{user.name}</span>
