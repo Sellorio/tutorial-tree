@@ -3,8 +3,14 @@ import type { Locator, Page } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 import { createInstance } from '../src/shared/model/createInstance'
 import { exportData } from '../src/shared/model/exportData'
+import type { DiagramNode } from '../src/shared/model/types/DiagramNode'
 import type { Library } from '../src/shared/model/types/Library'
+import type { TalentNode } from '../src/shared/model/types/TalentNode'
 import { starterLibrary } from '../src/shared/storage/starterLibrary'
+
+function isTalentNode(node: DiagramNode): node is TalentNode {
+  return node.kind !== 'dot'
+}
 
 async function stored(page: Page): Promise<Library> {
   return page.evaluate(async (modulePath) => {
@@ -320,14 +326,16 @@ test('custom categories can be colored, assigned to skills, and persisted', asyn
   expect(savedDiagram.categories[0].id).toBe(category.id)
   expect(category.color).toBe('#123456')
   expect(
-    savedDiagram.nodes.find((node) => node.id === 'seeing')?.categoryId,
+    savedDiagram.nodes.filter(isTalentNode).find((node) => node.id === 'seeing')
+      ?.categoryId,
   ).toBe(category.id)
 
   await page.reload()
   await page.waitForLoadState('networkidle')
   expect(
-    (await stored(page)).diagrams[0].nodes.find((node) => node.id === 'seeing')
-      ?.categoryId,
+    (await stored(page)).diagrams[0].nodes
+      .filter(isTalentNode)
+      .find((node) => node.id === 'seeing')?.categoryId,
   ).toBe(category.id)
 
   await page.getByRole('button', { name: 'Remove category Workshop' }).click()
@@ -348,7 +356,8 @@ test('custom categories can be colored, assigned to skills, and persisted', asyn
     afterRemoval.categories.some((entry) => entry.id === category.id),
   ).toBe(false)
   expect(
-    afterRemoval.nodes.find((node) => node.id === 'seeing')?.categoryId,
+    afterRemoval.nodes.filter(isTalentNode).find((node) => node.id === 'seeing')
+      ?.categoryId,
   ).toBe('category-green')
 })
 
@@ -680,13 +689,16 @@ test('creates, edits metadata, connects from an edge, saves, reloads, and export
   )!
   expect(saved.nodes[0]).toMatchObject({ kind: 'start', size: 'small' })
   expect(saved.connections[0].clockwise).toBe(true)
-  expect(saved.nodes[1]).toMatchObject({
+  const savedPractice = saved.nodes
+    .filter(isTalentNode)
+    .find((node) => node.kind === 'task' && node.title === 'Practice')!
+  expect(savedPractice).toMatchObject({
     title: 'Practice',
     requirement: 'any',
     categoryId: 'category-red',
     description: 'Practice for twenty minutes.',
   })
-  expect(saved.nodes[1].image).toContain('data:image/jpeg;base64,')
+  expect(savedPractice.image).toContain('data:image/jpeg;base64,')
   const url = page.url()
   await page.reload()
   await expect(page).toHaveURL(url)
@@ -899,7 +911,9 @@ test('connection rings support every node size and zoom, create nodes on empty d
   await expect(page.locator('.react-flow__edge')).toHaveCount(9)
   await page.getByRole('button', { name: 'Save', exact: true }).click()
   const saved = (await stored(page)).diagrams[0]
-  const added = saved.nodes.find((node) => node.title === 'New skill')!
+  const added = saved.nodes
+    .filter(isTalentNode)
+    .find((node) => node.title === 'New skill')!
   expect(added.size).toBe('medium')
   expect(saved.connections).toContainEqual(
     expect.objectContaining({ source: 'seeing', target: added.id }),
@@ -956,7 +970,7 @@ test('right-click adds nodes; node drag and left/middle panning work; panel undo
   await page.getByRole('button', { name: 'Save', exact: true }).click()
   expect(
     (await stored(page)).diagrams[0].nodes.find(
-      (entry) => entry.title === 'Moved skill',
+      (entry) => isTalentNode(entry) && entry.title === 'Moved skill',
     )!.position.x,
   ).not.toBe(0)
 })
@@ -1147,8 +1161,9 @@ test('Run mode saves user tips with their node', async ({ page }) => {
     .poll(async () => {
       const library = await stored(page)
       return {
-        text: library.diagrams[0].nodes.find((node) => node.id === 'seeing')
-          ?.userTips[0]?.text,
+        text: library.diagrams[0].nodes
+          .filter(isTalentNode)
+          .find((node) => node.id === 'seeing')?.userTips[0]?.text,
         status: library.instances.find(
           (entry) => entry.name === 'My first journey',
         )?.statuses.seeing,
