@@ -1608,7 +1608,20 @@ test('long labels and descriptions fit their controls and floating panels stay r
     })
     .toBe(true)
   await page.getByRole('button', { name: 'Dock panel right' }).click()
-  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  const saveButton = page.getByRole('button', { name: 'Save', exact: true })
+  await expect
+    .poll(async () => {
+      const box = await saveButton.boundingBox()
+      return (
+        box !== null &&
+        box.x >= 0 &&
+        box.x + box.width <= 390 &&
+        box.y >= 0 &&
+        box.y + box.height <= 900
+      )
+    })
+    .toBe(true)
+  await saveButton.click()
   await startJourney(page, 'Long content')
   await openNode(page, 'seeing')
   await expect(
